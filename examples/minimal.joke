@@ -1,0 +1,66 @@
+#!/usr/bin/env boxxy
+;; minimal.joke - Minimal example showing core boxxy/vz concepts
+;;
+;; This example demonstrates the structure without actually booting a VM.
+;; Useful for understanding the API.
+
+(println "boxxy/vz API demonstration")
+(println "==========================")
+(println)
+
+;; Show available functions
+(println "Boot Loaders:")
+(println "  vz/new-efi-variable-store  - Create/open EFI NVRAM")
+(println "  vz/new-efi-boot-loader     - For UEFI systems (Haiku, BSD, Windows)")
+(println "  vz/new-linux-boot-loader   - For direct kernel boot")
+(println "  vz/new-macos-boot-loader   - For macOS guests")
+(println)
+
+(println "Platform:")
+(println "  vz/new-generic-platform    - For non-macOS guests")
+(println)
+
+(println "Storage:")
+(println "  vz/new-disk-attachment     - Attach disk/ISO image")
+(println "  vz/new-virtio-block-device - High-performance disk")
+(println "  vz/new-usb-mass-storage    - USB/CD-ROM for boot media")
+(println)
+
+(println "Network:")
+(println "  vz/new-nat-network         - NAT with host sharing")
+(println "  vz/new-virtio-network      - High-performance NIC")
+(println)
+
+(println "Configuration:")
+(println "  vz/new-vm-config           - Create VM config")
+(println "  vz/add-storage-devices     - Attach storage")
+(println "  vz/add-network-devices     - Attach network")
+(println "  vz/validate-config         - Check config validity")
+(println)
+
+(println "VM Control:")
+(println "  vz/new-vm                  - Create VM from config")
+(println "  vz/start-vm!               - Start VM")
+(println "  vz/stop-vm!                - Stop VM")
+(println "  vz/pause-vm!               - Pause VM")
+(println "  vz/resume-vm!              - Resume VM")
+(println "  vz/vm-state                - Get current state")
+(println)
+
+(println "Utilities:")
+(println "  vz/create-disk-image       - Create sparse disk file")
+(println)
+
+;; Example: Create a 1GB disk image
+(println "Creating a test disk image (1GB)...")
+(vz/create-disk-image "/tmp/boxxy-test.img" 1)
+(println "Created /tmp/boxxy-test.img")
+
+;; Example: Show platform creation
+(println)
+(println "Creating generic platform configuration...")
+(def platform (vz/new-generic-platform))
+(println "Platform created successfully:" (type platform))
+
+(println)
+(println "Done! See haiku-vm.joke or linux-vm.joke for full examples.")

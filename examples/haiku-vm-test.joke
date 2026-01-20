@@ -1,0 +1,61 @@
+#!/usr/bin/env boxxy
+;; haiku-vm-test.joke - Boot HaikuOS with downloaded ISO
+
+(def iso-path "/Users/bob/Downloads/haiku/haiku-r1beta5-x86_64-anyboot.iso")
+(def disk-path "/Users/bob/Downloads/haiku/haiku.img")
+(def nvram-path "/Users/bob/Downloads/haiku/haiku.nvram")
+(def cpus 4)
+(def memory-gb 8)
+
+(println "╔════════════════════════════════════════════╗")
+(println "║  boxxy - HaikuOS Virtual Machine           ║")
+(println "║  Apple Virtualization.framework            ║")
+(println "╚════════════════════════════════════════════╝")
+(println)
+
+(println "Building HaikuOS VM...")
+(println "  ISO:   " iso-path)
+(println "  Disk:  " disk-path)
+(println "  CPUs:  " cpus)
+(println "  Memory:" memory-gb "GB")
+(println)
+
+;; Create EFI boot loader with NVRAM
+(def store (vz/new-efi-variable-store nvram-path true))
+(def boot (vz/new-efi-boot-loader store))
+
+;; Create platform
+(def platform (vz/new-generic-platform))
+
+;; Create VM configuration
+(def vm-config (vz/new-vm-config cpus memory-gb boot platform))
+
+;; Attach ISO as USB mass storage (for EFI boot)
+(def iso-att (vz/new-disk-attachment iso-path true))
+(def iso-dev (vz/new-usb-mass-storage iso-att))
+
+;; Create and attach disk as virtio block device
+(vz/create-disk-image disk-path 32)
+(def disk-att (vz/new-disk-attachment disk-path false))
+(def disk-dev (vz/new-virtio-block-device disk-att))
+
+;; Add storage devices
+(vz/add-storage-devices vm-config [iso-dev disk-dev])
+
+;; Add NAT network
+(def nat (vz/new-nat-network))
+(def net (vz/new-virtio-network nat))
+(vz/add-network-devices vm-config [net])
+
+;; Validate configuration
+(def valid (vz/validate-config vm-config))
+(if (= valid true)
+  (do
+    (println "Configuration valid, creating VM...")
+    (def vm (vz/new-vm vm-config))
+    (println "Starting HaikuOS VM...")
+    (println "  Press Ctrl+C to stop")
+    (println)
+    (vz/start-vm! vm)
+    (println "VM is running. State:" (vz/vm-state vm)))
+  (println "Configuration invalid:" valid))

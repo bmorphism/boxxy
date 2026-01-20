@@ -1,0 +1,301 @@
+;; vz - Clojure bindings for Apple Virtualization.framework
+;; 
+;; This namespace provides a functional interface to create and manage
+;; virtual machines on macOS using Apple's Virtualization.framework
+;; via the Code-Hex/vz Go library.
+;;
+;; Boot modes supported:
+;;   - EFI: For HaikuOS, FreeBSD, Windows, and other UEFI-compatible systems
+;;   - Linux: Direct kernel boot with initrd
+;;   - macOS: For running macOS guests on Apple Silicon
+;;
+;; Example usage:
+;;   (require '[vz :as vz])
+;;   
+;;   ;; Create an EFI-booted VM for HaikuOS
+;;   (let [store (vz/new-efi-variable-store "haiku.nvram" true)
+;;         boot (vz/new-efi-boot-loader store)
+;;         platform (vz/new-generic-platform)
+;;         config (vz/new-vm-config 2 4 boot platform)
+;;         iso-att (vz/new-disk-attachment "haiku.iso" true)
+;;         iso (vz/new-usb-mass-storage iso-att)
+;;         disk-att (vz/new-disk-attachment "haiku.img" false)
+;;         disk (vz/new-virtio-block-device disk-att)
+;;         nat (vz/new-nat-network)
+;;         net (vz/new-virtio-network nat)]
+;;     (vz/add-storage-devices config [iso disk])
+;;     (vz/add-network-devices config [net])
+;;     (when (vz/validate-config config)
+;;       (let [vm (vz/new-vm config)]
+;;         (vz/start-vm! vm))))
+
+(ns vz
+  "Apple Virtualization.framework bindings for Joker/boxxy.
+  
+  Create and manage virtual machines with support for EFI, Linux, and macOS boot modes.
+  
+  Core workflow:
+  1. Create a boot loader (EFI, Linux, or macOS)
+  2. Create a platform configuration
+  3. Create a VM configuration with CPUs and memory
+  4. Add storage devices (disks, ISOs)
+  5. Add network devices
+  6. Validate the configuration
+  7. Create and start the VM")
+
+;; =============================================================================
+;; Boot Loader Functions
+;; =============================================================================
+
+(defn ^{:doc "Create an EFI variable store for NVRAM persistence.
+  
+  Parameters:
+    path    - Path to the NVRAM file
+    create? - If true, create new store; if false, open existing
+  
+  Returns: EFI variable store object"
+        :added "1.0"}
+  new-efi-variable-store
+  [path create?])
+
+(defn ^{:doc "Create an EFI boot loader for UEFI-compatible guests.
+  
+  Use for: HaikuOS, FreeBSD, Windows, or any UEFI system.
+  
+  Parameters:
+    store - EFI variable store from new-efi-variable-store
+  
+  Returns: EFI boot loader object"
+        :added "1.0"}
+  new-efi-boot-loader
+  [store])
+
+(defn ^{:doc "Create a Linux boot loader for direct kernel boot.
+  
+  Parameters:
+    kernel  - Path to vmlinuz kernel image
+    initrd  - Path to initrd/initramfs (optional, can be empty string)
+    cmdline - Kernel command line (default: \"console=hvc0\")
+  
+  Returns: Linux boot loader object"
+        :added "1.0"}
+  new-linux-boot-loader
+  [kernel initrd cmdline])
+
+(defn ^{:doc "Create a macOS boot loader.
+  
+  Only works on Apple Silicon with a macOS IPSW restore image.
+  
+  Returns: macOS boot loader object"
+        :added "1.0"}
+  new-macos-boot-loader
+  [])
+
+;; =============================================================================
+;; Platform Configuration
+;; =============================================================================
+
+(defn ^{:doc "Create a generic platform configuration.
+  
+  Use for non-macOS guests (Linux, BSD, HaikuOS, etc.)
+  
+  Returns: Generic platform configuration object"
+        :added "1.0"}
+  new-generic-platform
+  [])
+
+;; =============================================================================
+;; Storage Devices
+;; =============================================================================
+
+(defn ^{:doc "Create a disk image attachment.
+  
+  Parameters:
+    path       - Path to disk image (.img, .iso, .raw)
+    read-only? - If true, mount as read-only
+  
+  Returns: Disk attachment object"
+        :added "1.0"}
+  new-disk-attachment
+  [path read-only?])
+
+(defn ^{:doc "Create a virtio block device from a disk attachment.
+  
+  Use for primary disk drives with virtio for best performance.
+  
+  Parameters:
+    attachment - Disk attachment from new-disk-attachment
+  
+  Returns: Virtio block device object"
+        :added "1.0"}
+  new-virtio-block-device
+  [attachment])
+
+(defn ^{:doc "Create a USB mass storage device from a disk attachment.
+  
+  Use for ISO images that need to boot as USB/CD-ROM.
+  Essential for EFI boot from installation media.
+  
+  Parameters:
+    attachment - Disk attachment from new-disk-attachment
+  
+  Returns: USB mass storage device object"
+        :added "1.0"}
+  new-usb-mass-storage
+  [attachment])
+
+;; =============================================================================
+;; Network Devices
+;; =============================================================================
+
+(defn ^{:doc "Create a NAT network attachment.
+  
+  Provides outbound network access via the host's network connection.
+  Guest gets a private IP address in the 192.168.64.0/24 range.
+  
+  Returns: NAT network attachment object"
+        :added "1.0"}
+  new-nat-network
+  [])
+
+(defn ^{:doc "Create a virtio network device from a network attachment.
+  
+  Parameters:
+    attachment - Network attachment from new-nat-network
+  
+  Returns: Virtio network device object"
+        :added "1.0"}
+  new-virtio-network
+  [attachment])
+
+;; =============================================================================
+;; VM Configuration
+;; =============================================================================
+
+(defn ^{:doc "Create a virtual machine configuration.
+  
+  Parameters:
+    cpus      - Number of virtual CPUs
+    memory-gb - Memory in gigabytes
+    boot      - Boot loader object
+    platform  - Platform configuration object
+  
+  Returns: VM configuration object"
+        :added "1.0"}
+  new-vm-config
+  [cpus memory-gb boot platform])
+
+(defn ^{:doc "Add storage devices to a VM configuration.
+  
+  Parameters:
+    config  - VM configuration from new-vm-config
+    devices - Vector of storage device objects
+  
+  Returns: nil (mutates config in place)"
+        :added "1.0"}
+  add-storage-devices
+  [config devices])
+
+(defn ^{:doc "Add network devices to a VM configuration.
+  
+  Parameters:
+    config  - VM configuration from new-vm-config
+    devices - Vector of network device objects
+  
+  Returns: nil (mutates config in place)"
+        :added "1.0"}
+  add-network-devices
+  [config devices])
+
+(defn ^{:doc "Validate a VM configuration.
+  
+  Checks that all required components are present and compatible.
+  
+  Parameters:
+    config - VM configuration from new-vm-config
+  
+  Returns: true if valid, error string if invalid"
+        :added "1.0"}
+  validate-config
+  [config])
+
+(defn ^{:doc "Create a virtual machine from a validated configuration.
+  
+  Parameters:
+    config - Validated VM configuration
+  
+  Returns: VM instance object"
+        :added "1.0"}
+  new-vm
+  [config])
+
+;; =============================================================================
+;; VM Control
+;; =============================================================================
+
+(defn ^{:doc "Start a virtual machine.
+  
+  Parameters:
+    vm - VM instance from new-vm
+  
+  Returns: true on success, throws on error"
+        :added "1.0"}
+  start-vm!
+  [vm])
+
+(defn ^{:doc "Stop a virtual machine.
+  
+  Parameters:
+    vm - VM instance
+  
+  Returns: true on success, throws on error"
+        :added "1.0"}
+  stop-vm!
+  [vm])
+
+(defn ^{:doc "Pause a running virtual machine.
+  
+  Parameters:
+    vm - VM instance
+  
+  Returns: true on success, throws on error"
+        :added "1.0"}
+  pause-vm!
+  [vm])
+
+(defn ^{:doc "Resume a paused virtual machine.
+  
+  Parameters:
+    vm - VM instance
+  
+  Returns: true on success, throws on error"
+        :added "1.0"}
+  resume-vm!
+  [vm])
+
+(defn ^{:doc "Get the current state of a virtual machine.
+  
+  Parameters:
+    vm - VM instance
+  
+  Returns: State string - one of:
+    \"stopped\", \"running\", \"paused\", \"error\",
+    \"starting\", \"stopping\", \"pausing\", \"resuming\", \"unknown\""
+        :added "1.0"}
+  vm-state
+  [vm])
+
+;; =============================================================================
+;; Utilities
+;; =============================================================================
+
+(defn ^{:doc "Create a sparse disk image file.
+  
+  Parameters:
+    path    - Path for the new disk image
+    size-gb - Size in gigabytes
+  
+  Returns: true on success, throws on error"
+        :added "1.0"}
+  create-disk-image
+  [path size-gb])
