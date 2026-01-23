@@ -1,0 +1,74 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage{isabelle,isabellesym}
+\usepackage{amsmath,amssymb}
+\usepackage{hyperref}
+
+\title{Vibesnipe: AGM Belief Revision meets Semi-Reliable Nashator}
+\author{boxxy formalization}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+We formalize the intersection of AGM belief revision theory and 
+compositional game theory via Hedges-Capucci's semi-reliable nashator.
+The \emph{vibesnipe} construction models multi-agent belief revision 
+as a game where agents select revision operators from indeterministic 
+options, reaching $\epsilon$-approximate Nash equilibria.
+
+Key contributions:
+\begin{itemize}
+\item Isabelle/HOL formalization of AGM postulates (K*1--K*8)
+\item Selection relations and the Nash product (nashator)
+\item Semi-reliable variant for bounded rationality
+\item Connection to Grove sphere systems and epistemic entrenchment
+\item GF(3) trit conservation throughout
+\end{itemize}
+\end{abstract}
+
+\tableofcontents
+
+\section{Introduction}
+
+The AGM framework \cite{agm1985} provides postulates for rational belief revision.
+When epistemic entrenchment fails to be totally ordered, multiple revision 
+operators become admissible---the Lindström-Rabinowicz indeterminism phenomenon.
+
+Hedges and Capucci's compositional game theory \cite{hedges2021} provides 
+selection functions and the Nash product for modeling multi-agent equilibria.
+The \emph{semi-reliable} variant allows $\epsilon$-slack, modeling bounded 
+rationality.
+
+\textbf{Vibesnipe} = selecting from indeterministic revisions (vibes) with 
+near-optimal precision (snipe).
+
+\section{Theories}
+
+\input{session}
+
+\section{GF(3) Conservation}
+
+All structures maintain GF(3) trit balance:
+\begin{align}
+\text{Selection } (+1) + \text{Nashator } (0) + \text{Verify } (-1) &\equiv 0 \pmod{3}
+\end{align}
+
+This ensures compositional coherence across the Cat\# equipment structure.
+
+\bibliographystyle{plain}
+\begin{thebibliography}{9}
+\bibitem{agm1985} Alchourrón, Gärdenfors, Makinson. 
+\emph{On the logic of theory change}. J. Symbolic Logic, 1985.
+
+\bibitem{hedges2021} Capucci, Gavranović, Hedges, Rischel. 
+\emph{Towards Foundations of Categorical Cybernetics}. ACT 2021.
+
+\bibitem{capucci2022} Capucci. 
+\emph{Diegetic Representation of Feedback in Open Games}. ACT 2022.
+
+\bibitem{lindstrom1999} Lindström, Rabinowicz.
+\emph{DDL unlimited: Dynamic doxastic logic for introspective agents}. 1999.
+\end{thebibliography}
+
+\end{document}
