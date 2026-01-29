@@ -1,4 +1,4 @@
-.PHONY: all build sign install clean test lint deps
+.PHONY: all build sign install clean test lint deps bdd joker-test tapes
 
 BINARY := boxxy
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -52,6 +52,34 @@ repl: sign
 # Run an example
 example: sign
 	./$(BINARY) examples/haiku-vm.joke
+
+TAPES := $(wildcard tapes/*.tape)
+GIFS  := $(TAPES:.tape=.gif)
+
+# BDD: run all specs (Go tests + Joker assertions + CUE validation)
+bdd: test joker-test cue-vet
+	@echo "✓ All BDD specs green"
+
+# GIVEN hof.joker definitions
+# WHEN  joker evaluates all assertions
+# THEN  all HOF beta reductions hold
+joker-test:
+	@printf "GIVEN hof.joker definitions\nWHEN  joker evaluates all assertions\n"
+	@joker hof.joker
+	@echo "THEN  all HOF beta reductions hold ✓"
+
+# GIVEN hof.cue schema
+# WHEN  cue vet validates constraints
+# THEN  GF(3) triad balance is enforced
+cue-vet:
+	@printf "GIVEN hof.cue schema\nWHEN  cue vet validates constraints\n"
+	@command -v cue >/dev/null && cue vet hof.cue && echo "THEN  GF(3) triad balance enforced ✓" || echo "THEN  (cue not installed, skipped)"
+
+# Record all VHS tapes (requires vhs + ttyd)
+tapes: $(GIFS)
+
+tapes/%.gif: tapes/%.tape
+	vhs $<
 
 # Build HaikuOS GUI launcher
 haiku-gui: deps

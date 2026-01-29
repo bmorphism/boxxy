@@ -57,6 +57,28 @@ boxxy run --linux \
   --cpus 4
 ```
 
+Run Guix (EFI installer or kernel boot):
+
+```bash
+boxxy run --guix --iso guix.iso --disk guix.img
+boxxy run --guix --kernel vmlinuz --initrd initrd --disk guix.img
+```
+
+Run Guix with Rosetta for x86_64 Linux binaries (Apple Silicon):
+
+```bash
+boxxy run --guix --guix-arch x86_64 --rosetta \
+  --kernel vmlinuz \
+  --initrd initrd \
+  --disk guix.img
+```
+
+Hardened sandbox (disable guest networking):
+
+```bash
+boxxy run --guix --iso guix.iso --disk guix.img --hardened
+```
+
 Run a script:
 
 ```bash
@@ -183,6 +205,7 @@ boxxy
 | FreeBSD | EFI | ✅ Tested |
 | Alpine Linux | Linux | ✅ Tested |
 | Ubuntu | Linux/EFI | ✅ Tested |
+| Guix System | Linux/EFI | ✅ Supported |
 | macOS | macOS | ⚠️ Apple Silicon only |
 | Windows | EFI | ⚠️ Experimental |
 
@@ -203,7 +226,7 @@ make release
 From `docs/HAIKU-ARM64-STATUS.md`:
 
 - HaikuOS ARM64 cannot currently run via boxxy (no prebuilt images, incomplete port, macOS toolchain issues).
-- Apple Virtualization.framework only supports native ARM64 guests; Rosetta only applies to Linux x86_64 inside an ARM64 Linux VM (Haiku uses different ABIs).
+- Apple Virtualization.framework only supports native ARM64 guests; Rosetta only applies to Linux x86_64 binaries inside an ARM64 Linux VM (Haiku uses different ABIs).
 
 Concrete example in this repo:
 

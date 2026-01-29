@@ -48,8 +48,7 @@ func main() {
 	flag.Parse()
 
 	// Create shared Lisp environment with vz namespace
-	env := lisp.NewEnv(nil)
-	lisp.RegisterStdlib(env)
+	env := lisp.CreateStandardEnv()
 	vm.RegisterNamespace(env)
 	var evalMu sync.Mutex
 
@@ -135,7 +134,10 @@ func safeEval(exprStr string, env *lisp.Env) (result string, errStr string) {
 	}()
 
 	reader := lisp.NewReader(strings.NewReader(exprStr))
-	exprs := reader.ReadAll()
+	exprs, err := reader.ReadAll()
+	if err != nil {
+		return "", fmt.Sprintf("read error: %v", err)
+	}
 
 	var lastVal lisp.Value = lisp.Nil{}
 	for _, expr := range exprs {

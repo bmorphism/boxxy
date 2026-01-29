@@ -1,20 +1,13 @@
 session Boxxy_AGM = HOL +
-  description \<open>
-    AGM Belief Revision with Semi-Reliable Nashator (Hedges-Capucci)
-    
-    Formalizes:
-    - AGM postulates (K*1 through K*8)
-    - Lindstrom-Rabinowicz indeterministic revision
-    - Selection functions and Nash product
-    - Semi-reliable epsilon-approximate equilibria
-    - Vibesnipe: compositional belief revision game theory
-    - GF(3) trit conservation
-  \<close>
+  description "AGM Belief Revision"
   options [document = false, quick_and_dirty = true]
   sessions
     "HOL-Library"
   theories
     AGM_Base
+    AGM_Extensions
+    Grove_Spheres
+    Boxxy_AGM_Bridge
     OpticClass
     SemiReliable_Nashator
     Vibesnipe

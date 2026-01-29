@@ -13,15 +13,18 @@ import (
 )
 
 type RunConfig struct {
-	BootMode string // efi, linux, macos
-	Kernel   string
-	Initrd   string
-	Cmdline  string
-	ISO      string
-	Disk     string
-	Memory   int
-	CPUs     int
-	NVRAM    string
+	BootMode       string // efi, linux, macos
+	Kernel         string
+	Initrd         string
+	Cmdline        string
+	ISO            string
+	Disk           string
+	Memory         int
+	CPUs           int
+	NVRAM          string
+	DisableNetwork bool
+	EnableRosetta  bool
+	RosettaTag     string
 }
 
 func Run(args []string) error {
@@ -35,6 +38,7 @@ func Run(args []string) error {
 	efi := fs.Bool("efi", false, "Use EFI boot")
 	linux := fs.Bool("linux", false, "Use Linux boot")
 	macos := fs.Bool("macos", false, "Use macOS boot")
+	guix := fs.Bool("guix", false, "Use Guix (auto-select EFI or Linux boot)")
 	fs.StringVar(&cfg.Kernel, "kernel", "", "Linux kernel path")
 	fs.StringVar(&cfg.Initrd, "initrd", "", "Linux initrd path")
 	fs.StringVar(&cfg.Cmdline, "cmdline", "console=hvc0", "Linux kernel cmdline")
@@ -43,6 +47,10 @@ func Run(args []string) error {
 	fs.IntVar(&cfg.Memory, "memory", 4, "Memory in GB")
 	fs.IntVar(&cfg.CPUs, "cpus", 2, "CPU count")
 	fs.StringVar(&cfg.NVRAM, "nvram", "boxxy-nvram", "EFI NVRAM path")
+	fs.BoolVar(&cfg.DisableNetwork, "hardened", false, "Disable networking for stronger sandboxing")
+	fs.BoolVar(&cfg.EnableRosetta, "rosetta", false, "Enable Rosetta for Linux x86_64 binaries (Apple Silicon)")
+	fs.StringVar(&cfg.RosettaTag, "rosetta-tag", "rosetta", "VirtioFS tag for Rosetta directory share")
+	guixArch := fs.String("guix-arch", "aarch64", "Guix architecture: aarch64 or x86_64 (x86_64 requires --rosetta)")
 
 	if err := fs.Parse(args); err != nil {
 		return err
@@ -50,6 +58,18 @@ func Run(args []string) error {
 
 	// Determine boot mode
 	switch {
+	case *guix:
+		if *efi {
+			cfg.BootMode = "efi"
+		} else if *linux {
+			cfg.BootMode = "linux"
+		} else if cfg.Kernel != "" || cfg.Initrd != "" {
+			cfg.BootMode = "linux"
+		} else if cfg.ISO != "" {
+			cfg.BootMode = "efi"
+		} else {
+			return fmt.Errorf("guix mode requires --iso or --kernel/--initrd")
+		}
 	case *efi:
 		cfg.BootMode = "efi"
 	case *linux:
@@ -57,26 +77,40 @@ func Run(args []string) error {
 	case *macos:
 		cfg.BootMode = "macos"
 	default:
-		return fmt.Errorf("must specify --efi, --linux, or --macos")
+		return fmt.Errorf("must specify --efi, --linux, --macos, or --guix")
+	}
+
+	if *guix {
+		switch strings.ToLower(*guixArch) {
+		case "aarch64", "arm64":
+			// default
+		case "x86_64", "amd64":
+			cfg.EnableRosetta = true
+		default:
+			return fmt.Errorf("unsupported guix architecture: %s", *guixArch)
+		}
 	}
 
 	return runVM(cfg)
 }
 
 func runVM(cfg *RunConfig) error {
-	fmt.Printf("Starting VM: mode=%s cpus=%d memory=%dGB\n", 
+	fmt.Printf("Starting VM: mode=%s cpus=%d memory=%dGB\n",
 		cfg.BootMode, cfg.CPUs, cfg.Memory)
 
 	vmInstance, err := vm.CreateVM(vm.Config{
-		BootMode: cfg.BootMode,
-		Kernel:   cfg.Kernel,
-		Initrd:   cfg.Initrd,
-		Cmdline:  cfg.Cmdline,
-		ISO:      cfg.ISO,
-		Disk:     cfg.Disk,
-		Memory:   cfg.Memory,
-		CPUs:     cfg.CPUs,
-		NVRAM:    cfg.NVRAM,
+		BootMode:       cfg.BootMode,
+		Kernel:         cfg.Kernel,
+		Initrd:         cfg.Initrd,
+		Cmdline:        cfg.Cmdline,
+		ISO:            cfg.ISO,
+		Disk:           cfg.Disk,
+		Memory:         cfg.Memory,
+		CPUs:           cfg.CPUs,
+		NVRAM:          cfg.NVRAM,
+		DisableNetwork: cfg.DisableNetwork,
+		EnableRosetta:  cfg.EnableRosetta,
+		RosettaTag:     cfg.RosettaTag,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create VM: %w", err)

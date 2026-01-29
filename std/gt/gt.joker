@@ -1,0 +1,111 @@
+;; gt - Joker bindings for gastown multi-agent workspace manager
+;;
+;; Maps gastown's domain into boxxy's Clojure-on-Go world.
+;; Each agent is a polecat in a rig, communicating via mail.
+;;
+;; Example:
+;;   (require '[gt :as gt])
+;;
+;;   ;; List rigs and their polecats
+;;   (let [rigs (gt/list-rigs)]
+;;     (doseq [r rigs]
+;;       (println (:name r) "—" (:polecat-count r) "agents")))
+;;
+;;   ;; Spawn a polecat on an issue
+;;   (gt/spawn :rig "boxxy" :issue "bd-abc123")
+;;
+;;   ;; Send mail between agents
+;;   (gt/mail! {:from "boxxy/Toast"
+;;              :to   "boxxy/Furiosa"
+;;              :subject "rebase needed"
+;;              :priority :high})
+;;
+;;   ;; Check merge queue
+;;   (gt/merge-queue "boxxy")
+
+(ns gt)
+
+;; --- Rig: managed repository workspace ---
+
+(defn list-rigs
+  "List all registered rigs. Returns seq of rig summaries."
+  [] (gt/__list-rigs))
+
+(defn rig-info
+  "Get full rig info by name."
+  [name] (gt/__rig-info name))
+
+;; --- Polecat: worker agent (git worktree + tmux session) ---
+
+(defn spawn
+  "Spawn a new polecat in a rig.
+   Options: :rig name, :issue id, :account handle"
+  [& {:keys [rig issue account]}]
+  (gt/__spawn rig issue account))
+
+(defn list-polecats
+  "List polecats in a rig. Returns seq of {:name :state :issue}."
+  [rig] (gt/__list-polecats rig))
+
+(defn polecat-state
+  "Get polecat state: :working, :done, :stuck"
+  [rig name] (gt/__polecat-state rig name))
+
+(defn nuke
+  "Remove a polecat worktree (must be clean)."
+  [rig name] (gt/__nuke rig name))
+
+;; --- Beads: git-backed issue tracker ---
+
+(defn create-issue
+  "Create a new issue. Returns issue id."
+  [title & {:keys [body labels assignee priority]}]
+  (gt/__create-issue title body labels assignee priority))
+
+(defn show-issue
+  "Get issue by id."
+  [id] (gt/__show-issue id))
+
+(defn list-issues
+  "List issues. Options: :state :open/:closed, :assignee name"
+  [& {:keys [state assignee]}]
+  (gt/__list-issues state assignee))
+
+(defn close-issue
+  "Close an issue with reason."
+  [id reason] (gt/__close-issue id reason))
+
+;; --- Mail: inter-agent messaging ---
+
+(defn mail!
+  "Send a message between agents.
+   m is a map with :from :to :subject :body :priority :type :delivery"
+  [m] (gt/__send-mail m))
+
+(defn inbox
+  "Read agent's inbox. Returns seq of messages."
+  [agent] (gt/__inbox agent))
+
+(defn claim-mail
+  "Claim a queue message for processing."
+  [agent msg-id] (gt/__claim-mail agent msg-id))
+
+;; --- Witness: merge gatekeeper ---
+
+(defn merge-queue
+  "Get the merge queue for a rig."
+  [rig] (gt/__merge-queue rig))
+
+(defn merge-ready
+  "Signal a polecat's branch is ready for merge."
+  [rig polecat] (gt/__merge-ready rig polecat))
+
+;; --- Daemon ---
+
+(defn status
+  "Get daemon status: running rigs, agent health, operational state."
+  [] (gt/__status))
+
+(defn doctor
+  "Run health checks. Returns seq of {:check :status :message}."
+  [] (gt/__doctor))

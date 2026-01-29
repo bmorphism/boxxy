@@ -1,0 +1,52 @@
+#!/usr/bin/env joker
+;; Higher-order functions with canonical beta reductions
+
+(ns boxxy.hof)
+
+;; --- Core HOF patterns ---
+
+(def curry    (fn [x] (fn [y] (+ x y))))
+(def compose  (fn [f] (fn [g] (fn [x] (f (g x))))))
+(def hof-map  (fn [f] (fn [s] (map f s))))
+(def hof-fold (fn [f] (fn [z] (fn [s] (reduce f z s)))))
+
+;; --- Church numerals ---
+
+(def C0 (fn [f] (fn [x] x)))
+(def C1 (fn [f] (fn [x] (f x))))
+(def C2 (fn [f] (fn [x] (f (f x)))))
+(def succ (fn [n] (fn [f] (fn [x] (f ((n f) x))))))
+(def to-int (fn [n] ((n inc) 0)))
+
+;; --- Z combinator (applicative-order Y) ---
+
+(def Z (fn [f] ((fn [x] (f (fn [v] ((x x) v)))) (fn [x] (f (fn [v] ((x x) v)))))))
+
+;; --- GF(3) classification ---
+;; trit = SHA-256(name) % 3
+;;   0: ERGODIC (coordinator)
+;;   1: PLUS    (generator)
+;;   2: MINUS   (verifier)
+
+(def skills
+  {:map   {:name "hof-map"  :trit 1 :role :PLUS}
+   :comp  {:name "compose"  :trit 0 :role :ERGODIC}
+   :zcomb {:name "z-comb"   :trit 2 :role :MINUS}})
+
+(defn balanced? [a b c]
+  (zero? (mod (+ (:trit a) (:trit b) (:trit c)) 3)))
+
+;; --- Assertions ---
+
+(assert (= 7    ((curry 3) 4)))
+(assert (= 11   (((compose (fn [x] (+ x 1))) (fn [x] (* x 2))) 5)))
+(assert (= [2 4 6] ((hof-map (fn [x] (* x 2))) [1 2 3])))
+(assert (= 6    (((hof-fold +) 0) [1 2 3])))
+(assert (= 0    (to-int C0)))
+(assert (= 1    (to-int C1)))
+(assert (= 2    (to-int C2)))
+(assert (= 3    (to-int (succ C2))))
+(assert (= 120  ((Z (fn [f] (fn [n] (if (<= n 1) 1 (* n (f (- n 1))))))) 5)))
+(assert (balanced? (:map skills) (:comp skills) (:zcomb skills)))
+
+(println "All HOF assertions pass.")

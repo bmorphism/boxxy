@@ -17,15 +17,18 @@ import (
 
 // Config holds VM configuration
 type Config struct {
-	BootMode string // efi, linux, macos
-	Kernel   string
-	Initrd   string
-	Cmdline  string
-	ISO      string
-	Disk     string
-	Memory   int // GB
-	CPUs     int
-	NVRAM    string
+	BootMode       string // efi, linux, macos
+	Kernel         string
+	Initrd         string
+	Cmdline        string
+	ISO            string
+	Disk           string
+	Memory         int // GB
+	CPUs           int
+	NVRAM          string
+	DisableNetwork bool
+	EnableRosetta  bool
+	RosettaTag     string
 }
 
 // VMInstance wraps a running VM
@@ -75,7 +78,7 @@ func CreateVM(cfg Config) (*VMInstance, error) {
 
 	// Add storage devices
 	var storageDevices []vz.StorageDeviceConfiguration
-	
+
 	// Add ISO if specified (USB mass storage for EFI boot)
 	if cfg.ISO != "" {
 		isoAtt, err := vz.NewDiskImageStorageDeviceAttachment(cfg.ISO, true)
@@ -106,16 +109,22 @@ func CreateVM(cfg Config) (*VMInstance, error) {
 		vmConfig.SetStorageDevicesVirtualMachineConfiguration(storageDevices)
 	}
 
-	// Add network (NAT)
-	natAtt, err := vz.NewNATNetworkDeviceAttachment()
-	if err != nil {
-		return nil, fmt.Errorf("failed to create NAT: %w", err)
+	if err := addRosettaDirectoryShare(vmConfig, cfg); err != nil {
+		return nil, err
 	}
-	virtioNet, err := vz.NewVirtioNetworkDeviceConfiguration(natAtt)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create virtio network: %w", err)
+
+	if !cfg.DisableNetwork {
+		// Add network (NAT)
+		natAtt, err := vz.NewNATNetworkDeviceAttachment()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create NAT: %w", err)
+		}
+		virtioNet, err := vz.NewVirtioNetworkDeviceConfiguration(natAtt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create virtio network: %w", err)
+		}
+		vmConfig.SetNetworkDevicesVirtualMachineConfiguration([]*vz.VirtioNetworkDeviceConfiguration{virtioNet})
 	}
-	vmConfig.SetNetworkDevicesVirtualMachineConfiguration([]*vz.VirtioNetworkDeviceConfiguration{virtioNet})
 
 	// Add serial console
 	serialAtt, err := vz.NewFileHandleSerialPortAttachment(os.Stdin, os.Stdout)
@@ -714,7 +723,7 @@ func startGraphicAppLisp(args []lisp.Value) lisp.Value {
 		panic("vz/start-graphic-app! requires VM")
 	}
 	instance := args[0].(*lisp.ExternalValue).Value.(*VMInstance)
-	
+
 	width := float64(1920)
 	height := float64(1200)
 	title := "boxxy VM"
@@ -730,8 +739,8 @@ func startGraphicAppLisp(args []lisp.Value) lisp.Value {
 
 	// Lock OS thread as required by macOS GUI
 	runtime.LockOSThread()
-	
+
 	instance.VM.StartGraphicApplication(width, height, vz.WithWindowTitle(title))
-	
+
 	return lisp.Bool(true)
 }

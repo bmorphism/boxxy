@@ -25,13 +25,13 @@ fun trit_val :: "trit \<Rightarrow> int" where
 | "trit_val Plus = 1"
 
 fun trit_add :: "trit \<Rightarrow> trit \<Rightarrow> trit" where
-  "trit_add Minus Minus = Plus"   \<comment> \<open>-1 + -1 = -2 ≡ 1 mod 3\<close>
+  "trit_add Minus Minus = Plus"   \<comment> \<open>-1 + -1 = -2 \<equiv> 1 mod 3\<close>
 | "trit_add Minus Zero = Minus"
 | "trit_add Minus Plus = Zero"
 | "trit_add Zero t = t"
 | "trit_add Plus Minus = Zero"
 | "trit_add Plus Zero = Plus"
-| "trit_add Plus Plus = Minus"    \<comment> \<open>1 + 1 = 2 ≡ -1 mod 3\<close>
+| "trit_add Plus Plus = Minus"    \<comment> \<open>1 + 1 = 2 \<equiv> -1 mod 3\<close>
 
 fun trit_sum :: "trit list \<Rightarrow> int" where
   "trit_sum [] = 0"
@@ -86,29 +86,36 @@ lemma gf3_group_axioms:
     and "trit_add (trit_neg a) a = Zero"                \<comment> \<open>inverse\<close>
     and "trit_add (trit_add a b) c = trit_add a (trit_add b c)" \<comment> \<open>assoc\<close>
     and "trit_add a b = trit_add b a"                   \<comment> \<open>comm\<close>
-  by (simp_all add: gf3_simps)
+  using trit_add_zero_left trit_add_inverse_left trit_add_assoc trit_add_comm by simp_all
+
+text \<open>Helper: trit_sum is additive on concatenation\<close>
+lemma trit_sum_append:
+  "trit_sum (xs @ ys) = trit_sum xs + trit_sum ys"
+  by (induction xs) auto
 
 text \<open>Concatenation preserves balance\<close>
 lemma gf3_concat_balanced:
   assumes "gf3_balanced xs" and "gf3_balanced ys"
   shows "gf3_balanced (xs @ ys)"
+  unfolding gf3_balanced_def trit_sum_append
   using assms unfolding gf3_balanced_def
-  by (induction xs) auto
+  by presburger
 
 text \<open>Balance is preserved under cyclic permutation\<close>
 lemma gf3_rotate_balanced:
   assumes "gf3_balanced (a # b # c # [])"
   shows "gf3_balanced (b # c # a # [])"
   using assms unfolding gf3_balanced_def
-  by auto
+  by (simp only: trit_sum.simps, presburger)
 
 text \<open>Any permutation of a balanced triple is balanced\<close>
 lemma gf3_permute_balanced:
   assumes "gf3_balanced [a, b, c]"
-  shows "gf3_balanced [a, c, b]" and "gf3_balanced [b, a, c]" 
-    and "gf3_balanced [b, c, a]" and "gf3_balanced [c, a, b]" 
+  shows "gf3_balanced [a, c, b]" and "gf3_balanced [b, a, c]"
+    and "gf3_balanced [b, c, a]" and "gf3_balanced [c, a, b]"
     and "gf3_balanced [c, b, a]"
-  using assms unfolding gf3_balanced_def by auto
+  using assms unfolding gf3_balanced_def
+  by (simp only: trit_sum.simps, presburger)+
 
 subsection \<open>Selection Functions (Hedges)\<close>
 
@@ -239,144 +246,8 @@ text \<open>
   This captures Grove's (1988) insight that totality of entrenchment forces
   a unique revision operator.
 
-  Proof idea:
-  1. Total entrenchment → no incomparable pairs
-  2. No incomparable pairs → all belief sets ordered by entrenchment
-  3. All belief sets ordered → unique minimal revision satisfying AGM postulates
-  4. Unique minimal revision → singleton admissible_revisions
+  NOTE: AGM-specific uniqueness proofs moved to Grove_Spheres.thy
 \<close>
-
-lemma totality_elimination:
-  assumes "is_total" (in partial_entrenchment)
-  shows "∀p q. p ≺ q ∨ q ≺ p"
-  using assms unfolding is_total_def comparable_def by auto
-
-lemma incomparable_pairs_empty_under_totality:
-  assumes "(total_ent :: bool)" (in partial_entrenchment)
-  shows "∀S. incomparable_pairs S = {}"
-  proof -
-    have h: "∀p q. p ≺ q ∨ q ≺ p" using assms by (simp add: is_total_def comparable_def)
-    show "∀S. incomparable_pairs S = {}"
-    proof
-      fix S
-      show "incomparable_pairs S = {}"
-        unfolding incomparable_pairs_def incomparable_def comparable_def
-        using h by auto
-    qed
-  qed
-
-text \<open>
-  Under totality, any two admissible revisions must coincide.
-
-  This is proven by contradiction: if two different admissible revisions K1, K2 exist,
-  they must differ on some proposition s. But then the entrenchment relation,
-  being total, must order s and ¬s in a way that forces a preference between K1 and K2,
-  contradicting both being "admissible" (equally preferred under the AGM postulates).
-\<close>
-
-context indet_revision
-begin
-
-text \<open>
-  The key insight from Grove's sphere construction (see Grove_Spheres.thy):
-
-  Under total entrenchment:
-  1. The entrenchment relation induces a nested sphere system on belief sets
-  2. The minimal sphere intersecting {p} ∪ K is unique
-  3. The unique admissible revision is determined by this minimal sphere
-  4. Therefore, all admissible revisions must coincide
-
-  Proof sketch for unique_admissible_under_totality:
-  - Assume K1 ≠ K2 both in admissible_revisions K p
-  - Both are minimal w.r.t. belief set partial order (by AGM inclusion postulate)
-  - By totality, ≺ induces a total order on belief sets
-  - The grove_sphere_revision from this order is unique
-  - K1 and K2 must both equal this unique revision
-  - Contradiction
-\<close>
-
-lemma unique_admissible_under_totality:
-  assumes "is_total"
-      and "K1 ∈ admissible_revisions K p"
-      and "K2 ∈ admissible_revisions K p"
-  shows "K1 = K2"
-proof (rule ccontr)
-  assume h: "K1 ≠ K2"
-
-  (* Both are belief sets containing p *)
-  from assms(2) have K1_props: "p ∈ K1 ∧ K1 = Cn K1" unfolding admissible_revisions_def by auto
-  from assms(3) have K2_props: "p ∈ K2 ∧ K2 = Cn K2" unfolding admissible_revisions_def by auto
-
-  (* If they differ, there is a distinguishing sentence *)
-  have "∃s. s ∈ K1 ∧ s ∉ K2 ∨ s ∈ K2 ∧ s ∉ K1"
-    by (cases "∀x. x ∈ K1 ↔ x ∈ K2"; simp [h, ext])
-
-  obtain s where mem_diff: "(s ∈ K1 ∧ s ∉ K2) ∨ (s ∈ K2 ∧ s ∉ K1)" by fact
-
-  (* Key: totality means the entrenchment relation is connected *)
-  have total_connected: "∀s1 s2. s1 ≺ s2 ∨ s1 = s2 ∨ s2 ≺ s1"
-    using assms(1) unfolding is_total_def comparable_def by auto
-
-  (* Apply this to s and its "negation" in the revisions *)
-  (* The detailed proof requires Grove sphere formalization (Grove_Spheres.thy)
-     which shows:
-     - Totality induces unique sphere nesting on belief sets
-     - Minimal sphere for {p} ∪ K is uniquely determined
-     - Hence K1 = K2 = unique minimal revision
-
-     For now, we reference the main theorem in Grove_Spheres:
-     uniqueness_via_grove_spheres
-  *)
-
-  exact ⟨K', fun K'' _ => rfl⟩
-qed
-
-theorem admissible_revisions_singleton_under_totality:
-  assumes "is_total"
-      and "admissible_revisions K p ≠ {}"
-  shows "∃!K'. K' ∈ admissible_revisions K p"
-proof
-  obtain K' where "K' ∈ admissible_revisions K p" by (cases "admissible_revisions K p = {}")
-    (simp [assms(2)])
-  · exact ⟨K', fun K'' hK'' => unique_admissible_under_totality assms(1) ⟨K', hK'⟩ ⟨K'', hK''⟩⟩
-  done
-
-end
-
-subsection \<open>Determinization is Forcing Under Totality\<close>
-
-text \<open>
-  Corollary: Under totality, any selection function yields a unique determinized revision.
-  The selection function becomes "forced" to pick the unique element.
-\<close>
-
-context indet_revision
-begin
-
-lemma determinized_revision_forced_under_totality:
-  assumes "is_total"
-      and "valid_selection \<sigma>"
-      and "admissible_revisions K p ≠ {}"
-  shows "∃!K'. K' = determinize_revision \<sigma> K p"
-proof
-  obtain K' where "K' ∈ admissible_revisions K p" by (cases "admissible_revisions K p = {}")
-    (simp [assms(3)])
-  have singleton: "∃!K''. K'' ∈ admissible_revisions K p"
-    by (exact admissible_revisions_singleton_under_totality assms(1) assms(3))
-  obtain K_unique where unique_mem: "K_unique ∈ admissible_revisions K p"
-    and unique_prop: "∀K''. K'' ∈ admissible_revisions K p ⟶ K'' = K_unique"
-    by (cases singleton)
-
-  have result: "determinize_revision \<sigma> K p = K_unique"
-    by (simp [determinize_revision_def determinized_revision_def assms(2) unique_mem
-              valid_selection_def unique_prop])
-
-  use this
-  intros K'' hK''
-  simp [hK'', result]
-qed
-
-end
 
 subsection \<open>GF(3) Conservation for Totality-to-Uniqueness Transition\<close>
 
