@@ -3,6 +3,7 @@
 package skill
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -330,5 +331,43 @@ func TestMedicalDeviceCapabilities(t *testing.T) {
 	errs := registry.ValidateAll()
 	if len(errs) > 0 {
 		t.Errorf("Medical device validation errors: %v", errs)
+	}
+}
+
+func TestRegistryCapacityLimit(t *testing.T) {
+	// Test resource exhaustion protection
+	registry := NewRegistry()
+
+	// Fill registry to capacity
+	for i := 0; i < MaxSkillsPerDevice; i++ {
+		name := fmt.Sprintf("skill-%d", i)
+		err := registry.Register(&EmbeddedSkill{
+			Name:        name,
+			Description: "Test skill",
+			Trit:        uint8(i % 3),
+		})
+		if err != nil {
+			t.Errorf("Failed to register skill %d: %v", i, err)
+		}
+	}
+
+	if registry.Count() != MaxSkillsPerDevice {
+		t.Errorf("Registry count = %d, want %d", registry.Count(), MaxSkillsPerDevice)
+	}
+
+	// Try to exceed capacity
+	err := registry.Register(&EmbeddedSkill{
+		Name:        "extra-skill",
+		Description: "Should fail",
+		Trit:        0,
+	})
+
+	if err == nil {
+		t.Errorf("Expected error when exceeding registry capacity, got nil")
+	}
+
+	// Verify count didn't change
+	if registry.Count() != MaxSkillsPerDevice {
+		t.Errorf("Registry count changed after failed registration")
 	}
 }

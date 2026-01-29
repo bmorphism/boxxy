@@ -128,6 +128,11 @@ func estimateTokensEmbedded(charCount int) int {
 
 // ComputeTriEmbedded computes the GF(3) trit from a skill name via SHA-256.
 // Returns 0, 1, or 2 (never panics).
+//
+// SECURITY NOTE: This hash is deterministic and public, suitable only for capability
+// classification. NOT suitable for security-critical operations (authentication,
+// attestation, or firmware signing). For those, use ATECC608A secure element as
+// documented in skills/embedded-medical-device/SKILL.md Part 4.
 func ComputetritEmbedded(name string) uint8 {
 	h := sha256.Sum256([]byte(name))
 	val := binary.LittleEndian.Uint64(h[0:8])
@@ -163,6 +168,11 @@ func ParseEmbeddedSkillLine(line string) (*EmbeddedSkill, error) {
 	return s, nil
 }
 
+// MaxSkillsPerDevice is the maximum number of skills a medical device firmware can register.
+// Typical healthcare devices have 5-20 capabilities; 32 is a safe upper bound.
+// Prevents memory exhaustion attacks on embedded firmware.
+const MaxSkillsPerDevice = 32
+
 // EmbeddedSkillRegistry holds a compact registry of skills for MCU enumeration.
 type EmbeddedSkillRegistry struct {
 	skills []*EmbeddedSkill
@@ -175,7 +185,9 @@ func NewRegistry() *EmbeddedSkillRegistry {
 	}
 }
 
-// Register adds a skill to the registry (panics if name duplicates).
+// Register adds a skill to the registry.
+// Returns error if name duplicates or registry is full (MaxSkillsPerDevice limit).
+// Returns error to prevent resource exhaustion attacks on firmware.
 func (r *EmbeddedSkillRegistry) Register(s *EmbeddedSkill) error {
 	// Check for duplicates
 	for _, existing := range r.skills {
@@ -183,6 +195,12 @@ func (r *EmbeddedSkillRegistry) Register(s *EmbeddedSkill) error {
 			return fmt.Errorf("skill: duplicate name %q", s.Name)
 		}
 	}
+
+	// Check registry capacity (resource exhaustion protection)
+	if len(r.skills) >= MaxSkillsPerDevice {
+		return fmt.Errorf("skill: registry full (%d skills, max %d)", len(r.skills), MaxSkillsPerDevice)
+	}
+
 	r.skills = append(r.skills, s)
 	return nil
 }
