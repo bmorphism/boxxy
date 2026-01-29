@@ -1,0 +1,175 @@
+;; boxxy provider in normal form (EDN)
+;;
+;; Identical shape to soft-machine ComputeProvider interface,
+;; metacircular: the evaluator that boots VMs is itself described
+;; as data the evaluator can read.
+;;
+;; Colors from gay MCP seed=42:
+;;   depth-0 #0BC68E (root)     spin +1
+;;   depth-1 #91BE25 (config)   spin -1
+;;   depth-2 #1533EA (instance) spin +1
+;;   depth-3 #D822A5 (snapshot) spin -1
+;;   depth-4 #B09A11 (exec)     spin +1
+;;   depth-5 #E2799D (branch)   spin -1
+;;   depth-6 #A4DE31 (volume)   spin +1
+;;
+;; GF(3) trit: 0 (ERGODIC - coordination)
+;; magnetization: 0.143 (near-balanced)
+
+{:provider/name     "boxxy"
+ :provider/type     :local
+ :provider/color    "#0BC68E"
+ :provider/trit     0
+
+ ;; ── capabilities ──────────────────────────────────────────────
+ :capabilities
+ {:memory-snapshots  true
+  :branching         true
+  :cold-boot-ms      5000
+  :warm-resume-ms    1000
+  :volumes           true
+  :suspend           true
+  :gpu               false
+  :max-branches      16
+  :regions           ["local"]
+  :contexts          [:server]
+  :runtimes          [:microvm :linux]
+  :labels            [:local :rewind :branch :suspend]
+  :color             "#91BE25"}
+
+ ;; ── vz namespace (the metacircular core) ──────────────────────
+ ;; Each fn here is both:
+ ;;   1. A spec of what boxxy's Lisp evaluator provides
+ ;;   2. A callable from squint/SCI/babashka via the bridge
+ :vz/namespace
+ {:boot-loaders
+  [{:name   :vz/new-efi-variable-store
+    :args   [:path :create?]
+    :return :external/efi-store
+    :color  "#1533EA"}
+   {:name   :vz/new-efi-boot-loader
+    :args   [:store]
+    :return :external/boot-loader
+    :color  "#1533EA"}
+   {:name   :vz/new-linux-boot-loader
+    :args   [:kernel :initrd :cmdline]
+    :return :external/boot-loader
+    :color  "#1533EA"}
+   {:name   :vz/new-macos-boot-loader
+    :args   []
+    :return :external/boot-loader
+    :color  "#1533EA"}]
+
+  :platform
+  [{:name   :vz/new-generic-platform
+    :args   []
+    :return :external/platform
+    :color  "#D822A5"}]
+
+  :storage
+  [{:name   :vz/new-disk-attachment
+    :args   [:path :read-only?]
+    :return :external/disk-attachment
+    :color  "#B09A11"}
+   {:name   :vz/new-virtio-block-device
+    :args   [:attachment]
+    :return :external/block-device
+    :color  "#B09A11"}
+   {:name   :vz/new-usb-mass-storage
+    :args   [:attachment]
+    :return :external/usb-storage
+    :color  "#B09A11"}]
+
+  :network
+  [{:name   :vz/new-nat-network
+    :args   []
+    :return :external/nat
+    :color  "#E2799D"}
+   {:name   :vz/new-virtio-network
+    :args   [:nat-attachment]
+    :return :external/nic
+    :color  "#E2799D"}]
+
+  :config
+  [{:name   :vz/new-vm-config
+    :args   [:cpus :memory-gb :boot-loader :platform]
+    :return :external/vm-config
+    :color  "#A4DE31"}
+   {:name   :vz/add-storage-devices
+    :args   [:config :devices]
+    :return :nil
+    :color  "#A4DE31"}
+   {:name   :vz/add-network-devices
+    :args   [:config :devices]
+    :return :nil
+    :color  "#A4DE31"}
+   {:name   :vz/validate-config
+    :args   [:config]
+    :return :bool
+    :color  "#A4DE31"}]
+
+  :control
+  [{:name   :vz/new-vm
+    :args   [:config]
+    :return :external/vm
+    :color  "#A3C343"}
+   {:name   :vz/start-vm!
+    :args   [:vm]
+    :return :bool
+    :color  "#A3C343"}
+   {:name   :vz/stop-vm!
+    :args   [:vm]
+    :return :bool
+    :color  "#A3C343"}
+   {:name   :vz/pause-vm!
+    :args   [:vm]
+    :return :bool
+    :color  "#A3C343"}
+   {:name   :vz/resume-vm!
+    :args   [:vm]
+    :return :bool
+    :color  "#A3C343"}
+   {:name   :vz/vm-state
+    :args   [:vm]
+    :return :string
+    :color  "#A3C343"}]
+
+  :utilities
+  [{:name   :vz/create-disk-image
+    :args   [:path :size-gb]
+    :return :bool
+    :color  "#8CE2F0"}
+   {:name   :vz/wait-for-shutdown
+    :args   [:vm]
+    :return :nil
+    :color  "#8CE2F0"}]}
+
+ ;; ── evaluator shape (the metacircular part) ───────────────────
+ ;; boxxy's eval/apply is a standard Lisp-1 with these forms.
+ ;; This is the shape that squint/SCI/babashka must implement
+ ;; to be "identical" — same eval, same data, same colors.
+ :evaluator
+ {:special-forms [:quote :def :let :fn :if :do :require :ns]
+  :value-types   [:nil :bool :int :float :string
+                  :symbol :keyword :list :vector :hash-map
+                  :fn :external-value]
+  :builtins      [:+ :- :* :/
+                  := :< :>
+                  :nil? :string? :number? :vector?
+                  :type :println :print :str
+                  :vector :count :first :rest :nth :conj
+                  :get :assoc
+                  :or :and :not
+                  :getenv]
+  :color         "#0BC68E"}
+
+ ;; ── machine sizes ─────────────────────────────────────────────
+ :sizes
+ {:small    {:cpus 1  :memory-gb 1  :label "Micro"  :tier :basic}
+  :medium   {:cpus 2  :memory-gb 2  :label "Small"  :tier :basic}
+  :large    {:cpus 4  :memory-gb 4  :label "Medium" :tier :standard}
+  :xlarge   {:cpus 4  :memory-gb 8  :label "Large"  :tier :standard}
+  :2xlarge  {:cpus 8  :memory-gb 16 :label "XL"     :tier :performance}
+  :4xlarge  {:cpus 8  :memory-gb 32 :label "2XL"    :tier :performance}
+  :8xlarge  {:cpus 16 :memory-gb 64 :label "4XL"    :tier :performance}
+  :16xlarge {:cpus 16 :memory-gb 64 :label "4XL"    :tier :performance}}}
