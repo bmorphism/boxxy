@@ -122,7 +122,7 @@ Sleep 1.5s
 Ctrl+D
 Sleep 1s
 
-Type "joker hof.joker"
+Type "joker hof.joke"
 Enter
 Sleep 3s
 

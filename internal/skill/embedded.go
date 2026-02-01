@@ -1,5 +1,3 @@
-//go:build tinygo
-
 // Package skill provides embedded-compatible skill validation for TinyGo MCU targets.
 // This file removes glamour/lipgloss dependencies for firmware builds targeting
 // STM32, nRF52840, RP2040, and ESP32 (where available).

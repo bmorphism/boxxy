@@ -1,5 +1,3 @@
-//go:build tinygo
-
 package skill
 
 import (
@@ -25,7 +23,7 @@ func TestNewSiderefToken(t *testing.T) {
 		t.Errorf("got expiry %d, want 0", token.ExpiresAt)
 	}
 	// Token should be non-zero (HMAC result)
-	if bytes.Equal(token.Token[:], [32]byte{}) {
+	if token.Token == [32]byte{} {
 		t.Error("token is all zeros, expected HMAC result")
 	}
 }

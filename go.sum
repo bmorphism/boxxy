@@ -42,6 +42,8 @@ github.com/cristalhq/ternary v0.1.0 h1:C6WH5siKwoBUb9lONnsHmXC2nGm9dM60h1JdWy+D5
 github.com/cristalhq/ternary v0.1.0/go.mod h1:tr6K42YXMIzaZIOPEXka4dvZNoS567SGrpyVPN2bTiQ=
 github.com/dlclark/regexp2 v1.11.0 h1:G/nrcoOa7ZXlpoa/91N3X7mM3r8eIlMBBJZvsz/mxKI=
 github.com/dlclark/regexp2 v1.11.0/go.mod h1:DHkYz0B9wPfa6wondMfaivmHpzrQ3v9q8cnmRbL6yW8=
+github.com/fsnotify/fsevents v0.2.0 h1:BRlvlqjvNTfogHfeBOFvSC9N0Ddy+wzQCQukyoD7o/c=
+github.com/fsnotify/fsevents v0.2.0/go.mod h1:B3eEk39i4hz8y1zaWS/wPrAP4O6wkIl7HQwKBr1qH/w=
 github.com/goloop/trit v1.8.1 h1:Dy0S6HTFMkxX/0s0pO83hfOo/6ab+9/CSn0H0Z1AqLs=
 github.com/goloop/trit v1.8.1/go.mod h1:DVMcZPI0c2vjgl/F7SXsAE3AsDDEdVnAofRhnzqFsi0=
 github.com/gorilla/css v1.0.1 h1:ntNaBIghp6JmvWnxbZKANoLyuXTPZ4cAMlo6RyhlbO8=

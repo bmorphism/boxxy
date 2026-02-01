@@ -1,0 +1,438 @@
+## Flox Environment Manifest -----------------------------------------
+##
+##   boxxy: cross-platform VM provider with device emulators
+##
+##   Platforms:
+##     macOS  -> Apple Virtualization.framework (Go + vz bindings)
+##     Linux  -> cloud-hypervisor (KVM VMM, HTTP API over Unix socket)
+##     Exotic -> TinyGo cross-compiles to ESP32, RISC-V, GBA, WASM, etc.
+##
+##   RISC-V first-class:
+##     spike       ISA simulator (run RV32/RV64 ELF without hardware)
+##     sail-riscv  Formal ISA spec (executable reference model)
+##     ripes       Visual pipeline simulator + assembly editor
+##     qemu        Full system emulation (riscv-qemu TinyGo target)
+##     qemu-user   Run RISC-V ELFs on x86/ARM host (Linux binfmt)
+##     renode      Multi-node SoC emulator (HiFive1, ESP32-C3)
+##     verilator   Cycle-accurate RTL simulation (RISC-V on FPGA)
+##     yosys       RTL synthesis (RISC-V soft-core -> bitstream)
+##     nextpnr     Place & route (bitstream -> FPGA)
+##     openfpgaloader  Flash bitstream to FPGA hardware
+##
+##   https://flox.dev/docs/reference/command-reference/manifest.toml/
+##
+## -------------------------------------------------------------------
+version = 1
+
+
+## ═══════════════════════════════════════════════════════════════════
+## Core Toolchain (all platforms)
+## ═══════════════════════════════════════════════════════════════════
+[install]
+go.pkg-path = "go"
+go.version = "^1.22.0"
+
+joker.pkg-path = "joker"
+
+isabelle.pkg-path = "isabelle"
+isabelle.version = "^2024"
+
+## ═══════════════════════════════════════════════════════════════════
+## TinyGo (all platforms)
+##
+## Compiles Go to bare metal and exotic targets:
+##   ESP32-C3 (RISC-V), ESP32 (Xtensa), RP2040/RP2350,
+##   nRF52840, SAMD21/51, AVR, Game Boy Advance,
+##   Nintendo Switch, WASM/WASI, Tillitis TKey,
+##   SiFive HiFive1 Rev B (RISC-V), riscv-qemu
+## ═══════════════════════════════════════════════════════════════════
+tinygo.pkg-path = "tinygo"
+tinygo.version = "^0.40.0"
+
+## ═══════════════════════════════════════════════════════════════════
+## RISC-V — the full stack from ISA spec to silicon
+## ═══════════════════════════════════════════════════════════════════
+
+# Spike — official RISC-V ISA Simulator from riscv-software-src
+# Runs RV32IMAFDC / RV64GC ELF binaries cycle-accurately
+# This is THE reference simulator for RISC-V
+spike.pkg-path = "spike"
+spike.systems = ["aarch64-linux", "x86_64-linux"]
+
+# Sail RISC-V — formal executable specification of RISC-V ISA
+# Written in Sail (theorem-prover-friendly HDL from Cambridge)
+# Can execute RISC-V binaries as the spec defines them
+sail-riscv.pkg-path = "sail-riscv"
+
+# Sail RV32 / RV64 standalone emulators
+sail-riscv-rv32.pkg-path = "sail-riscv-rv32"
+sail-riscv-rv64.pkg-path = "sail-riscv-rv64"
+
+# Ripes — graphical RISC-V pipeline simulator + assembly editor
+# Visualize instruction flow through 5-stage / superscalar pipelines
+# Great for understanding what TinyGo-compiled RISC-V code does
+ripes.pkg-path = "ripes"
+
+# Verilator — cycle-accurate Verilog/SystemVerilog simulator
+# Simulate actual RISC-V RTL cores (PicoRV32, VexRiscv, SERV, etc.)
+# TinyGo binary -> Spike ISA sim -> Verilator RTL sim -> FPGA
+verilator.pkg-path = "verilator"
+
+# Yosys — open RTL synthesis framework
+# Synthesize RISC-V soft-cores from Verilog to FPGA bitstream
+yosys.pkg-path = "yosys"
+yosys.systems = ["aarch64-darwin", "aarch64-linux", "x86_64-linux"]
+
+# nextpnr — FPGA place and route
+# Takes Yosys netlist -> produces bitstream for iCE40, ECP5, Gowin, etc.
+nextpnr.pkg-path = "nextpnr"
+
+# openFPGALoader — flash bitstream to physical FPGA hardware
+# Supports iCE40, ECP5, Xilinx, Gowin, Efinix, Anlogic, Lattice
+openfpgaloader.pkg-path = "openfpgaloader"
+
+## ═══════════════════════════════════════════════════════════════════
+## Device emulators and flashers (all platforms unless noted)
+## ═══════════════════════════════════════════════════════════════════
+
+# WASM runtime — runs TinyGo WASI output + boxxy context migration
+wasmtime.pkg-path = "wasmtime"
+
+# AVR simulator — emulates Arduino Uno/Nano/Mega TinyGo targets
+simavr.pkg-path = "simavr"
+
+# QEMU full — ARM Cortex-M (cortex-m-qemu), RISC-V (riscv-qemu),
+# full system VMs, and TinyGo target emulation
+qemu.pkg-path = "qemu"
+
+# ESP32 serial flasher — flash TinyGo firmware to ESP32/ESP8266
+esptool.pkg-path = "esptool"
+
+# On-chip debugger — JTAG/SWD for ARM, RISC-V, ESP32
+openocd.pkg-path = "openocd"
+
+# ARM Cortex-M/R bare-metal cross-compiler — TinyGo needs this for
+# nRF, SAMD, STM32, RP2040, Flipper Zero (STM32WB55)
+gcc-arm-embedded.pkg-path = "gcc-arm-embedded"
+
+# AVR programmer — flash TinyGo firmware to Arduino boards
+avrdude.pkg-path = "avrdude"
+
+# DFU programmer — flash over USB (Flipper Zero, STM32 DFU mode)
+dfu-util.pkg-path = "dfu-util"
+
+# RP2040/RP2350 tool — flash TinyGo firmware to Raspberry Pi Pico
+picotool.pkg-path = "picotool"
+
+## ═══════════════════════════════════════════════════════════════════
+## Flipper Zero
+##
+## STM32WB55 (ARM Cortex-M4 + Cortex-M0+ BLE co-processor)
+## TinyGo target via gcc-arm-embedded + dfu-util
+## ═══════════════════════════════════════════════════════════════════
+qFlipper.pkg-path = "qFlipper"
+qFlipper.systems = ["aarch64-linux", "x86_64-darwin", "x86_64-linux"]
+
+## ═══════════════════════════════════════════════════════════════════
+## Game Boy Advance emulator
+##
+##   tinygo build -target=gameboy-advance -o game.gba .
+##   mgba-qt game.gba
+## ═══════════════════════════════════════════════════════════════════
+mgba.pkg-path = "mgba"
+mgba.systems = ["aarch64-linux", "x86_64-linux"]
+
+## ═══════════════════════════════════════════════════════════════════
+## Renode — multi-node embedded system emulator
+##
+## Emulates complete SoCs without hardware:
+##   STM32, nRF52, SiFive HiFive1 (RISC-V), ESP32-C3 (RISC-V)
+## Networked device simulation — run a mesh of TinyGo devices
+## ═══════════════════════════════════════════════════════════════════
+renode.pkg-path = "renode"
+renode.systems = ["x86_64-linux"]
+
+## ═══════════════════════════════════════════════════════════════════
+## Linux-only: cloud-hypervisor + QEMU user-space emulation
+##
+## cloud-hypervisor: KVM VMM replacing Virtualization.framework
+## qemu-user: run RISC-V / ARM / MIPS ELFs natively on x86/ARM host
+## ═══════════════════════════════════════════════════════════════════
+cloud-hypervisor.pkg-path = "cloud-hypervisor"
+cloud-hypervisor.systems = ["aarch64-linux", "x86_64-linux"]
+
+qemu-user.pkg-path = "qemu-user"
+qemu-user.systems = ["aarch64-linux", "x86_64-linux"]
+
+
+## ═══════════════════════════════════════════════════════════════════
+## Environment Variables
+## ═══════════════════════════════════════════════════════════════════
+[vars]
+# ── TinyGo RISC-V targets ──────────────────────────────────────
+TINYGO_RISCV_QEMU = "riscv-qemu"
+TINYGO_HIFIVE1 = "hifive1b"
+TINYGO_ESP32C3 = "esp32-c3"
+TINYGO_MAIXBIT = "maixbit"
+TINYGO_TKEY = "tkey"
+
+# ── TinyGo ARM targets ─────────────────────────────────────────
+TINYGO_RP2040 = "pico"
+TINYGO_RP2350 = "pico2"
+TINYGO_NRF52 = "feather-nrf52840"
+TINYGO_GBA = "gameboy-advance"
+TINYGO_SWITCH = "nintendoswitch"
+
+# ── TinyGo other targets ───────────────────────────────────────
+TINYGO_ESP32 = "esp32-coreboard-v2"
+TINYGO_WASI = "wasip1"
+TINYGO_WASM = "wasm"
+TINYGO_AVR = "arduino-nano"
+
+# ── Go cross-compile targets for joker + boxxy ─────────────────
+GOARCH_RISCV = "riscv64"
+GOOS_LINUX = "linux"
+
+
+## ═══════════════════════════════════════════════════════════════════
+## Activation Hook
+## ═══════════════════════════════════════════════════════════════════
+[hook]
+on-activate = """
+  export GOENV="$FLOX_ENV_CACHE/goenv"
+  go get . 2>/dev/null || true
+
+  # Build boxxy for current platform if sources present
+  if [ -f cmd/boxxy/main.go ]; then
+    if [ ! -f "$FLOX_ENV_CACHE/boxxy" ] || \
+       [ cmd/boxxy/main.go -nt "$FLOX_ENV_CACHE/boxxy" ] || \
+       [ internal/vm/vm.go -nt "$FLOX_ENV_CACHE/boxxy" ] 2>/dev/null; then
+      echo "[boxxy] Building for $(go env GOOS)/$(go env GOARCH)..."
+      go build -o "$FLOX_ENV_CACHE/boxxy" ./cmd/boxxy 2>/dev/null && \
+        echo "[boxxy] Built $FLOX_ENV_CACHE/boxxy" || \
+        echo "[boxxy] Build skipped (missing platform deps)"
+    fi
+    export BOXXY_PATH="$FLOX_ENV_CACHE/boxxy"
+  fi
+
+  # ── Cross-compile helper ──────────────────────────────────────
+  _boxxy_cross() {
+    local goos=$1 goarch=$2 suffix=${3:-}
+    local out="$FLOX_ENV_CACHE/${4:-joker}-${goos}-${goarch}${suffix}"
+    if [ ! -f "$out" ]; then
+      echo "[cross] Building ${4:-joker} for ${goos}/${goarch}..."
+      GOOS=$goos GOARCH=$goarch CGO_ENABLED=0 \
+        go build -o "$out" ${5:-.} 2>/dev/null && \
+        echo "[cross] Built $out" || true
+    fi
+  }
+
+  # ── RISC-V first: always build joker + boxxy for riscv64 ──────
+  if [ -d "$FLOX_ENV_CACHE" ]; then
+    _boxxy_cross linux riscv64 "" joker "github.com/candid82/joker"
+
+    # boxxy for RISC-V Linux (cloud-hypervisor backend)
+    if [ -f cmd/boxxy/main.go ]; then
+      _boxxy_cross linux riscv64 "" boxxy "./cmd/boxxy"
+    fi
+  fi
+
+  # ── Full exotic cross-compile on demand ───────────────────────
+  #   BOXXY_CROSS=1 flox activate
+  if [ "${BOXXY_CROSS:-}" = "1" ]; then
+    _boxxy_cross linux arm64 "" joker "github.com/candid82/joker"
+    _boxxy_cross linux mips "" joker "github.com/candid82/joker"
+    _boxxy_cross linux mips64 "" joker "github.com/candid82/joker"
+    _boxxy_cross linux loong64 "" joker "github.com/candid82/joker"
+    _boxxy_cross js wasm ".wasm" joker "github.com/candid82/joker"
+    _boxxy_cross wasip1 wasm ".wasm" joker "github.com/candid82/joker"
+    _boxxy_cross freebsd arm64 "" joker "github.com/candid82/joker"
+    _boxxy_cross freebsd riscv64 "" joker "github.com/candid82/joker"
+    _boxxy_cross netbsd amd64 "" joker "github.com/candid82/joker"
+    _boxxy_cross openbsd amd64 "" joker "github.com/candid82/joker"
+    _boxxy_cross plan9 amd64 "" joker "github.com/candid82/joker"
+
+    # boxxy for all Linux arches
+    if [ -f cmd/boxxy/main.go ]; then
+      _boxxy_cross linux arm64 "" boxxy "./cmd/boxxy"
+      _boxxy_cross linux mips "" boxxy "./cmd/boxxy"
+      _boxxy_cross linux mips64 "" boxxy "./cmd/boxxy"
+      _boxxy_cross linux loong64 "" boxxy "./cmd/boxxy"
+    fi
+  fi
+
+  # ── RISC-V tool availability ──────────────────────────────────
+  echo ""
+  echo "[risc-v] Tools available:"
+  command -v spike >/dev/null 2>&1 && echo "  spike        RISC-V ISA simulator (RV32/RV64)" || true
+  command -v sail-riscv >/dev/null 2>&1 && echo "  sail-riscv   Formal ISA reference model" || true
+  command -v ripes >/dev/null 2>&1 && echo "  ripes        Visual pipeline simulator" || true
+  command -v qemu-system-riscv64 >/dev/null 2>&1 && echo "  qemu-riscv   Full system emulator" || true
+  command -v qemu-riscv64 >/dev/null 2>&1 && echo "  qemu-user    User-space RISC-V emulation" || true
+  command -v verilator >/dev/null 2>&1 && echo "  verilator    RTL simulation (RISC-V cores)" || true
+  command -v yosys >/dev/null 2>&1 && echo "  yosys        RTL synthesis -> FPGA" || true
+  command -v nextpnr-ice40 >/dev/null 2>&1 && echo "  nextpnr      Place & route -> bitstream" || true
+  command -v openFPGALoader >/dev/null 2>&1 && echo "  fpgaloader   Flash bitstream to hardware" || true
+  command -v renode >/dev/null 2>&1 && echo "  renode       Multi-SoC emulator (HiFive1, ESP32-C3)" || true
+  echo ""
+
+  echo "[tinygo] $(tinygo version 2>/dev/null || echo 'not found')"
+  echo "[tinygo] RISC-V targets:"
+  echo "  tg-riscv-qemu   emulated RV32 (no hardware needed)"
+  echo "  tg-hifive1      SiFive HiFive1 Rev B (RV32IMAC)"
+  echo "  tg-esp32c3      Espressif ESP32-C3 (RV32IMC + WiFi/BLE)"
+  echo "  tg-maixbit      Sipeed MAix Bit (RV64GC + AI accelerator)"
+  echo "  tg-tkey          Tillitis TKey (RV32 on FPGA)"
+
+  # joker riscv64 binary location
+  if [ -f "$FLOX_ENV_CACHE/joker-linux-riscv64" ]; then
+    echo ""
+    echo "[joker] RISC-V binary: $FLOX_ENV_CACHE/joker-linux-riscv64"
+    echo "  Run on RISC-V hardware or: qemu-riscv64 $FLOX_ENV_CACHE/joker-linux-riscv64"
+  fi
+"""
+
+
+## ═══════════════════════════════════════════════════════════════════
+## Profile
+## ═══════════════════════════════════════════════════════════════════
+[profile]
+common = '''
+  # ── TinyGo RISC-V aliases (the good stuff) ────────────────────
+  alias tg-riscv-qemu="tinygo build -target=riscv-qemu"
+  alias tg-hifive1="tinygo build -target=hifive1b"
+  alias tg-esp32c3="tinygo build -target=esp32-c3"
+  alias tg-maixbit="tinygo build -target=maixbit"
+  alias tg-tkey="tinygo build -target=tkey"
+
+  # ── TinyGo RISC-V flash ──────────────────────────────────────
+  alias tg-flash-esp32c3="tinygo flash -target=esp32-c3"
+  alias tg-flash-hifive1="tinygo flash -target=hifive1b"
+
+  # ── TinyGo ARM aliases ───────────────────────────────────────
+  alias tg-pico="tinygo build -target=pico"
+  alias tg-pico2="tinygo build -target=pico2"
+  alias tg-nrf="tinygo build -target=feather-nrf52840"
+  alias tg-gba="tinygo build -target=gameboy-advance"
+  alias tg-switch="tinygo build -target=nintendoswitch"
+  alias tg-avr="tinygo build -target=arduino-nano"
+
+  # ── TinyGo ARM flash ─────────────────────────────────────────
+  alias tg-flash-pico="tinygo flash -target=pico"
+  alias tg-flash-nrf="tinygo flash -target=feather-nrf52840"
+  alias tg-flash-avr="tinygo flash -target=arduino-nano"
+
+  # ── TinyGo WASM ──────────────────────────────────────────────
+  alias tg-wasi="tinygo build -target=wasip1"
+  alias tg-wasm="tinygo build -target=wasm"
+
+  # ── Emulator shortcuts ───────────────────────────────────────
+  alias gba-run="mgba-qt"
+
+  # Run a RISC-V ELF in spike (ISA sim)
+  riscv-run() {
+    spike --isa=rv64gc "$@"
+  }
+
+  # Run a RISC-V ELF in QEMU user-space (Linux binfmt)
+  riscv-qemu() {
+    qemu-riscv64 "$@"
+  }
+
+  # Run TinyGo RISC-V binary in QEMU system emulation
+  tg-run-riscv() {
+    tinygo run -target=riscv-qemu "$@"
+  }
+
+  # Visualize a RISC-V binary in Ripes pipeline simulator
+  riscv-viz() {
+    ripes "$@"
+  }
+
+  # ── Cross-compile helpers ────────────────────────────────────
+  joker-cross() {
+    local goos=${1:?usage: joker-cross GOOS GOARCH}
+    local goarch=${2:?usage: joker-cross GOOS GOARCH}
+    GOOS=$goos GOARCH=$goarch CGO_ENABLED=0 \
+      go build -o "joker-${goos}-${goarch}" github.com/candid82/joker
+    echo "Built joker-${goos}-${goarch}"
+  }
+
+  boxxy-cross() {
+    local goos=${1:?usage: boxxy-cross GOOS GOARCH}
+    local goarch=${2:?usage: boxxy-cross GOOS GOARCH}
+    GOOS=$goos GOARCH=$goarch CGO_ENABLED=0 \
+      go build -o "boxxy-${goos}-${goarch}" ./cmd/boxxy
+    echo "Built boxxy-${goos}-${goarch}"
+  }
+
+  # ── Quick RISC-V cross-compile ───────────────────────────────
+  alias joker-riscv="joker-cross linux riscv64"
+  alias boxxy-riscv="boxxy-cross linux riscv64"
+
+  # ── FPGA flow: Verilog -> synthesis -> P&R -> flash ──────────
+  # Example: synthesize a RISC-V soft-core for iCE40
+  fpga-flow() {
+    local src=${1:?usage: fpga-flow design.v [device]}
+    local dev=${2:-up5k}
+    local base="${src%.v}"
+    echo "[yosys] Synthesizing ${src}..."
+    yosys -p "synth_ice40 -top top -json ${base}.json" "$src"
+    echo "[nextpnr] Place & route..."
+    nextpnr-ice40 --${dev} --json "${base}.json" --pcf "${base}.pcf" --asc "${base}.asc" 2>/dev/null || \
+    nextpnr-ice40 --${dev} --json "${base}.json" --asc "${base}.asc"
+    echo "[icepack] Generating bitstream..."
+    icepack "${base}.asc" "${base}.bin"
+    echo "[done] Bitstream: ${base}.bin"
+    echo "  Flash: openFPGALoader -b ice40_generic ${base}.bin"
+  }
+'''
+
+
+## ═══════════════════════════════════════════════════════════════════
+## Services
+## ═══════════════════════════════════════════════════════════════════
+[services]
+# boxxy serve — WebSocket proxy for browser access to vz/ namespace
+# boxxy-serve.command = "$BOXXY_PATH serve --port 7888"
+
+
+## ═══════════════════════════════════════════════════════════════════
+## Build targets
+## ═══════════════════════════════════════════════════════════════════
+[build]
+# [build.boxxy]
+# description = "Cross-platform VM provider with Lisp REPL"
+# version = "0.1.0"
+# command = """
+#   mkdir -p $out/bin
+#   go build -o $out/bin/boxxy ./cmd/boxxy
+# """
+
+# [build.boxxy-riscv]
+# description = "boxxy for RISC-V Linux"
+# version = "0.1.0"
+# command = """
+#   mkdir -p $out/bin
+#   GOOS=linux GOARCH=riscv64 CGO_ENABLED=0 go build -o $out/bin/boxxy-linux-riscv64 ./cmd/boxxy
+# """
+
+# [build.joker-riscv]
+# description = "Joker Lisp for RISC-V Linux"
+# version = "0.1.0"
+# command = """
+#   mkdir -p $out/bin
+#   GOOS=linux GOARCH=riscv64 CGO_ENABLED=0 go build -o $out/bin/joker-linux-riscv64 github.com/candid82/joker
+# """
+
+
+## ═══════════════════════════════════════════════════════════════════
+## Platform support
+## ═══════════════════════════════════════════════════════════════════
+[options]
+systems = [
+  "aarch64-darwin",
+  "aarch64-linux",
+  "x86_64-darwin",
+  "x86_64-linux",
+]

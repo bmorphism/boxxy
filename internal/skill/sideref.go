@@ -1,5 +1,3 @@
-//go:build tinygo
-
 // Package skill provides Sideref token support for OCAPN capability binding.
 // This file works with embedded.go for medical device firmware builds.
 package skill
@@ -96,7 +94,7 @@ func (t *SiderefToken) WithVersion(version uint8) *SiderefToken {
 // Used for firmware advertisement over BLE or custom medical protocols.
 func (t *SiderefToken) MarshalSideref() []byte {
 	trit := ComputeTriEmbedded(t.SkillName)
-	buf := make([]byte, 40+len(t.SkillName))
+	buf := make([]byte, 39+len(t.SkillName))
 	buf[0] = byte(len(t.SkillName))
 	buf[1] = trit
 	buf[2] = t.TokenVersion

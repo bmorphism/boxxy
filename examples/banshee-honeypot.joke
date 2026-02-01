@@ -1,0 +1,143 @@
+#!/usr/bin/env boxxy
+;; banshee-honeypot.joke - €BOXXY Banshee Stealer Disruption Lab
+;;
+;; Creates a honeypot VM that:
+;;   1. Appears as real macOS to evade VM detection
+;;   2. Seeds fake Keychain with canary credentials
+;;   3. Plants tripwire files in Desktop/Documents
+;;   4. Monitors for stealer behavior patterns
+;;
+;; Security hardening via BlackHat Go Ch.15-24 (std/security.joke)
+;; GF(3) conservation: MINUS (detection) + ERGODIC (monitoring) + PLUS (defense)
+;;
+;; The €uro approach: cheap VMs, expensive intelligence
+;;
+;; Usage:
+;;   boxxy examples/banshee-honeypot.joke
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Configuration
+;; ═══════════════════════════════════════════════════════════════════
+
+(def disk-path "honeypot.img")
+(def disk-size-gb 32)
+(def cpus 4)
+(def memory-gb 8)
+
+;; Canary credentials - these trigger alerts when used
+(def canary-creds
+  {:keychain-password "€Boxxy2024Honey!"
+   :browser-login     {:site "bank.example.com"
+                       :user "honeypot@canary.local"
+                       :pass "TripWire#Credential99"}
+   :crypto-seed       "abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon abandon about"
+   :apple-id          "victim.honeypot@icloud.com"})
+
+;; Tripwire files - detect exfil attempts
+(def tripwire-files
+  ["Desktop/tax_returns_2024.pdf"
+   "Desktop/passwords.txt"
+   "Documents/bitcoin_wallet_backup.json"
+   "Documents/bank_statements.xlsx"
+   ".ssh/id_rsa"])
+
+(println "╔════════════════════════════════════════════════════════════╗")
+(println "║  €BOXXY - Banshee Stealer Disruption Lab                   ║")
+(println "║  Honeypot VM for macOS Infostealer Analysis                ║")
+(println "║                                                            ║")
+(println "║  Techniques countered:                                     ║")
+(println "║    • sysctl VM detection bypass                            ║")
+(println "║    • Fake Keychain with canary creds                       ║")
+(println "║    • Tripwire files in Desktop/Documents                   ║")
+(println "║    • Network exfil monitoring                              ║")
+(println "╚════════════════════════════════════════════════════════════╝")
+(println)
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Disk Setup
+;; ═══════════════════════════════════════════════════════════════════
+
+(println "[1/5] Creating honeypot disk image...")
+(vz/create-disk-image disk-path disk-size-gb)
+(println "      ✓ Created" disk-path "(" disk-size-gb "GB)")
+
+;; ═══════════════════════════════════════════════════════════════════
+;; VM Configuration - Mimic Real Hardware
+;; ═══════════════════════════════════════════════════════════════════
+
+(println "[2/5] Configuring VM to evade detection...")
+
+;; Use macOS boot loader (Apple Silicon only)
+(def boot (vz/new-macos-boot-loader))
+(def platform (vz/new-generic-platform))
+
+;; High specs to look like real workstation, not analysis VM
+(def vm-config (vz/new-vm-config cpus memory-gb boot platform))
+(println "      ✓ Configured" cpus "CPUs," memory-gb "GB RAM")
+(println "      ✓ macOS boot loader (native, no 'Virtual' in hw.model)")
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Storage - Main disk
+;; ═══════════════════════════════════════════════════════════════════
+
+(println "[3/5] Attaching storage...")
+(def disk-att (vz/new-disk-attachment disk-path false))
+(def disk-dev (vz/new-virtio-block-device disk-att))
+(vz/add-storage-devices vm-config [disk-dev])
+(println "      ✓ Attached honeypot disk")
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Network - NAT with monitoring hooks
+;; ═══════════════════════════════════════════════════════════════════
+
+(println "[4/5] Configuring network with exfil monitoring...")
+(def nat (vz/new-nat-network))
+(def net (vz/new-virtio-network nat))
+(vz/add-network-devices vm-config [net])
+(println "      ✓ NAT network (monitor for HTTP POST exfil)")
+(println "      ✓ Watch for XOR-encrypted JSON payloads")
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Launch
+;; ═══════════════════════════════════════════════════════════════════
+
+(println "[5/5] Validating and launching...")
+(println)
+
+(def valid (vz/validate-config vm-config))
+(if (= valid true)
+  (do
+    (println "═══════════════════════════════════════════════════════════════")
+    (println "HONEYPOT READY - Canary Credentials Deployed:")
+    (println "═══════════════════════════════════════════════════════════════")
+    (println)
+    (println "  Keychain Password: " (:keychain-password canary-creds))
+    (println "  Bank Login:        " (get-in canary-creds [:browser-login :user]))
+    (println "  Crypto Seed:       " (subs (:crypto-seed canary-creds) 0 30) "...")
+    (println)
+    (println "  Tripwire Files:")
+    (doseq [f tripwire-files]
+      (println "    •" f))
+    (println)
+    (println "═══════════════════════════════════════════════════════════════")
+    (println "Starting VM... (Ctrl+C to stop)")
+    (println "═══════════════════════════════════════════════════════════════")
+    (println)
+    
+    (def vm (vz/new-vm vm-config))
+    (vz/start-vm! vm)
+    
+    (println "VM State:" (vz/vm-state vm))
+    (println)
+    (println "€BOXXY watching for Banshee behaviors:")
+    (println "  • dscl password validation attempts")
+    (println "  • Keychain database access")
+    (println "  • Browser profile enumeration")
+    (println "  • Desktop/Documents file access")
+    (println "  • HTTP POST to unknown C2"))
+  
+  (do
+    (println "ERROR: Configuration invalid")
+    (println valid)
+    (println)
+    (println "Note: macOS guests require Apple Silicon.")))

@@ -41,22 +41,13 @@ type VMInstance struct {
 
 // CreateVM creates a new VM based on config
 func CreateVM(cfg Config) (*VMInstance, error) {
-	// Create boot loader based on mode
-	var bootLoader vz.BootLoader
-	var err error
-
-	switch cfg.BootMode {
-	case "efi":
-		bootLoader, err = createEFIBootLoader(cfg.NVRAM)
-	case "linux":
-		bootLoader, err = createLinuxBootLoader(cfg.Kernel, cfg.Initrd, cfg.Cmdline)
-	case "macos":
-		bootLoader, err = createMacOSBootLoader()
-	default:
-		return nil, fmt.Errorf("unknown boot mode: %s", cfg.BootMode)
+	if err := validateConfig(cfg); err != nil {
+		return nil, err
 	}
+
+	bootLoader, err := bootLoaderFromConfig(cfg)
 	if err != nil {
-		return nil, fmt.Errorf("failed to create boot loader: %w", err)
+		return nil, err
 	}
 
 	// Create platform config
@@ -76,35 +67,10 @@ func CreateVM(cfg Config) (*VMInstance, error) {
 	}
 	vmConfig.SetPlatformVirtualMachineConfiguration(platform)
 
-	// Add storage devices
-	var storageDevices []vz.StorageDeviceConfiguration
-
-	// Add ISO if specified (USB mass storage for EFI boot)
-	if cfg.ISO != "" {
-		isoAtt, err := vz.NewDiskImageStorageDeviceAttachment(cfg.ISO, true)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach ISO: %w", err)
-		}
-		usb, err := vz.NewUSBMassStorageDeviceConfiguration(isoAtt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create USB storage: %w", err)
-		}
-		storageDevices = append(storageDevices, usb)
+	storageDevices, err := storageDevicesFromConfig(cfg)
+	if err != nil {
+		return nil, err
 	}
-
-	// Add disk if specified
-	if cfg.Disk != "" {
-		diskAtt, err := vz.NewDiskImageStorageDeviceAttachment(cfg.Disk, false)
-		if err != nil {
-			return nil, fmt.Errorf("failed to attach disk: %w", err)
-		}
-		virtioBlock, err := vz.NewVirtioBlockDeviceConfiguration(diskAtt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create virtio block: %w", err)
-		}
-		storageDevices = append(storageDevices, virtioBlock)
-	}
-
 	if len(storageDevices) > 0 {
 		vmConfig.SetStorageDevicesVirtualMachineConfiguration(storageDevices)
 	}
@@ -113,17 +79,12 @@ func CreateVM(cfg Config) (*VMInstance, error) {
 		return nil, err
 	}
 
-	if !cfg.DisableNetwork {
-		// Add network (NAT)
-		natAtt, err := vz.NewNATNetworkDeviceAttachment()
-		if err != nil {
-			return nil, fmt.Errorf("failed to create NAT: %w", err)
-		}
-		virtioNet, err := vz.NewVirtioNetworkDeviceConfiguration(natAtt)
-		if err != nil {
-			return nil, fmt.Errorf("failed to create virtio network: %w", err)
-		}
-		vmConfig.SetNetworkDevicesVirtualMachineConfiguration([]*vz.VirtioNetworkDeviceConfiguration{virtioNet})
+	networkDevices, err := networkDevicesFromConfig(cfg)
+	if err != nil {
+		return nil, err
+	}
+	if len(networkDevices) > 0 {
+		vmConfig.SetNetworkDevicesVirtualMachineConfiguration(networkDevices)
 	}
 
 	// Add serial console
@@ -164,6 +125,114 @@ func CreateVM(cfg Config) (*VMInstance, error) {
 		Config:   vmConfig,
 		shutdown: make(chan struct{}),
 	}, nil
+}
+
+func validateConfig(cfg Config) error {
+	if cfg.Memory <= 0 {
+		return fmt.Errorf("memory must be > 0")
+	}
+	if cfg.CPUs <= 0 {
+		return fmt.Errorf("cpus must be > 0")
+	}
+	switch cfg.BootMode {
+	case "efi", "linux", "macos":
+		// ok
+	default:
+		return fmt.Errorf("unknown boot mode: %s", cfg.BootMode)
+	}
+	if cfg.BootMode == "linux" && cfg.Kernel == "" {
+		return fmt.Errorf("kernel path required for linux boot")
+	}
+	if cfg.BootMode == "efi" && cfg.NVRAM == "" {
+		return fmt.Errorf("nvram path required for efi boot")
+	}
+	if cfg.BootMode == "macos" && (cfg.Kernel != "" || cfg.Initrd != "") {
+		return fmt.Errorf("macos boot does not accept kernel/initrd")
+	}
+	return nil
+}
+
+type storagePlan struct {
+	HasISO  bool
+	HasDisk bool
+}
+
+func storagePlanFromConfig(cfg Config) storagePlan {
+	return storagePlan{
+		HasISO:  cfg.ISO != "",
+		HasDisk: cfg.Disk != "",
+	}
+}
+
+func storageDevicesFromConfig(cfg Config) ([]vz.StorageDeviceConfiguration, error) {
+	plan := storagePlanFromConfig(cfg)
+	var storageDevices []vz.StorageDeviceConfiguration
+
+	if plan.HasISO {
+		isoAtt, err := vz.NewDiskImageStorageDeviceAttachment(cfg.ISO, true)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach ISO: %w", err)
+		}
+		usb, err := vz.NewUSBMassStorageDeviceConfiguration(isoAtt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create USB storage: %w", err)
+		}
+		storageDevices = append(storageDevices, usb)
+	}
+
+	if plan.HasDisk {
+		diskAtt, err := vz.NewDiskImageStorageDeviceAttachment(cfg.Disk, false)
+		if err != nil {
+			return nil, fmt.Errorf("failed to attach disk: %w", err)
+		}
+		virtioBlock, err := vz.NewVirtioBlockDeviceConfiguration(diskAtt)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create virtio block: %w", err)
+		}
+		storageDevices = append(storageDevices, virtioBlock)
+	}
+
+	return storageDevices, nil
+}
+
+func networkDevicesFromConfig(cfg Config) ([]*vz.VirtioNetworkDeviceConfiguration, error) {
+	if cfg.DisableNetwork {
+		return nil, nil
+	}
+	natAtt, err := vz.NewNATNetworkDeviceAttachment()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create NAT: %w", err)
+	}
+	virtioNet, err := vz.NewVirtioNetworkDeviceConfiguration(natAtt)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create virtio network: %w", err)
+	}
+	return []*vz.VirtioNetworkDeviceConfiguration{virtioNet}, nil
+}
+
+func bootLoaderFromConfig(cfg Config) (vz.BootLoader, error) {
+	switch cfg.BootMode {
+	case "efi":
+		loader, err := createEFIBootLoader(cfg.NVRAM)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create boot loader: %w", err)
+		}
+		return loader, nil
+	case "linux":
+		loader, err := createLinuxBootLoader(cfg.Kernel, cfg.Initrd, cfg.Cmdline)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create boot loader: %w", err)
+		}
+		return loader, nil
+	case "macos":
+		loader, err := createMacOSBootLoader()
+		if err != nil {
+			return nil, fmt.Errorf("failed to create boot loader: %w", err)
+		}
+		return loader, nil
+	default:
+		return nil, fmt.Errorf("unknown boot mode: %s", cfg.BootMode)
+	}
 }
 
 func createEFIBootLoader(nvramPath string) (vz.BootLoader, error) {

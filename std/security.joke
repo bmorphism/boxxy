@@ -1,0 +1,166 @@
+#!/usr/bin/env boxxy
+;; security.joke - BlackHat Go hardening for boxxy macOS VMs
+;;
+;; Techniques from Chapters 15-24 (macOS), 25 (Cloud), 32 (Red Team)
+;; GF(3) conservation: MINUS (detection) + ERGODIC (monitoring) + PLUS (defense)
+;;
+;; Usage:
+;;   boxxy std/security.joke              ;; Print security info
+;;   (load-file "std/security.joke")      ;; Load in REPL
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Risk Levels (from blackhat-go knowledge base)
+;; ═══════════════════════════════════════════════════════════════════
+
+(def risk-critical 10)  ;; cicd-injection, reentrancy, pod-escape
+(def risk-high     8)   ;; tcc-bypass, keychain-dump, dyld-injection
+(def risk-medium   5)   ;; process-enum, network-scan
+(def risk-low      2)   ;; passive-recon
+
+;; ═══════════════════════════════════════════════════════════════════
+;; TCC Bypass Detection (Ch.15-16)
+;; ═══════════════════════════════════════════════════════════════════
+
+(def tcc-protected-paths
+  ["~/Library/Application Support/com.apple.TCC"
+   "~/Library/Safari"
+   "~/Library/Mail"
+   "~/Library/Messages"
+   "~/Library/Calendars"
+   "~/Library/Cookies"
+   "~/Desktop"
+   "~/Documents"
+   "~/Downloads"])
+
+(def tcc-bypass-indicators
+  [{:name "fda-mount-bypass"    :indicator "diskutil mount"          :risk 8}
+   {:name "synthetic-click"     :indicator "CGEventCreateMouseEvent" :risk 8}
+   {:name "tcc-db-direct"       :indicator "TCC.db"                  :risk 10}
+   {:name "mdm-profile-abuse"   :indicator "Configuration Profile"   :risk 8}])
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Keychain Security (Ch.17)
+;; ═══════════════════════════════════════════════════════════════════
+
+(def keychain-attack-patterns
+  [{:name "security-dump-keychain" :cmd "security dump-keychain"       :risk 10}
+   {:name "security-find-generic"  :cmd "security find-generic-password" :risk 8}
+   {:name "keychain-db-direct"     :path "~/Library/Keychains"         :risk 10}
+   {:name "kcpassword-extract"     :path "/etc/kcpassword"             :risk 10}])
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Persistence Detection (Ch.18-19)
+;; ═══════════════════════════════════════════════════════════════════
+
+(def persistence-locations
+  [{:name "launch-agents"
+    :paths ["~/Library/LaunchAgents" "/Library/LaunchAgents"]
+    :risk 8}
+   {:name "launch-daemons"
+    :paths ["/Library/LaunchDaemons" "/System/Library/LaunchDaemons"]
+    :risk 10}
+   {:name "login-items"
+    :paths ["~/Library/Application Support/com.apple.backgroundtaskmanagementagent"]
+    :risk 5}
+   {:name "cron"
+    :paths ["/var/at/tabs" "/etc/crontab"]
+    :risk 8}
+   {:name "authorization-plugins"
+    :paths ["/Library/Security/SecurityAgentPlugins"]
+    :risk 10}])
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Network Exfil Detection (Ch.20, 32)
+;; ═══════════════════════════════════════════════════════════════════
+
+(def exfil-indicators
+  [{:name "http-post-json"  :pattern "POST.*application/json"       :risk 8}
+   {:name "xor-encoded"     :pattern "XOR.*[A-Za-z0-9+/=]{100,}"    :risk 10}
+   {:name "telegram-api"    :pattern "api.telegram.org"             :risk 8}
+   {:name "discord-webhook" :pattern "discord.com/api/webhooks"     :risk 8}
+   {:name "dns-exfil"       :pattern "TXT.*[A-Za-z0-9]{50,}"        :risk 5}])
+
+(def c2-blocklist
+  ["*.ngrok.io"
+   "*.serveo.net"
+   "*.localhost.run"
+   "*.trycloudflare.com"
+   "*.burpcollaborator.net"])
+
+;; ═══════════════════════════════════════════════════════════════════
+;; EDR Evasion Detection (Ch.21-22)
+;; ═══════════════════════════════════════════════════════════════════
+
+(def edr-evasion-techniques
+  [{:name "dyld-insert"     :env "DYLD_INSERT_LIBRARIES"           :risk 10}
+   {:name "ptrace-deny"     :syscall "ptrace(PT_DENY_ATTACH)"      :risk 8}
+   {:name "sysctl-vm-detect" :cmd "sysctl -n kern.hv_vmm_present"  :risk 5}
+   {:name "sandbox-escape"  :indicator "sandbox-exec"              :risk 10}])
+
+(def edr-decoys
+  ["CrowdStrike Falcon"
+   "SentinelOne"
+   "Carbon Black"
+   "Jamf Protect"])
+
+;; ═══════════════════════════════════════════════════════════════════
+;; VM Detection Evasion (for honeypot stealth)
+;; ═══════════════════════════════════════════════════════════════════
+
+(def vm-detection-checks
+  [{:name "hw-model"
+    :check "sysctl -n hw.model"
+    :vm-indicator "Virtual"
+    :fix "Use vz/new-mac-platform (not Generic)"}
+   {:name "kern-hv"
+    :check "sysctl -n kern.hv_vmm_present"
+    :vm-indicator "1"
+    :fix "Cannot hide - Virtualization.framework limitation"}
+   {:name "ioreg-platform"
+    :check "ioreg -l | grep -i virtual"
+    :vm-indicator "VirtualMachine"
+    :fix "Use vz/new-macos-boot-loader"}])
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Print status
+;; ═══════════════════════════════════════════════════════════════════
+
+(println "╔════════════════════════════════════════════════════════════╗")
+(println "║  BOXXY Security Hardening (BlackHat Go Ch.15-24)           ║")
+(println "╠════════════════════════════════════════════════════════════╣")
+(println "║")
+(println "║  Detection (MINUS -1):")
+(println "║    • TCC tripwire paths:     " (count tcc-protected-paths))
+(println "║    • TCC bypass indicators:  " (count tcc-bypass-indicators))
+(println "║    • Keychain attack sigs:   " (count keychain-attack-patterns))
+(println "║    • Persistence locations:  " (count persistence-locations))
+(println "║")
+(println "║  Monitoring (ERGODIC 0):")
+(println "║    • Network exfil patterns: " (count exfil-indicators))
+(println "║    • C2 blocklist domains:   " (count c2-blocklist))
+(println "║    • EDR evasion signatures: " (count edr-evasion-techniques))
+(println "║")
+(println "║  Defense (PLUS +1):")
+(println "║    • EDR decoy processes:    " (count edr-decoys))
+(println "║    • VM stealth checks:      " (count vm-detection-checks))
+(println "║")
+(println "║  GF(3) Conservation: -1 + 0 + 1 = 0 ✓")
+(println "╚════════════════════════════════════════════════════════════╝")
+(println)
+(println "Network capture command:")
+(println "  sudo tcpdump -i bridge100 -w honeypot-$(date +%s).pcap \\")
+(println "    'tcp port 80 or tcp port 443 or udp port 53'")
+(println)
+(println "Tripwire setup (inside guest):")
+(println "  touch ~/Desktop/._boxxy_tripwire")
+(println "  touch ~/Documents/._boxxy_tripwire")
+(println "  touch ~/Downloads/._boxxy_tripwire")
+(println "  touch '~/Library/Safari/._boxxy_tripwire'")
+(println "  touch '~/Library/Keychains/._boxxy_tripwire'")
+(println)
+(println "Persistence monitor (on host):")
+(println "  fswatch -r ~/.boxxy/macos/*/disk.img")
+(println)
+(println "Data available in REPL:")
+(println "  tcc-protected-paths, keychain-attack-patterns,")
+(println "  persistence-locations, exfil-indicators, edr-decoys")

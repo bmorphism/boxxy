@@ -1,0 +1,18 @@
+;; Load Trail of Bits triads + Black Hat Go skill text into vars.
+;; Intended for host REPL or Joker runner with access to /Users/bob/.codex/skills.
+
+(def swg (slurp "/Users/bob/.codex/skills/secure-workflow-guide/SKILL.md"))
+(def apa (slurp "/Users/bob/.codex/skills/audit-prep-assistant/SKILL.md"))
+(def cma (slurp "/Users/bob/.codex/skills/code-maturity-assessor/SKILL.md"))
+
+(def fxr (slurp "/Users/bob/.codex/skills/fix-review/SKILL.md"))
+(def dr  (slurp "/Users/bob/.codex/skills/differential-review/SKILL.md"))
+(def scc (slurp "/Users/bob/.codex/skills/spec-to-code-compliance/SKILL.md"))
+
+(def sgrep (slurp "/Users/bob/.codex/skills/semgrep/SKILL.md"))
+(def cql   (slurp "/Users/bob/.codex/skills/codeql/SKILL.md"))
+(def sarif (slurp "/Users/bob/.codex/skills/sarif-parsing/SKILL.md"))
+
+(def bhg (slurp "/Users/bob/.codex/skills/blackhat-go/SKILL.md"))
+
+(println "Loaded triads: audit-readiness, fix-verification, static-analysis + blackhat-go")

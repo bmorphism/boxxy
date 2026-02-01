@@ -1,0 +1,168 @@
+;; streams - macOS event stream consumption for boxxy
+;;
+;; This namespace provides bindings to consume macOS event streams:
+;;   - FSEvents: File system change notifications
+;;   - OSLog: Unified logging system
+;;   - Darwin Notifications: Inter-process communication
+;;
+;; All streams are non-blocking and can be polled from the REPL or scripts.
+
+(ns streams
+  "macOS event stream consumption for boxxy.
+  
+  Provides access to FSEvents, OSLog, and Darwin notification streams.
+  
+  Example usage:
+    ;; Watch current directory for file changes
+    (def fs (streams/fsevents-start [\".\"]))
+    
+    ;; Poll for events
+    (streams/poll fs 1000)  ;; timeout 1000ms
+    
+    ;; Clean up
+    (streams/fsevents-stop fs)")
+
+;; =============================================================================
+;; FSEvents - File System Event Streams
+;; =============================================================================
+
+(defn ^{:doc "Start watching file system events for given paths.
+  
+  Parameters:
+    paths   - Vector of directory paths to watch
+    options - Optional HashMap with:
+              :latency - Polling latency in milliseconds (default: 50)
+              :flags   - FSEvent flags from (streams/fsevents-flags)
+  
+  Returns: Stream consumer handle
+  
+  Example:
+    (def watcher (streams/fsevents-start [\"/tmp\" "/var/log"]))
+    (def watcher (streams/fsevents-start [\"."] {:latency 100 :flags (:item-created (streams/fsevents-flags))}))"
+        :added "1.0"}
+  fsevents-start
+  [paths] [paths options])
+
+(defn ^{:doc "Stop a running FSEvents stream.
+  
+  Parameters:
+    stream - Stream handle from fsevents-start
+  
+  Returns: true"
+        :added "1.0"}
+  fsevents-stop
+  [stream])
+
+(defn ^{:doc "Get FSEvents flag constants as a HashMap.
+  
+  Available flags:
+    :none :must-scan-subdirs :user-dropped :kernel-dropped
+    :event-ids-wrapped :history-done :root-changed :mount :unmount
+    :item-created :item-removed :item-inode-meta-mod :item-renamed
+    :item-modified :item-finder-info-mod :item-change-owner
+    :item-xattr-mod :item-is-file :item-is-dir :item-is-symlink
+    :own-event :item-is-hardlink :item-is-last-hardlink
+    :no-defer :watch-root
+  
+  Returns: HashMap of flag keywords to integer values"
+        :added "1.0"}
+  fsevents-flags
+  [])
+
+;; =============================================================================
+;; OSLog - Unified Logging Streams
+;; =============================================================================
+
+(defn ^{:doc "Start streaming macOS Unified Logging events.
+  
+  Parameters:
+    predicate - Optional predicate string for filtering (e.g., \"subsystem == 'com.example.app'\")
+    level     - Log level: \"default\", \"info\", \"debug\", or \"error\"
+  
+  Returns: Stream consumer handle
+  
+  Example:
+    (def logs (streams/oslog-start \"process == 'boxxy'\" \"info\"))"
+        :added "1.0"}
+  oslog-start
+  [])
+
+(defn ^{:doc "Stop a running OSLog stream.
+  
+  Parameters:
+    stream - Stream handle from oslog-start
+  
+  Returns: true"
+        :added "1.0"}
+  oslog-stop
+  [stream])
+
+;; =============================================================================
+;; Darwin Notifications
+;; =============================================================================
+
+(defn ^{:doc "Start listening for Darwin notification center events.
+  
+  Parameters:
+    names - Vector of notification names to listen for
+  
+  Returns: Stream consumer handle
+  
+  Example:
+    (def notifier (streams/darwin-start [\"com.example.app.changed\"]))"
+        :added "1.0"}
+  darwin-start
+  [names])
+
+(defn ^{:doc "Post a Darwin notification.
+  
+  Parameters:
+    name - Notification name to post
+  
+  Returns: true"
+        :added "1.0"}
+  darwin-post
+  [name])
+
+(defn ^{:doc "Stop a running Darwin notification stream.
+  
+  Parameters:
+    stream - Stream handle from darwin-start
+  
+  Returns: true"
+        :added "1.0"}
+  darwin-stop
+  [stream])
+
+;; =============================================================================
+;; General Stream Management
+;; =============================================================================
+
+(defn ^{:doc "List all active stream IDs.
+  
+  Returns: Vector of stream ID strings"
+        :added "1.0"}
+  list
+  [])
+
+(defn ^{:doc "Poll a stream for the next event with timeout.
+  
+  Parameters:
+    stream  - Stream handle
+    timeout - Timeout in milliseconds (default: 100)
+  
+  Returns: Event HashMap or nil if timeout
+    {:stream-id \"fsevents-1\"
+     :type \"fsevent\"
+     :timestamp \"2024-01-15T10:30:00Z\"
+     :data {:path \"/tmp/file.txt\" :flags 65792 :id 12345}}"
+        :added "1.0"}
+  poll
+  [stream] [stream timeout])
+
+(defn ^{:doc "Stop all active streams.
+  
+  Returns: true"
+        :added "1.0"}
+  stop-all
+  [])

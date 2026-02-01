@@ -1,4 +1,4 @@
-.PHONY: all build sign install clean test lint deps bdd joker-test tapes
+.PHONY: all build sign install clean test lint deps bdd joker-test tapes isabelle-agm isabelle-all
 
 BINARY := boxxy
 VERSION := $(shell git describe --tags --always --dirty 2>/dev/null || echo "dev")
@@ -49,6 +49,16 @@ release:
 repl: sign
 	./$(BINARY) repl
 
+# Run Isabelle AGM proofs inside Apple/container
+isabelle-agm:
+	container system start
+	container run --rm --entrypoint /home/isabelle/Isabelle/bin/isabelle -m 8G -v /Users/bob/i/boxxy:/work -w /home/isabelle makarius/isabelle:Isabelle2025-2_ARM build -D /work/theories
+
+# Prove all Isabelle sessions in theories/ (currently Boxxy_AGM)
+isabelle-all:
+	container system start
+	container run --rm --entrypoint /home/isabelle/Isabelle/bin/isabelle -m 8G -v /Users/bob/i/boxxy:/work -w /home/isabelle makarius/isabelle:Isabelle2025-2_ARM build -D /work/theories -v
+
 # Run an example
 example: sign
 	./$(BINARY) examples/haiku-vm.joke
@@ -60,12 +70,12 @@ GIFS  := $(TAPES:.tape=.gif)
 bdd: test joker-test cue-vet
 	@echo "✓ All BDD specs green"
 
-# GIVEN hof.joker definitions
+# GIVEN hof.joke definitions
 # WHEN  joker evaluates all assertions
 # THEN  all HOF beta reductions hold
 joker-test:
-	@printf "GIVEN hof.joker definitions\nWHEN  joker evaluates all assertions\n"
-	@joker hof.joker
+	@printf "GIVEN hof.joke definitions\nWHEN  joker evaluates all assertions\n"
+	@joker hof.joke
 	@echo "THEN  all HOF beta reductions hold ✓"
 
 # GIVEN hof.cue schema

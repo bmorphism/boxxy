@@ -174,15 +174,15 @@ func TestEstimateTokensEmbedded(t *testing.T) {
 
 func TestComputeTritEmbedded(t *testing.T) {
 	// Same hash should produce same trit
-	trit1 := ComputetritEmbedded("pulse-oximetry")
-	trit2 := ComputetritEmbedded("pulse-oximetry")
+	trit1 := ComputeTriEmbedded("pulse-oximetry")
+	trit2 := ComputeTriEmbedded("pulse-oximetry")
 	if trit1 != trit2 {
-		t.Errorf("ComputetritEmbedded not deterministic: %d != %d", trit1, trit2)
+		t.Errorf("ComputeTriEmbedded not deterministic: %d != %d", trit1, trit2)
 	}
 
 	// Trit should be valid (0, 1, or 2)
 	if trit1 > 2 {
-		t.Errorf("ComputetritEmbedded returned invalid trit: %d", trit1)
+		t.Errorf("ComputeTriEmbedded returned invalid trit: %d", trit1)
 	}
 }
 

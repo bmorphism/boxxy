@@ -12,6 +12,7 @@ import (
 
 	"github.com/bmorphism/boxxy/internal/color"
 	"github.com/bmorphism/boxxy/internal/lisp"
+	"github.com/bmorphism/boxxy/internal/streams"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
 
@@ -27,6 +28,9 @@ func Start() {
 
 	// Register vz namespace
 	vm.RegisterNamespace(env)
+
+	// Register streams namespace (macOS event consumption)
+	streams.RegisterNamespace(env)
 
 	// Register AGM belief revision namespace
 	RegisterAGM(env)
