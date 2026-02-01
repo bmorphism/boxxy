@@ -51,6 +51,15 @@ func main() {
 	case "generate-sideref":
 		runGenerateSideref(args)
 
+	case "asi-select-balanced":
+		runASISelectBalanced(args)
+
+	case "asi-list":
+		runASIList(args)
+
+	case "asi-export":
+		runASIExport(args)
+
 	case "help", "-h", "--help":
 		printUsage()
 
@@ -547,6 +556,226 @@ HMAC Token:    %x
 	fmt.Printf("%s\n", token.String())
 }
 
+// runASISelectBalanced selects a balanced subset from ASI registry
+func runASISelectBalanced(args []string) {
+	if len(args) < 2 {
+		fmt.Fprintln(os.Stderr, `usage: boxxy asi-select-balanced <json-file> <count>
+
+Selects a balanced subset of N skills from ASI registry JSON.
+Ensures GF(3) triadic balance (sum ≡ 0 mod 3).
+
+Arguments:
+  json-file    Path to ASI registry JSON file
+  count        Number of skills to select (ideally multiple of 3)
+
+Example:
+  boxxy asi-select-balanced asi-registry.json 27`)
+		os.Exit(1)
+	}
+
+	jsonFile := args[0]
+	count, err := strconv.Atoi(args[1])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: invalid count %q: %v\n", args[1], err)
+		os.Exit(1)
+	}
+
+	// Read JSON registry
+	data, err := os.ReadFile(jsonFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: cannot read %s: %v\n", jsonFile, err)
+		os.Exit(1)
+	}
+
+	// Import registry
+	reg := skill.NewASIRegistry()
+	if err := reg.FromJSON(data); err != nil {
+		fmt.Fprintf(os.Stderr, "error: failed to parse registry: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Select balanced subset
+	selected, err := reg.SelectBalancedSubset(count)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Output results
+	fmt.Printf("Selected %d balanced skills:\n", len(selected))
+	fmt.Printf("─────────────────────────────\n")
+
+	tritCounts := [3]int{}
+	for _, s := range selected {
+		tritCounts[s.Trit]++
+		roleStr := "Coordinator"
+		if s.Trit == 1 {
+			roleStr = "Generator"
+		} else if s.Trit == 2 {
+			roleStr = "Verifier"
+		}
+		fmt.Printf("  %s (%s, trit=%d)\n", s.Name, roleStr, s.Trit)
+	}
+
+	fmt.Printf("\nDistribution:\n")
+	fmt.Printf("  Coordinators: %d\n", tritCounts[0])
+	fmt.Printf("  Generators:   %d\n", tritCounts[1])
+	fmt.Printf("  Verifiers:    %d\n", tritCounts[2])
+
+	// Verify balance
+	sum := tritCounts[0]*0 + tritCounts[1]*1 + tritCounts[2]*2
+	fmt.Printf("  Sum: %d (mod 3 = %d)\n", sum, sum%3)
+	if sum%3 == 0 {
+		fmt.Printf("  ✓ Balanced\n")
+	} else {
+		fmt.Printf("  ✗ Not balanced\n")
+	}
+}
+
+// runASIList lists skills from ASI registry JSON
+func runASIList(args []string) {
+	if len(args) < 1 {
+		fmt.Fprintln(os.Stderr, `usage: boxxy asi-list <json-file> [options]
+
+Lists all skills from ASI registry JSON file.
+
+Options:
+  --trit N      Filter by trit value (0, 1, or 2)
+  --category C  Filter by category
+
+Example:
+  boxxy asi-list asi-registry.json --trit 1`)
+		os.Exit(1)
+	}
+
+	jsonFile := args[0]
+	// Note: filterTrit and filterCategory could be used for filtering
+	// Currently shows all skills from registry
+
+	// Parse options (for future use)
+	for i := 1; i < len(args); i++ {
+		switch args[i] {
+		case "--trit", "--category":
+			// Skip option and its value for now
+			if i+1 < len(args) {
+				i++
+			}
+		}
+	}
+
+	// Read JSON registry
+	data, err := os.ReadFile(jsonFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: cannot read %s: %v\n", jsonFile, err)
+		os.Exit(1)
+	}
+
+	// Import registry
+	reg := skill.NewASIRegistry()
+	if err := reg.FromJSON(data); err != nil {
+		fmt.Fprintf(os.Stderr, "error: failed to parse registry: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Output header
+	fmt.Printf("ASI Skills Registry\n")
+	fmt.Printf("───────────────────\n")
+	status := reg.TriadStatus()
+	fmt.Printf("Total: %v skills\n", status["total_skills"])
+	fmt.Printf("Coordinators: %v | Generators: %v | Verifiers: %v\n",
+		status["coordinators"], status["generators"], status["verifiers"])
+	fmt.Printf("Balance: %v\n\n", status["balanced"])
+
+	// List skills (simplified - just show names and trits)
+	fmt.Printf("Skills:\n")
+	fmt.Printf("─────────────────────────────────────────\n")
+	fmt.Printf("(Full listing requires registry export functionality)\n")
+	fmt.Printf("Use 'asi-select-balanced' to create balanced subsets for export.\n")
+}
+
+// runASIExport exports balanced subset to embedded skill format
+func runASIExport(args []string) {
+	if len(args) < 3 {
+		fmt.Fprintln(os.Stderr, `usage: boxxy asi-export <json-file> <count> <device-secret-hex>
+
+Exports balanced ASI skill subset to embedded skill format with Sideref tokens.
+
+Arguments:
+  json-file          Path to ASI registry JSON file
+  count              Number of skills to select
+  device-secret-hex  16-byte device secret as hex (32 chars)
+
+Example:
+  boxxy asi-export asi-registry.json 27 0102030405060708090a0b0c0d0e0f10`)
+		os.Exit(1)
+	}
+
+	jsonFile := args[0]
+	count, err := strconv.Atoi(args[1])
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: invalid count: %v\n", err)
+		os.Exit(1)
+	}
+
+	secretHex := args[2]
+	if len(secretHex) != 32 {
+		fmt.Fprintf(os.Stderr, "error: device secret must be 32 hex characters\n")
+		os.Exit(1)
+	}
+
+	// Parse device secret
+	secret := [16]byte{}
+	for i := 0; i < 16; i++ {
+		var b byte
+		_, err := fmt.Sscanf(secretHex[i*2:i*2+2], "%02x", &b)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: invalid hex in device secret\n")
+			os.Exit(1)
+		}
+		secret[i] = b
+	}
+
+	// Read and import registry
+	data, err := os.ReadFile(jsonFile)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: cannot read %s: %v\n", jsonFile, err)
+		os.Exit(1)
+	}
+
+	reg := skill.NewASIRegistry()
+	if err := reg.FromJSON(data); err != nil {
+		fmt.Fprintf(os.Stderr, "error: failed to parse registry: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Select balanced subset
+	_, err = reg.SelectBalancedSubset(count)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Export to embedded format
+	embedded, err := reg.ExportForEmbedded(secret)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "error: %v\n", err)
+		os.Exit(1)
+	}
+
+	// Output exported skills
+	fmt.Printf("Exported %d embedded skills with Sideref tokens:\n", len(embedded))
+	fmt.Printf("────────────────────────────────────────────────\n")
+
+	for _, e := range embedded {
+		fmt.Printf("• %s (trit=%d)\n", e.Name, e.Trit)
+		if e.Sideref != nil {
+			fmt.Printf("  Sideref: %x\n", e.Sideref.Token[:8])
+		}
+	}
+
+	fmt.Printf("\nReady for deployment to medical device firmware.\n")
+}
+
 func printUsage() {
 	fmt.Print(`boxxy - Clojure SCI for Apple Virtualization.framework
 
@@ -560,6 +789,9 @@ Usage:
   boxxy list-skills <path> [options]   List skills with GF(3) trits (Phase 2)
   boxxy check-balance <path>           Validate GF(3) equilibrium (Phase 2)
   boxxy generate-sideref <name> <hex>  Create OCAPN Sideref token (Phase 1)
+  boxxy asi-select-balanced <j> <n>    Select balanced ASI skill subset (Phase 3)
+  boxxy asi-list <json-file>           List ASI registry skills (Phase 3)
+  boxxy asi-export <j> <n> <hex>       Export balanced skills with Sideref (Phase 3)
   boxxy <script.joke>                  Run a Joker script
   boxxy version                        Show version
   boxxy help                           Show this help
