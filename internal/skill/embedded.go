@@ -12,12 +12,12 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"fmt"
-	"path/filepath"
 	"strings"
 )
 
 // EmbeddedSkill is the lightweight skill model for TinyGo MCU targets.
 // Contains only what's necessary for validation and capability checking.
+// Integrates OCAPN Sideref tokens for unforgeable capability authorization.
 type EmbeddedSkill struct {
 	Name        string // max 64 chars, lowercase+hyphens
 	Description string // max 1024 chars, what skill does + when to use
@@ -28,6 +28,9 @@ type EmbeddedSkill struct {
 	Path  string // filesystem path or resource ID
 	Body  string // markdown instructions (advisory <500 lines, <5000 tokens)
 	Trit  uint8  // GF(3) classification (0, 1, or 2)
+
+	// OCAPN Capability Binding (Phase 1)
+	Sideref *SiderefToken // Cryptographic authorization (unforgeable reference)
 }
 
 // ValidateEmbedded checks the skill against agentskills spec constraints.
@@ -73,6 +76,13 @@ func (s *EmbeddedSkill) ValidateEmbedded() []string {
 	// Trit validation (0, 1, or 2 only)
 	if s.Trit > 2 {
 		errs = append(errs, fmt.Sprintf("invalid trit %d: must be 0, 1, or 2", s.Trit))
+	}
+
+	// OCAPN Sideref token validation (required for capability binding)
+	if s.Sideref == nil {
+		errs = append(errs, "sideref token required for OCAPN capability binding (unforgeable reference)")
+	} else if s.Sideref.SkillName != s.Name {
+		errs = append(errs, fmt.Sprintf("sideref skill name mismatch: token has %q, skill has %q", s.Sideref.SkillName, s.Name))
 	}
 
 	return errs
@@ -133,7 +143,7 @@ func estimateTokensEmbedded(charCount int) int {
 // classification. NOT suitable for security-critical operations (authentication,
 // attestation, or firmware signing). For those, use ATECC608A secure element as
 // documented in skills/embedded-medical-device/SKILL.md Part 4.
-func ComputetritEmbedded(name string) uint8 {
+func ComputeTriEmbedded(name string) uint8 {
 	h := sha256.Sum256([]byte(name))
 	val := binary.LittleEndian.Uint64(h[0:8])
 	return uint8(val % 3)
@@ -270,6 +280,21 @@ func (r *EmbeddedSkillRegistry) SerializeCompact() string {
 		b.WriteString(fmt.Sprintf("%s:%s:%d\n", s.Name, desc, s.Trit))
 	}
 	return b.String()
+}
+
+// BindSideref binds an OCAPN Sideref token to the skill for capability authorization.
+// The token becomes unforgeable once bound to the device secret.
+func (s *EmbeddedSkill) BindSideref(deviceSecret [16]byte) {
+	s.Sideref = NewSiderefToken(s.Name, deviceSecret)
+}
+
+// VerifySiderefBinding checks if the Sideref token is valid for this skill and device.
+// Returns error if token is missing, mismatched, or invalid.
+func (s *EmbeddedSkill) VerifySiderefBinding(deviceSecret [16]byte) error {
+	if s.Sideref == nil {
+		return fmt.Errorf("skill %q: no sideref token bound", s.Name)
+	}
+	return VerifySideref(s.Sideref, s.Name, deviceSecret)
 }
 
 // CompactFormat is the wire format for skill capabilities over serial/BLE.
