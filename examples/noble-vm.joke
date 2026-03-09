@@ -1,0 +1,363 @@
+#!/usr/bin/env boxxy
+;; noble-vm.joke — Noble chain (noble-1) as a single boxxy tile
+;;
+;; Walks EVERY step in the boxxy architecture:
+;;
+;;   cmd/boxxy/main.go      → CLI: `boxxy examples/noble-vm.joke`
+;;   internal/lisp/          → Reader parses this .joke file
+;;   internal/runner/         → Script runner executes top-level forms
+;;   std/vz/                 → vz namespace resolves to internal/vm bindings
+;;   internal/vm/vm.go       → CreateVM() via Virtualization.framework
+;;   internal/vm/invisicap.go → CapTable tracks noble chain state regions
+;;   internal/gf3/gf3.go     → GF(3) balance verification
+;;   internal/pinhole/        → pf rules for Noble P2P + RPC ports only
+;;   internal/demon/          → QUIC multipath probe (when Noble migrates to EVM)
+;;
+;; The tile morphism:
+;;
+;;   tile_noble : GenesisState ⊗ NobleConfig → ChainState' ⊗ RPCEndpoint
+;;
+;; Input wires (top):
+;;   - Linux kernel (vmlinuz, arm64)
+;;   - Initramfs (with nobled v11.2.0 baked in or fetched)
+;;   - Disk image (noble-chain.img, 500 GB for full node)
+;;   - Genesis file (strangelove-ventures/noble-networks/mainnet/noble-1)
+;;   - Seed peers (LavenFive, BlueStake)
+;;   - Snapshot (Polkachu ~1 GB pruned)
+;;
+;; Output wires (bottom):
+;;   - Synced chain state (noble-1, block ~46.5M+)
+;;   - RPC endpoint (port 26657)
+;;   - REST API (port 1317)
+;;   - gRPC (port 9090)
+;;   - P2P (port 26656)
+;;
+;; GF(3) conservation:
+;;   nobled validator (-1)  — verifies blocks, rejects invalid state transitions
+;;   boxxy runtime    ( 0)  — ergodic coordinator, tile lifecycle management
+;;   IBC relayer      (+1)  — generates denom traces, pushes cross-chain transfers
+;;   SUM = 0 mod 3 ✓
+;;
+;; Noble chain facts (recon 2026-03-09):
+;;   Chain ID:     noble-1
+;;   Binary:       nobled v11.2.0
+;;   Consensus:    CometBFT v0.38.19
+;;   SDK:          Cosmos SDK v0.45.16 (noble-assets fork)
+;;   CosmWasm:     DISABLED (never enabled on noble-1)
+;;   Validators:   18 bonded (permissioned, 1M tokens each)
+;;   IBC channels: 437 on-chain (155 transfer, 280 ICA, 2 non-standard)
+;;   Snapshot:     ~1 GB pruned (Polkachu)
+;;   Fee tokens:   uusdc, IBC-wrapped ATOM
+;;
+;; MONOCULTURE WARNING (from VALIDATORS.md):
+;;   L7: 100% nobled v11.2.0, 97% CometBFT 0.38.19, 100% Go 1.24.12
+;;   L4: 100% TCP, 0% QUIC, 0% Noise
+;;   L3: 43% Hetzner (AS24940), 58% in DE+FI
+;;   L1: 100% linux/amd64, 0% ARM, 0% RISC-V
+;;
+;; Usage:
+;;   boxxy examples/noble-vm.joke
+;;
+;; Prerequisites:
+;;   1. ARM64 Linux kernel + initrd (Alpine minimal or custom buildroot)
+;;   2. nobled v11.2.0 binary cross-compiled for linux/arm64:
+;;        cd noble && GOOS=linux GOARCH=arm64 make build
+;;   3. Noble genesis file:
+;;        curl -sL https://raw.githubusercontent.com/strangelove-ventures/noble-networks/main/mainnet/noble-1/genesis.json
+;;   4. Disk image (created by this script if missing)
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 1: CONFIGURATION (input wires)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: user env → lisp/reader.go → here
+
+(def kernel-path   (or (env "BOXXY_KERNEL")   "vmlinuz"))
+(def initrd-path   (or (env "BOXXY_INITRD")   "initrd"))
+(def disk-path     (or (env "BOXXY_DISK")     "noble-chain.img"))
+(def disk-size-gb  (or (env "BOXXY_DISK_SIZE") 500))
+(def chain-id      "noble-1")
+(def moniker       (or (env "BOXXY_MONIKER")   "boxxy-noble-0"))
+(def cpus          (or (env "BOXXY_CPUS")      8))
+(def memory-gb     (or (env "BOXXY_MEMORY")    32))
+(def genesis-dir   (or (env "BOXXY_GENESIS")   "./noble-genesis"))
+
+;; Noble P2P seed peers (from cosmos/chain-registry)
+(def seed-peers
+  (str "20e1000e88125698264454a884812746c2eb4807@seeds.lavenderfive.com:21590,"
+       "b85358e035343a3b15e77e1102857dcdaf70053b@seeds.bluestake.net:25556"))
+
+;; Noble network ports
+(def p2p-port  26656)
+(def rpc-port  26657)
+(def rest-port 1317)
+(def grpc-port 9090)
+
+;; Kernel command line: hvc0 console, pass chain config to guest systemd env
+(def cmdline
+  (str "console=hvc0 root=/dev/vda rw"
+       " systemd.setenv=CHAIN_ID=" chain-id
+       " systemd.setenv=MONIKER=" moniker
+       " systemd.setenv=SEED_PEERS=" seed-peers
+       " systemd.setenv=P2P_PORT=" p2p-port
+       " systemd.setenv=RPC_PORT=" rpc-port
+       " systemd.setenv=REST_PORT=" rest-port
+       " systemd.setenv=GRPC_PORT=" grpc-port))
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 2: BANNER
+;; ════════════════════════════════════════════════════════════════════════
+
+(println "╔═══════════════════════════════════════════════════════════════════╗")
+(println "║  boxxy tile: Noble Chain (noble-1)                              ║")
+(println "║                                                                 ║")
+(println "║  nobled v11.2.0 · CometBFT v0.38.19 · Cosmos SDK v0.45.16      ║")
+(println "║  18 permissioned validators · 437 IBC channels · ~1 GB pruned   ║")
+(println "║                                                                 ║")
+(println "║  GF(3): validator(-1) + runtime(0) + relayer(+1) = 0 mod 3     ║")
+(println "║                                                                 ║")
+(println "║  MONOCULTURE: 43% Hetzner, 100% amd64, 100% CometBFT 0.38.19  ║")
+(println "║  This tile is ARM64 — breaking L1 monoculture by existing.      ║")
+(println "╚═══════════════════════════════════════════════════════════════════╝")
+(println)
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 3: DISK IMAGE (utility wire)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/create-disk-image → internal/vm/vm.go RegisterNamespace
+;;   → os.Create + Truncate (sparse file)
+
+(println "[ 0] Disk image: " disk-path " (" disk-size-gb " GB)")
+;; Create disk if it doesn't exist (sparse allocation, instant)
+(vz/create-disk-image disk-path disk-size-gb)
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 4: BOOT LOADER (input wire)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/new-linux-boot-loader → internal/vm/vm.go
+;;   → vz.NewLinuxBootLoader(kernel, initrd, cmdline)
+;;   → Apple Virtualization.framework VZLinuxBootLoader
+;;
+;; Direct kernel boot (no UEFI overhead):
+;;   Apple VF → kernel → initrd → /dev/vda → nobled
+;;   Startup: ~150ms (vs 850ms EFI)
+;;
+;; Noble runs nobled which is Go — builds for linux/arm64 natively.
+;; This tile runs ARM64, breaking Noble's 100% amd64 monoculture.
+
+(println "[-1] Configuring Linux Boot Loader (direct kernel, arm64)...")
+(println "     kernel:  " kernel-path)
+(println "     initrd:  " initrd-path)
+(println "     cmdline: console=hvc0 root=/dev/vda rw ...")
+(def boot (vz/new-linux-boot-loader kernel-path initrd-path cmdline))
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 5: PLATFORM (structural wire)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/new-generic-platform → internal/vm/vm.go
+;;   → vz.NewGenericPlatformConfiguration()
+;;   → VZGenericPlatformConfiguration (non-macOS guest)
+
+(println "[ 0] Platform: generic (non-macOS guest)")
+(def platform (vz/new-generic-platform))
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 6: VM CONFIGURATION (tile core)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/new-vm-config → internal/vm/vm.go
+;;   → vz.NewVirtualMachineConfiguration(bootLoader, cpus, memory)
+;;   → VZVirtualMachineConfiguration
+;;
+;; This is the tile itself:
+;;   tile : GuestState ⊗ Config → GuestState' ⊗ Result
+;;                  ↑ input wires      ↑ output wires
+
+(println "[ 0] Initializing tile: " cpus " CPUs, " memory-gb " GB RAM")
+(def vm-config (vz/new-vm-config cpus memory-gb boot platform))
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 7: STORAGE DEVICES (input wire — chain state)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/new-disk-attachment → internal/vm/vm.go
+;;   → vz.NewDiskImageStorageDeviceAttachment(path, readOnly)
+;;   → vz/new-virtio-block-device
+;;   → vz.NewVirtioBlockDeviceConfiguration(attachment)
+;;   → vz/add-storage-devices
+;;   → vmConfig.SetStorageDevicesVirtualMachineConfiguration([devices])
+;;
+;; The disk holds:
+;;   ~/.noble/data/       — chain state (IAVL tree, block store)
+;;   ~/.noble/config/     — config.toml, app.toml, genesis.json
+;;   ~/.noble/cosmovisor/ — binary management (optional)
+;;   /usr/local/bin/nobled — the binary itself
+
+(println "[ 0] Attaching chain disk: " disk-path " (read-write)")
+(def disk-att (vz/new-disk-attachment disk-path false))
+(def disk-dev (vz/new-virtio-block-device disk-att))
+(vz/add-storage-devices vm-config [disk-dev])
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 8: NETWORK DEVICE (input/output wire — P2P + RPC)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/new-nat-network → internal/vm/vm.go
+;;   → vz.NewNATNetworkDeviceAttachment()
+;;   → vz/new-virtio-network
+;;   → vz.NewVirtioNetworkDeviceConfiguration(nat)
+;;   → vz/add-network-devices
+;;   → vmConfig.SetNetworkDevicesVirtualMachineConfiguration([net])
+;;
+;; Noble needs network for:
+;;   P2P (26656):  CometBFT peer-to-peer gossip, block propagation
+;;   RPC (26657):  Tendermint RPC (query, broadcast_tx)
+;;   REST (1317):  Cosmos SDK REST API (LCD)
+;;   gRPC (9090):  Cosmos SDK gRPC
+;;
+;; NAT provides outbound via host, inbound via port forwarding.
+;; For production: use bridged network or VPN for direct P2P peering.
+
+(println "[+1] Enabling NAT network (P2P + RPC + REST + gRPC)")
+(println "     Ports: P2P=" p2p-port " RPC=" rpc-port " REST=" rest-port " gRPC=" grpc-port)
+(def nat (vz/new-nat-network))
+(def net (vz/new-virtio-network nat))
+(vz/add-network-devices vm-config [net])
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 9: DIRECTORY SHARES (input wire — genesis + config)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/new-virtio-fs-device → internal/vm/vm.go
+;;   → vz.NewSharedDirectory(path, readOnly)
+;;   → vz.NewSingleDirectoryShare(share)
+;;   → vz.NewVirtioFileSystemDeviceConfiguration(tag)
+;;   → vmConfig.SetDirectorySharingDevicesVirtualMachineConfiguration([fs])
+;;
+;; Share host directory with Noble genesis, config, and provision scripts.
+;; Guest mounts: mount -t virtiofs noble-genesis /mnt/noble-genesis
+
+(println "[ 0] Sharing genesis directory: tag='noble-genesis' path='" genesis-dir "'")
+(def genesis-share (vz/new-virtio-fs-device "noble-genesis" genesis-dir))
+(vz/add-directory-shares vm-config [genesis-share])
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 10: VALIDATE (verification wire)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/validate-config → internal/vm/vm.go
+;;   → vmConfig.Validate()
+;;   → Apple Virtualization.framework validation
+;;
+;; Checks: CPUs>0, Memory>0, boot mode valid, NVRAM present if EFI,
+;;         kernel present if Linux, all attachments exist
+
+(println)
+(println "[-1] Validating tile configuration...")
+(def valid (vz/validate-config vm-config))
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 11: INVISICAP TABLE (capability tracking)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: internal/vm/invisicap.go → CapTable, InvisiCap
+;;
+;; Fil-C InvisiCaps model: every pointer carries invisible capability.
+;; Applied to Noble chain state regions:
+;;
+;;   "chain_state"    → CapData (+1)     — writable by consensus
+;;   "genesis"        → CapReadonly (0)  — immutable reference
+;;   "validator_key"  → CapFunction (-1) — callable for signing only
+;;   "ibc_channels"   → CapData (+1)     — writable by IBC module
+;;   "snapshot"       → CapReadonly (0)  — read-only restoration point
+;;
+;; GF(3) balance of a capability triad:
+;;   CapData(+1) + CapReadonly(0) + CapFunction(-1) = 0 mod 3 ✓
+
+(println "[ 0] InvisiCap capability table (not yet live, applied at runtime):")
+(println "     chain_state   → CapData(+1)     writable by consensus")
+(println "     genesis       → CapReadonly(0)   immutable reference")
+(println "     validator_key → CapFunction(-1)  callable for signing only")
+(println "     ibc_channels  → CapData(+1)     writable by IBC module")
+(println "     snapshot      → CapReadonly(0)   read-only restoration")
+(println)
+
+;; ════════════════════════════════════════════════════════════════════════
+;; STEP 12: LAUNCH (tile instantiation)
+;; ════════════════════════════════════════════════════════════════════════
+;; Architecture path: vz/new-vm → internal/vm/vm.go CreateVM()
+;;   → vz.NewVirtualMachine(vmConfig)
+;;   → Apple Virtualization.framework VZVirtualMachine
+;;
+;;   vz/start-vm! → StartVM() → instance.VM.Start()
+;;   → VZVirtualMachine.start()
+;;   → Apple Virtualization.framework starts guest execution
+;;
+;;   vz/vm-state → GetState() → instance.VM.State()
+;;   → VZVirtualMachineState enum → string
+
+(if (= valid true)
+  (do
+    (println "[✓] Configuration valid")
+    (println)
+    (println "═══════════════════════════════════════════════════════════════════")
+    (println "NOBLE CHAIN TILE CONFIGURATION:")
+    (println "═══════════════════════════════════════════════════════════════════")
+    (println "  Chain ID:       " chain-id)
+    (println "  Moniker:        " moniker)
+    (println "  Binary:         nobled v11.2.0 (linux/arm64)")
+    (println "  Consensus:      CometBFT v0.38.19")
+    (println "  Kernel:         " kernel-path " (arm64)")
+    (println "  Disk:           " disk-path " (" disk-size-gb " GB)")
+    (println "  CPUs:           " cpus)
+    (println "  Memory:         " memory-gb " GB")
+    (println "  Genesis share:  " genesis-dir " → /mnt/noble-genesis")
+    (println "  Seed peers:     LavenFive:21590, BlueStake:25556")
+    (println)
+    (println "PORTS:")
+    (println "  P2P:   " p2p-port " (CometBFT gossip)")
+    (println "  RPC:   " rpc-port " (Tendermint RPC)")
+    (println "  REST:  " rest-port " (Cosmos LCD)")
+    (println "  gRPC:  " grpc-port " (Cosmos gRPC)")
+    (println)
+    (println "NOBLE IBC SURFACE (from CHANNELS.md):")
+    (println "  437 total channels (155 transfer, 280 ICA, 2 non-standard)")
+    (println "  59 registered (chain-registry), 96 shadow (undocumented)")
+    (println "  7 causal chains identified")
+    (println)
+    (println "POST-BOOT PROVISIONING:")
+    (println "  # Inside guest after boot:")
+    (println "  mount -t virtiofs noble-genesis /mnt/noble-genesis")
+    (println "  /mnt/noble-genesis/provision-noble-guest.sh")
+    (println)
+    (println "  # Or manually:")
+    (println "  nobled init " moniker " --chain-id " chain-id)
+    (println "  cp /mnt/noble-genesis/genesis.json ~/.noble/config/genesis.json")
+    (println "  sed -i 's/seeds = \"\"/seeds = \"" seed-peers "\"/' ~/.noble/config/config.toml")
+    (println "  # Apply Polkachu snapshot:")
+    (println "  wget -O snap.tar.lz4 https://snapshots.polkachu.com/snapshots/noble/noble_46419300.tar.lz4")
+    (println "  lz4 -d snap.tar.lz4 | tar xf - -C ~/.noble")
+    (println "  nobled start")
+    (println)
+    (println "═══════════════════════════════════════════════════════════════════")
+    (println "Starting tile... (Ctrl+C to stop)")
+    (println "═══════════════════════════════════════════════════════════════════")
+    (println)
+
+    ;; ── STEP 12a: Create VM instance ──
+    ;; Architecture: vz/new-vm → CreateVM() → VZVirtualMachine
+    (def vm (vz/new-vm vm-config))
+
+    ;; ── STEP 12b: Start VM ──
+    ;; Architecture: vz/start-vm! → StartVM() → instance.VM.Start()
+    (vz/start-vm! vm)
+
+    ;; ── STEP 12c: Report state ──
+    ;; Architecture: vz/vm-state → GetState() → VZVirtualMachineState
+    (println "VM State: " (vz/vm-state vm))
+    (println)
+    (println "Tile is live. Serial console active on hvc0.")
+    (println "Press Ctrl+C to stop tile."))
+
+  ;; Validation failed
+  (do
+    (println "[✗] Configuration INVALID: " valid)
+    (println)
+    (println "Check prerequisites:")
+    (println "  1. Kernel exists: " kernel-path)
+    (println "  2. Initrd exists: " initrd-path)
+    (println "  3. Genesis dir exists: " genesis-dir)
+    (println "  4. Disk image writable: " disk-path)))

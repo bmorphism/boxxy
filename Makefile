@@ -91,6 +91,22 @@ tapes: $(GIFS)
 tapes/%.gif: tapes/%.tape
 	vhs $<
 
+# Prepare Noble chain tile artifacts
+noble-genesis:
+	@echo "Preparing Noble genesis VirtioFS share..."
+	mkdir -p examples/noble-genesis
+	@test -f examples/noble-genesis/genesis.json || \
+		(echo "Downloading Noble genesis..." && \
+		 curl -sL https://raw.githubusercontent.com/strangelove-ventures/noble-networks/main/mainnet/noble-1/genesis.json \
+		   > examples/noble-genesis/genesis.json)
+	cp scripts/provision-noble-guest.sh examples/noble-genesis/
+	@echo "✓ Noble genesis share ready at examples/noble-genesis/"
+	@echo "  Next: boxxy examples/noble-vm.joke"
+
+# Run Noble chain tile
+noble: sign noble-genesis
+	./$(BINARY) examples/noble-vm.joke
+
 # Build HaikuOS GUI launcher
 haiku-gui: deps
 	CGO_ENABLED=1 go build $(LDFLAGS) $(GOFLAGS) -o haiku-gui ./cmd/haiku-gui
