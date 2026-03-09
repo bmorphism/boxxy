@@ -1,0 +1,739 @@
+;; WoW Spell.dbc Boolean Flags — Complete Witnessing Surface
+;; Source: https://wowdev.wiki/Spell.dbc/Attributes + related pages
+;; 644 boolean flags + 43 shapeshift form enum values
+;; Core revision 11.2, last updated 2025-08-10
+
+;; === SpellAttr0 (57 flags) ===
+0x00000001  SPELL_ATTR0_PROC_FAILURE_BURNS_CHARGE  ;; bit 1: The spell will consume a charge that is natural or procced even if it fails to apply it's effect.
+0x00000001  SPELL_ATTR0_CU_ENCHANT_PROC  ;; bit 1: Spell that procs has enchantment relationship. Ex. Colossus(116631) damage absorb.
+0x00000002  SPELL_ATTR0_USES_RANGED_SLOT  ;; bit 2: Source: "Use ammo, ranged attack range modifiers, ranged haste, etc."
+0x00000002  SPELL_ATTR0_CU_CONE_BACK  ;; bit 2: Affects the spell cone(path) area. See [Implicit Targets](https://wowdev.wiki/Spell.dbc/EffectImplicitTarget "Spell.dbc/
+0x00000004  SPELL_ATTR0_ON_NEXT_SWING_NO_DAMAGE  ;; bit 3: Source: "Both "on next swing" attributes have identical handling in server & client.
+0x00000004  SPELL_ATTR0_CU_CONE_LINE  ;; bit 3: Similar to SPELL_ATTR0_CU_CONE_BACK. Ex. Vehicle attacks affected by the Z-axis.
+0x00000008  SPELL_ATTR0_DO_NOT_LOG_IMMUNE_MISSES  ;; bit 4: Self descriptive. Not set in 3.0.3. Possibly not used in later versions as well.
+0x00000008  SPELL_ATTR0_CU_SHARE_DAMAGE  ;; bit 4: Implies [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName "Spell.dbc/EffectApplyAuraName") 300 SPELL_AURA_
+0x00000010  SPELL_ATTR0_IS_ABILITY  ;; bit 5: Client puts "Ability" instead of "Spell" in the strings associated with this spell. Source: "Cannot be reflected, not af
+0x00000010  SPELL_ATTR0_CU_NO_INITIAL_THREAT  ;; bit 5: Seems the same as SPELL_ATTR2_NO_INITIAL_THREAT. Might have uses when the original causes conflicts or is not functionin
+0x00000020  SPELL_ATTR0_IS_TRADESKILL  ;; bit 6: Source: "Displayed in recipe list, not affected by cast speed modifiers."
+0x00000020  SPELL_ATTR0_CU_AURA_CC  ;; bit 6: Can modify functionality to behave with crowd controlled effects like stun, freeze, etc.
+0x00000040  SPELL_ATTR0_PASSIVE  ;; bit 7: Passive spell and lists them accordingly. Source: "Spell is automatically cast on self by core."
+0x00000040  SPELL_ATTR0_CU_DONT_BREAK_STEALTH  ;; bit 7: Likely very similar to SPELL_ATTR1_ALLOW_WHILE_STEALTHED. This might also override SPELL_ATTR1_FAILURE_BREAKS_STEALTH.
+0x00000080  SPELL_ATTR0_DO_NOT_DISPLAY_SPELLBOOK_AURA_ICON_COMBAT_LOG  ;; bit 8: These spells will be hidden from the spellbook, the list of aura icons, and partially from the combat log, but only on t
+0x00000080  SPELL_ATTR0_CU_CAN_CRIT  ;; bit 8: The opposite of SPELL_ATTR2_CANT_CRIT. Bypass restrictive attributes and [combinations](https://wowdev.wiki/Spell.dbc/Ef
+0x00000100  SPELL_ATTR0_DO_NOT_LOG  ;; bit 9: This attribute controls whether the spell appears in combat logs. This attribute will focus on the removal of all aspect
+0x00000100  SPELL_ATTR0_CU_DIRECT_DAMAGE  ;; bit 9: Could imply spell functionality modification such as (Direct Damage - Spell) from [SpellCategory](https://wowdev.wiki/DB
+0x00000200  SPELL_ATTR0_HELD_ITEM_ONLY  ;; bit 10: Source: "Client will automatically select main-hand item as cast target."
+0x00000200  SPELL_ATTR0_CU_CHARGE  ;; bit 10: This might imply [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName "Spell.dbc/EffectApplyAuraName") 411 SP
+0x00000400  SPELL_ATTR0_ON_NEXT_SWING  ;; bit 11: Source: "Both "on next swing" attributes have identical handling in server & client."
+0x00000400  SPELL_ATTR0_CU_PICKPOCKET  ;; bit 11: Allows access to the pickpocket loot table of an enemy.
+0x00000800  SPELL_ATTR0_WEARER_CASTS_PROC_TRIGGER  ;; bit 12: Source: Marker attribute to show auras that trigger another spell (either directly or with a script).
+0x00000800  SPELL_ATTR0_CU_DEPRECATED_ROLLING_PERIODIC  ;; bit 12: Seems like a combination of SPELL_ATTR4_OBSOLETE + SPELL_ATTR10_ROLLING_PERIODIC.
+0x00001000  SPELL_ATTR0_SERVER_ONLY  ;; bit 13: Used for server side scripts? Needs a real description.
+0x00001000  SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF0  ;; bit 13: Possible combination of SPELL_ATTR4_OBSOLETE + SPELL_ATTR0_AURA_IS_DEBUFF.
+0x00002000  SPELL_ATTR0_ALLOW_ITEM_SPELL_IN_PVP  ;; bit 14: Needs a description.
+0x00002000  SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF1  ;; bit 14: Unknown differences between this and SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF0 or SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF2.
+0x00004000  SPELL_ATTR0_INDOORS_ONLY  ;; bit 15: Opposite of SPELL_ATTR0_OUTDOORS_ONLY.
+0x00004000  SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF2  ;; bit 15: Unknown differences between this and SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF0 or SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF1.
+0x00008000  SPELL_ATTR0_OUTDOORS_ONLY  ;; bit 16: Only useable outdoors (Above ground level or not inside of a WMO for example).
+0x00008000  SPELL_ATTR0_CU_IGNORE_ARMOR  ;; bit 16: Implies [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName "Spell.dbc/EffectApplyAuraName") 345 SPELL_AURA_
+0x00010000  SPELL_ATTR0_NOT_SHAPESHIFTED  ;; bit 17: Spell may not be cast while under the effect of a conditional dependent Shapeshift.
+0x00010000  SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER  ;; bit 17: Similar to SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ONLY except the target is affected and this attribute is not client r
+0x00020000  SPELL_ATTR0_ONLY_STEALTHED  ;; bit 18: Must be in stealth (affected by ShapeshiftForm-FORM_STEALTH).
+0x00020000  SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET  ;; bit 18: Another EffectPos_facing similar attribute. An example for this would be backstab like spells. See SPELL_ATTR4_USE_FACIN
+0x00040000  SPELL_ATTR0_DO_NOT_SHEATH  ;; bit 19: Leaves your weapons (if) sheathed during spell animation. Source: "Does not sheathe weapons (client only)."
+0x00040000  SPELL_ATTR0_CU_ALLOW_INFLIGHT_TARGET  ;; bit 19: This may allow override for unit InhabitType; and possibly function similar to SPELL_ATTR6_CAN_TARGET_UNTARGETABLE or Sp
+0x00080000  SPELL_ATTR0_SCALES_WITH_CREATURE_LEVEL  ;; bit 20: Spell damage depends on level of the caster. Source: "For non-player casts, scale impact and power cost with caster's le
+0x00080000  SPELL_ATTR0_CU_NEEDS_AMMO_DATA  ;; bit 20: It is likely this is either referring to deprecated(version dependent) hunter ammunition or a vehicle mechanic.
+0x00100000  SPELL_ATTR0_CANCELS_AUTO_ATTACK_COMBAT  ;; bit 21: Cancels current auto-attack when cast.
+0x00100000  SPELL_ATTR0_CU_BINARY_SPELL  ;; bit 21: Spell can be 1 or 0. Example of spells that can be toggled on or off with an infinite duration would be a primary exampl
+0x00200000  SPELL_ATTR0_NO_ACTIVE_DEFENSE  ;; bit 22: Cannot be Dodged, Parried, or Blocked. Prevents physical based avoidance.
+0x00200000  SPELL_ATTR0_CU_SCHOOLMASK_NORMAL_WITH_MAGIC  ;; bit 22: Sets the school to 1 + 126? In 5.4.8, a value of 127 is Chaos damage. More information at [SchoolMask](https://wowdev.wi
+0x00400000  SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ONLY  ;; bit 23: Automatically forces player to face the target when casting. Applicable only on the client.
+0x00400000  SPELL_ATTR0_CU_DEPRECATED_LIQUID_AURA  ;; bit 23: Similar to the other custom deprecated attributes. An example of liquid auras could be the debuff from Naxxramas slime.
+0x00800000  SPELL_ATTR0_ALLOW_CAST_WHILE_DEAD  ;; bit 24: Attribute that allows a spell to be cast while in the dead state as well as ghost state.
+0x00800000  SPELL_ATTR0_CU_IS_TALENT  ;; bit 24: This attribute may deal with talent descriptions; and it might be used in complex spells in identifying the most promine
+0x01000000  SPELL_ATTR0_ALLOW_WHILE_MOUNTED  ;; bit 25: Spell can be cast while mounted.
+0x01000000  SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED  ;; bit 25: Aura is not saved in the database. One reason would be to prevent exploits (having a buff where it should not be).
+0x02000000  SPELL_ATTR0_COOLDOWN_ON_EVENT  ;; bit 26: Activate a cooldown after aura expiration, current summon removed, or go script. Spell is unusable while already active 
+0x04000000  SPELL_ATTR0_AURA_IS_DEBUFF  ;; bit 27: Forces the spell to be handled as negative. Ex. Aura is shown in the debuff bar.
+0x08000000  SPELL_ATTR0_ALLOW_WHILE_SITTING  ;; bit 28: Spell can be cast while sitting.
+0x10000000  SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL  ;; bit 29: Cannot be used in combat (Only Peaceful).
+0x20000000  SPELL_ATTR0_NO_IMMUNITIES  ;; bit 30: Unaffected by Invulnerability. Source: "Allows spell to pierce invulnerability, unless the invulnerability spell also ha
+0x40000000  SPELL_ATTR0_HEARTBEAT_RESIST  ;; bit 31: Periodic resistance checks. Source: "Periodically re-rolls against resistance to potentially expire the aura early." Nee
+0x80000000  SPELL_ATTR0_NO_AURA_CANCEL  ;; bit 32: Aura cannot be canceled or right-clicked off. Source: "Prevents the player from voluntarily canceling a positive aura."
+
+;; === SpellAttr1 (32 flags) ===
+0x00000001  SPELL_ATTR1_DISMISS_PET_FIRST  ;; bit 1: For spells without this flag the client doesn't allow summoning a pet if the caster already has a pet.
+0x00000002  SPELL_ATTR1_USE_ALL_MANA  ;; bit 2: Uses all power (Ex. Lay on Hands, Bunyanize). Source: "Ignores listed power cost and drains entire pool instead."
+0x00000004  SPELL_ATTR1_IS_CHANNELED  ;; bit 3: Spell is channeled. Spell is handled equally with client and server.
+0x00000008  SPELL_ATTR1_NO_REDIRECTION  ;; bit 4: No redirection to another target. Ignores spells with the "SPELL_AURA_SPELL_MAGNET" // [Effect Aura 96](https://wowdev.w
+0x00000010  SPELL_ATTR1_NO_SKILL_INCREASE  ;; bit 5: Does not give a skill up point.
+0x00000020  SPELL_ATTR1_ALLOW_WHILE_STEALTHED  ;; bit 6: Does not break Stealth.
+0x00000040  SPELL_ATTR1_IS_SELF_CHANNELLED  ;; bit 7: Spell is self channeled. Spell is handled equally with client and server.
+0x00000080  SPELL_ATTR1_NO_REFLECTION  ;; bit 8: Spell will bypass any reflection effects.
+0x00000100  SPELL_ATTR1_ONLY_PEACEFUL_TARGETS  ;; bit 9: Can only target out of combat units.
+0x00000200  SPELL_ATTR1_INITIATES_COMBAT_ENABLES_AUTO_ATTACK  ;; bit 10: Player starts melee combat after this spell is cast. Initiates combat (enables auto-attack).
+0x00000400  SPELL_ATTR1_NO_THREAT  ;; bit 11: Does not generate threat on cast and will not initiate combat.
+0x00000800  SPELL_ATTR1_AURA_UNIQUE  ;; bit 12: Source: "Aura will not refresh it's duration when recast".
+0x00001000  SPELL_ATTR1_FAILURE_BREAKS_STEALTH  ;; bit 13: Failure breaks Stealth. (Pickpocket).
+0x00002000  SPELL_ATTR1_TOGGLE_FAR_SIGHT  ;; bit 14: Client removes Farsight on aura loss.
+0x00004000  SPELL_ATTR1_TRACK_TARGET_IN_CHANNEL  ;; bit 15: Client automatically forces player to face target when channeling.
+0x00008000  SPELL_ATTR1_IMMUNITY_PURGES_EFFECT  ;; bit 16: Remove negative auras on immunity. Source: "For immunity spells, cancel all auras that this spell would make you immune 
+0x00010000  SPELL_ATTR1_IMMUNITY_TO_HOSTILE_AND_FRIENDLY_EFFECTS  ;; bit 17: Causes harmful and helpful spells cast on a target with this to be immune such as Cyclone. (School Immunity Only).
+0x00020000  SPELL_ATTR1_NO_AUTOCAST_AI  ;; bit 18: No AutoCast by Pet or similar AI.
+0x00040000  SPELL_ATTR1_PREVENTS_ANIM  ;; bit 19: Stun, Polymorph, Daze, Hex, etc. Auras apply "UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT".
+0x00080000  SPELL_ATTR1_EXCLUDE_CASTER  ;; bit 20: Excludes caster from spell effects even if not the primary target.
+0x00100000  SPELL_ATTR1_FINISHING_MOVE_DAMAGE  ;; bit 21: Finishing Move - Damage. Combo Point related.
+0x00200000  SPELL_ATTR1_THREAT_ONLY_ON_MISS  ;; bit 22: Untested if this implies all functions listed under SpellMissInfo aside from Miss such as Parry, Dodge, Resist, etc.
+0x00400000  SPELL_ATTR1_FINISHING_MOVE_DURATION  ;; bit 23: Finishing Move - Duration. Combo Point related.
+0x00800000  SPELL_ATTR1_IGNORE_OWNERS_DEATH  ;; bit 24: Unaffected by death of owner. Possibly works with temporary summons as well?
+0x01000000  SPELL_ATTR1_SPECIAL_SKILLUP  ;; bit 25: Only Fishing spells.
+0x02000000  SPELL_ATTR1_AURA_STAYS_AFTER_COMBAT  ;; bit 26: Self descriptive. Not all spells need this to have this effect.
+0x04000000  SPELL_ATTR1_REQUIRE_ALL_TARGETS  ;; bit 27: Works correctly with \[target=focus\] and \[target=mouseover\] macros? (Used in many vehicle type spells)
+0x08000000  SPELL_ATTR1_DISCOUNT_POWER_ON_MISS  ;; bit 28: This attribute is almost exclusive with spells that consume combo-point-like secondary resources.
+0x10000000  SPELL_ATTR1_NO_AURA_ICON  ;; bit 29: Client doesn't display these spells in aura bar.
+0x20000000  SPELL_ATTR1_NAME_IN_CHANNEL_BAR  ;; bit 30: Spell name is displayed in cast bar instead of "Channeling" text in Channel Bar. (Client Only).
+0x40000000  SPELL_ATTR1_DISPEL_ALL_STACKS  ;; bit 31: Dispel all stacks instead of one at a time.
+0x80000000  SPELL_ATTR1_CAST_WHEN_LEARNED  ;; bit 32: Casts the spell when learned.
+
+;; === SpellAttr2 (32 flags) ===
+0x00000001  SPELL_ATTR2_ALLOW_DEAD_TARGET  ;; bit 1: Can target a dead unit or corpse.
+0x00000002  SPELL_ATTR2_NO_SHAPESHIFT_UI  ;; bit 2: No shapeshift UI such as Stealth, Shadowform, Druid shapeshifts, etc. Also certain custom scripted ones for quests or ot
+0x00000004  SPELL_ATTR2_IGNORE_LINE_OF_SIGHT  ;; bit 3: Self descriptive.
+0x00000008  SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF  ;; bit 4: Allow low level buff. Allow casting lower level buffs? Maybe rank specific? This has relation to SpellLevels.dbc.
+0x00000010  SPELL_ATTR2_USE_SHAPESHIFT_BAR  ;; bit 5: Client displays icon in stance bar when learned, even if not shapeshift. Will still appear even if this is not listed in
+0x00000020  SPELL_ATTR2_AUTO_REPEAT  ;; bit 6: Wand attacks. Possibly others.
+0x00000040  SPELL_ATTR2_CANNOT_CAST_ON_TAPPED  ;; bit 7: Target must be tapped by caster. "Cannot cast on tapped". Relates to Dynamic Flags on creature (UNIT_DYNFLAG_TAPPED).
+0x00000080  SPELL_ATTR2_DO_NOT_REPORT_SPELL_FAILURE  ;; bit 8: Do not report spell failure. Combat log or error string related.
+0x00000100  SPELL_ATTR2_INCLUDE_IN_ADVANCED_COMBAT_LOG  ;; bit 9: Source: "Determines whether to include this aura in list of auras in SMSG_ENCOUNTER_START."
+0x00000200  SPELL_ATTR2_ALWAYS_CAST_AS_UNIT  ;; bit 10: \*NYI\* Unclear what the differences of casting a spell in this way would do.
+0x00000400  SPELL_ATTR2_SPECIAL_TAMING_FLAG  ;; bit 11: Special taming flag.
+0x00000800  SPELL_ATTR2_NO_TARGET_PER_SECOND_COSTS  ;; bit 12: Ignore power cost if listed in seconds.
+0x00001000  SPELL_ATTR2_CHAIN_FROM_CASTER  ;; bit 13: Effectively a point blank AoE with the source as the caster but seems to only apply to melee abilities (Ex. Cleave, Hear
+0x00002000  SPELL_ATTR2_ENCHANT_OWN_ITEM_ONLY  ;; bit 14: Items enchanted by spells with this flag also preserve the enchant in arenas.
+0x00004000  SPELL_ATTR2_ALLOW_WHILE_INVISIBLE  ;; bit 15: Allow spell to be used while invisible and the many different types of invisibility as well.
+0x00008000  SPELL_ATTR2_DO_NOT_CONSUME_IF_GAINED_DURING_CAST  ;; bit 16: Not set in 3.0.3. Still unused in 5.4.8.
+0x00010000  SPELL_ATTR2_NO_ACTIVE_PETS  ;; bit 17: Tame Beast.
+0x00020000  SPELL_ATTR2_DO_NOT_RESET_COMBAT_TIMERS  ;; bit 18: Don't reset timers for melee auto-attacks (swings) or ranged auto-attacks (autoshot).
+0x00040000  SPELL_ATTR2_NO_JUMP_WHILE_CAST_PENDING  ;; bit 19: Self descriptive. Client only.
+0x00080000  SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED_CASTER_FORM  ;; bit 20: Source: "Even if Stances are nonzero, allow spell to be cast outside of shapeshift (though not in a different shapeshift
+0x00100000  SPELL_ATTR2_INITIATE_COMBAT_POST_CAST_ENABLES_AUTO_ATTACK  ;; bit 21: Enable auto-attacks after the first spell is cast when in combat.
+0x00200000  SPELL_ATTR2_FAIL_ON_ALL_TARGETS_IMMUNE  ;; bit 22: Will invalidate certain auras on immunity gain. Source: "Causes BG flags to be dropped if combined with SPELL_ATTR1_IMMU
+0x00400000  SPELL_ATTR2_NO_INITIAL_THREAT  ;; bit 23: Can be found on several spells that deal damage and break stealth or are affected by a particular aura.
+0x00800000  SPELL_ATTR2_PROC_COOLDOWN_ON_FAILURE  ;; bit 24: Self descriptive.
+0x01000000  SPELL_ATTR2_ITEM_CAST_WITH_OWNER_SKILL  ;; bit 25: Needs a description.
+0x02000000  SPELL_ATTR2_DONT_BLOCK_MANA_REGEN  ;; bit 26: Mana regeneration is not affected.
+0x04000000  SPELL_ATTR2_NO_SCHOOL_IMMUNITIES  ;; bit 27: In relation to SpellImmunity/IMMUNITY_SCHOOL/SpellSchoolMask. Source: "Allow aura to be applied despite target being imm
+0x08000000  SPELL_ATTR2_IGNORE_WEAPONSKILL  ;; bit 28: Ignore skill level of a weapon.
+0x10000000  SPELL_ATTR2_NOT_AN_ACTION  ;; bit 29: Self descriptive. Unsure if anything besides spells and object interactions constitute an "action".
+0x20000000  SPELL_ATTR2_CANT_CRIT  ;; bit 30: Spell is not capable of being critical.
+0x40000000  SPELL_ATTR2_ACTIVE_THREAT  ;; bit 31: Spell can trigger even if triggered. Unknown if this has impact on actual "threat".
+0x80000000  SPELL_ATTR2_RETAIN_ITEM_CAST  ;; bit 32: Food or Drink Buff (Ex. Well Fed).
+
+;; === SpellAttr3 (32 flags) ===
+0x00000001  SPELL_ATTR3_PVP_ENABLING  ;; bit 1: Enables the PvP state when cast.
+0x00000002  SPELL_ATTR3_NO_PROC_EQUIP_REQUIREMENT  ;; bit 2: Proc can trigger even if the trigger spell is not active? Needs testing.
+0x00000004  SPELL_ATTR3_NO_CASTING_BAR_TEXT  ;; bit 3: No casting bar text.
+0x00000008  SPELL_ATTR3_COMPLETELY_BLOCKED  ;; bit 4: Applies only to Melee classes in 3.1.3.
+0x00000010  SPELL_ATTR3_NO_RES_TIMER  ;; bit 5: You don't have to wait to be resurrected with these spells.
+0x00000020  SPELL_ATTR3_NO_DURABILTIY_LOSS  ;; bit 6: Self descriptive.
+0x00000040  SPELL_ATTR3_NO_AVOIDANCE  ;; bit 7: Self descriptive. No AoE reduction modifiers will be calculated.
+0x00000080  SPELL_ATTR3_DOT_STACKING_RULE  ;; bit 8: Separate stack for every caster. Worth noting that not every DoT has this attribute even though it might seem like it sh
+0x00000100  SPELL_ATTR3_ONLY_ON_PLAYER  ;; bit 9: Can only target players. Opposite of SPELL_ATTR5_NOT_ON_PLAYER.
+0x00000200  SPELL_ATTR3_NOT_A_PROC  ;; bit 10: Triggered from effect? In 4.0+ some Mastery spells use this.
+0x00000400  SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON  ;; bit 11: Main hand weapon required.
+0x00000800  SPELL_ATTR3_ONLY_BATTLEGROUNDS  ;; bit 12: Can only be cast in Battlegrounds.
+0x00001000  SPELL_ATTR3_ONLY_ON_GHOSTS  ;; bit 13: Can only be cast on targets in the Ghost state.
+0x00002000  SPELL_ATTR3_HIDE_CHANNEL_BAR  ;; bit 14: Clientside attribute - Will not display channeling bar.
+0x00004000  SPELL_ATTR3_HIDE_IN_RAID_FILTER  ;; bit 15: Could also relate to "Hide messages like this one" when right clicking in combat log?
+0x00008000  SPELL_ATTR3_NORMAL_RANGED_ATTACK  ;; bit 16: Auto Shoot, Shoot, Throw, (Autoshot flag).
+0x00010000  SPELL_ATTR3_SUPPRESS_CASTER_PROCS  ;; bit 17: This will suppress any procs that could otherwise trigger (Ex. Spell/Item/Hidden).
+0x00020000  SPELL_ATTR3_SUPPRESS_TARGET_PROCS  ;; bit 18: This will suppress any procs the target could trigger from this spell. Similar to SPELL_ATTR3_SUPPRESS_CASTER_PROCS.
+0x00040000  SPELL_ATTR3_ALWAYS_HIT  ;; bit 19: Spell cannot miss, or be dodged/parried/blocked. Could still miss if overridden by another flag from caster or target.
+0x00080000  SPELL_ATTR3_INSTANT_TARGET_PROCS  ;; bit 20: Proc events are triggered before spell batching processes the spell hit on target.
+0x00100000  SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD  ;; bit 21: Death persistent spells. Allow aura while dead. Ex. Flasks and certain self class buffs with infinite duration.
+0x00200000  SPELL_ATTR3_ONLY_PROC_OUTDOORS  ;; bit 22: Unused in 3.3.5. Self descriptive.
+0x00400000  SPELL_ATTR3_DO_NOT_TRIGGER_TARGET_STAND  ;; bit 23: Casting cancels autorepeat(SPELL_ATTR2_AUTO_REPEAT).
+0x00800000  SPELL_ATTR3_NO_DAMAGE_HISTORY  ;; bit 24: Possible combat log or scripting relation.
+0x01000000  SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON  ;; bit 25: Self descriptive.
+0x02000000  SPELL_ATTR3_TREAT_AS_PERIODIC  ;; bit 26: Makes the spell appear as Periodic in client combat logs (Ex. Vampiric Embrace). Also used by spells that trigger anothe
+0x04000000  SPELL_ATTR3_CAN_PROC_FROM_PROCS  ;; bit 27: Auras with this attribute can proc from other spell procs. (Ex. from SpellAuraDefines in the dbcs or server side from Pr
+0x08000000  SPELL_ATTR3_ONLY_PROC_ON_CASTER  ;; bit 28: Only Drain Soul has this flag. \*Recheck and update needed.\*
+0x10000000  SPELL_ATTR3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS  ;; bit 29: Ignore caster and target restrictions.
+0x20000000  SPELL_ATTR3_IGNORE_CASTER_MODIFIERS  ;; bit 30: Does not inherit any of the casters spell, ability, or stat modifiers.
+0x40000000  SPELL_ATTR3_DO_NOT_DISPLAY_RANGE  ;; bit 31: Client does not display range in tooltip for these spells.
+0x80000000  SPELL_ATTR3_NOT_ON_AOE_IMMUNE  ;; bit 32: A descriptor for spells that implement Area of Effect Immunity and can serve as a handler for scripts that call for this
+
+;; === SpellAttr4 (32 flags) ===
+0x00000001  SPELL_ATTR4_NO_CAST_LOG  ;; bit 1: Does not put "Player casts X spell/ability" preceding the actual spell in the Combat Log.
+0x00000002  SPELL_ATTR4_CLASS_TRIGGER_ONLY_ON_TARGET  ;; bit 2: Proc only on effects with TARGET_UNIT_CASTER?
+0x00000004  SPELL_ATTR4_AURA_EXPIRES_OFFLINE  ;; bit 3: Most debuffs (with exceptions such as Resurrection Sickness) will automatically do this.
+0x00000008  SPELL_ATTR4_NO_HELPFUL_THREAT  ;; bit 4: Self descriptive.
+0x00000010  SPELL_ATTR4_NO_HARMFUL_THREAT  ;; bit 5: Self descriptive. May influence certain situations in towns with guard aggro in respect to PvP.
+0x00000020  SPELL_ATTR4_ALLOW_CLIENT_TARGETING  ;; bit 6: Allow client targeting. Applies only to pet spells, if this is not applied then opcode CMSG_PET_ACTION is sent instead o
+0x00000040  SPELL_ATTR4_CANNOT_BE_STOLEN  ;; bit 7: Although such auras might be dispellable, they cannot be stolen.
+0x00000080  SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING  ;; bit 8: Can be cast while another cast is in progress. Ignores already in-progress cast and still casts.
+0x00000100  SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS  ;; bit 9: Ignores resilience and any damage or % damage taken auras on target. Notes: Some effects/flags may override this and Mec
+0x00000200  SPELL_ATTR4_COMBAT_FEEDBACK_WHEN_USABLE  ;; bit 10: Combat Feedback When Usable (client only). Initially disabled / trigger activate from event. Ex. Execute, Riposte, Deep 
+0x00000400  SPELL_ATTR4_WEAPON_SPEED_COST_SCALING  ;; bit 11: Source: "Adds 10 to power cost for each 1s of weapon speed."
+0x00000800  SPELL_ATTR4_NO_PARTIAL_IMMUNITY  ;; bit 12: Self descriptive.
+0x00001000  SPELL_ATTR4_AURA_IS_BUFF  ;; bit 13: Self descriptive. Mostly applied to spells that would result in such spell showing as a debuff.
+0x00002000  SPELL_ATTR4_DO_NOT_LOG_CASTER  ;; bit 14: No caster object is sent to client combat log.
+0x00004000  SPELL_ATTR4_REACTIVE_DAMAGE_PROC  ;; bit 15: Doesn't break auras by damage from these spells. Source: "Damage from spells with this attribute doesn't break auras tha
+0x00008000  SPELL_ATTR4_NOT_IN_SPELLBOOK  ;; bit 16: Self descriptive.
+0x00010000  SPELL_ATTR4_NOT_IN_ARENA_OR_RATED_BATTLEGROUND  ;; bit 17: Cannot be used in Arenas or Rated Battlegrounds. Source: "Makes spell unusable despite CD <= 10min."
+0x00020000  SPELL_ATTR4_IGNORE_DEFAULT_ARENA_RESTRICTIONS  ;; bit 18: Opposite of SPELL_ATTR4_NOT_IN_ARENA_OR_RATED_BATTLEGROUND attribute. Source: "Makes spell usable despite CD > 10min."
+0x00040000  SPELL_ATTR4_BOUNCY_CHAIN_MISSILES  ;; bit 19: Source: "Hits area targets over time instead of all at once."
+0x00080000  SPELL_ATTR4_ALLOW_PROC_WHILE_SITTING  ;; bit 20: Self descriptive.
+0x00100000  SPELL_ATTR4_AURA_NEVER_BOUNCES  ;; bit 21: Static Aura. Pally aura, DK presence, Warrior stance, Mage armors; these auras persist under many conditions.
+0x00200000  SPELL_ATTR4_ALLOW_ENTERING_ARENA  ;; bit 22: Aura/Buff is not removed upon entering an arena match?
+0x00400000  SPELL_ATTR4_PROC_SUPPRESS_SWING_ANIM  ;; bit 23: Disables client side weapon swing animation.
+0x00800000  SPELL_ATTR4_SUPPRESS_WEAPON_PROCS  ;; bit 24: Suppress weapon procs. Similar to SPELL_ATTR3_SUPPRESS_CASTER_PROCS.
+0x01000000  SPELL_ATTR4_AUTO_RANGED_COMBAT  ;; bit 25: Self descriptive.
+0x02000000  SPELL_ATTR4_OWNER_POWER_SCALING  ;; bit 26: Pet scaling auras.
+0x04000000  SPELL_ATTR4_ONLY_FLYING_AREAS  ;; bit 27: Self descriptive.
+0x08000000  SPELL_ATTR4_FORCE_DISPLAY_CASTBAR  ;; bit 28: Self descriptive.
+0x10000000  SPELL_ATTR4_IGNORE_COMBAT_TIMER  ;; bit 29: Self descriptive.
+0x20000000  SPELL_ATTR4_AURA_BOUNCE_FAILS_SPELL  ;; bit 30: Self descriptive. Need description/example.
+0x40000000  SPELL_ATTR4_OBSOLETE  ;; bit 31: Deprecates the spell making it greyed out and gives "You can't use that here" error. Still usable with the triggered fla
+0x80000000  SPELL_ATTR4_USE_FACING_FROM_SPELL  ;; bit 32: Affects orientation. The value used is likely from the [SpellEffect](https://wowdev.wiki/DB/SpellEffect "DB/SpellEffect"
+
+;; === SpellAttr5 (32 flags) ===
+0x00000001  SPELL_ATTR5_ALLOW_ACTIONS_DURING_CHANNEL  ;; bit 1: Allows actions during a channeled spell such as moving and jumping.
+0x00000002  SPELL_ATTR5_NO_REAGENT_COST_WITH_AURA  ;; bit 2: Reagents will not be required in conjunction with UNIT_FLAG_PREPARATION.
+0x00000004  SPELL_ATTR5_REMOVE_ENTERING_ARENA  ;; bit 3: Source: "Force this aura to be removed on entering arena, regardless of other properties."
+0x00000008  SPELL_ATTR5_ALLOW_WHILE_STUNNED  ;; bit 4: Self descriptive.
+0x00000010  SPELL_ATTR5_TRIGGERS_CHANNELING  ;; bit 5: Self descriptive. Likely more script oriented.
+0x00000020  SPELL_ATTR5_LIMIT_N  ;; bit 6: Can only have one buff on the target at a time. Prevents multiple unique applications.
+0x00000040  SPELL_ATTR5_IGNORE_AREA_EFFECT_PVP_CHECK  ;; bit 7: Possible world PvP flag for objectives such as Spirit Towers?
+0x00000080  SPELL_ATTR5_NOT_ON_PLAYER  ;; bit 8: Opposite of SPELL_ATTR3_ONLY_ON_PLAYER.
+0x00000100  SPELL_ATTR5_NOT_ON_PLAYER_CONTROLLED_NPC  ;; bit 9: Self descriptive. (Ex. Pets, Minions).
+0x00000200  SPELL_ATTR5_EXTRA_INITIAL_PERIOD  ;; bit 10: Source: "Immediately do periodic tick on apply."
+0x00000400  SPELL_ATTR5_DO_NOT_DISPLAY_DURATION  ;; bit 11: Does not send duration to the client.
+0x00000800  SPELL_ATTR5_IMPLIED_TARGETING  ;; bit 12: Uses target of target if original target not valid (Ex. Intervene).
+0x00001000  SPELL_ATTR5_MELEE_CHAIN_TARGETING  ;; bit 13: Possible cleave type flag?
+0x00002000  SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC  ;; bit 14: Causes haste to affect the duration of periodic spells.
+0x00004000  SPELL_ATTR5_NOT_AVAILABLE_WHILE_CHARMED  ;; bit 15: Self descriptive.
+0x00008000  SPELL_ATTR5_TREAT_AS_AREA_EFFECT  ;; bit 16: Similar to SPELL_ATTR3_TREAT_AS_PERIODIC.
+0x00010000  SPELL_ATTR5_AURA_AFFECTS_NOT_JUST_REQ_EQUIPPED_ITEM  ;; bit 17: Self descriptive.
+0x00020000  SPELL_ATTR5_ALLOW_WHILE_FLEEING  ;; bit 18: Self descriptive.
+0x00040000  SPELL_ATTR5_ALLOW_WHILE_CONFUSED  ;; bit 19: Self descriptive.
+0x00080000  SPELL_ATTR5_AI_DOESNT_FACE_TARGET  ;; bit 20: Client does not automatically turn caster's model to face target. Opposite of SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ON
+0x00100000  SPELL_ATTR5_DO_NOT_ATTEMPT_A_PET_RESUMMON_WHEN_DISMOUNTING  ;; bit 21: Source: "No generic handling possible, used by scripted dismount spells."
+0x00200000  SPELL_ATTR5_IGNORE_TARGET_REQUIREMENTS  ;; bit 22: \*NYI\* Self descriptive.
+0x00400000  SPELL_ATTR5_NOT_ON_TRIVIAL  ;; bit 23: \*NYI\* Self descriptive. Most likely in relation to low level(grey) enemies.
+0x00800000  SPELL_ATTR5_NO_PARTIAL_RESISTS  ;; bit 24: Spell will either be fully resisted or deal the full amount of damage.
+0x01000000  SPELL_ATTR5_IGNORE_CASTER_REQUIREMENTS  ;; bit 25: Self descriptive.
+0x02000000  SPELL_ATTR5_ALWAYS_LINE_OF_SIGHT  ;; bit 26: Constant line of sight required for spell duration.
+0x04000000  SPELL_ATTR5_ALWAYS_AOE_LINE_OF_SIGHT  ;; bit 27: Same as SPELL_ATTR5_ALWAYS_LINE_OF_SIGHT but with area of effect spells instead.
+0x08000000  SPELL_ATTR5_NO_CASTER_AURA_ICON  ;; bit 28: Auras with this attribute are not visible on units that are the spell caster.
+0x10000000  SPELL_ATTR5_NO_TARGET_AURA_ICON  ;; bit 29: Auras with this attribute are not visible on units that are the spell target.
+0x20000000  SPELL_ATTR5_AURA_UNIQUE_PER_CASTER  ;; bit 30: Similar to SPELL_ATTR3_STACK_FOR_DIFF_CASTERS. Could be used for debuff grouping.
+0x40000000  SPELL_ATTR5_ALWAYS_SHOW_GROUND_TEXTURE  ;; bit 31: Likely refers to the Projected Texture setting and will cause this spell to ignore its value.
+0x80000000  SPELL_ATTR5_ADD_MELEE_HIT_RATING  ;; bit 32: Self descriptive.
+
+;; === SpellAttr6 (32 flags) ===
+0x00000001  SPELL_ATTR6_NO_COOLDOWN_ON_TOOLTIP  ;; bit 1: Client does not display cooldown in the tooltip for these spells.
+0x00000002  SPELL_ATTR6_DO_NOT_RESET_COOLDOWN_IN_ARENA  ;; bit 2: Self descriptive.
+0x00000004  SPELL_ATTR6_NOT_AN_ATTACK  ;; bit 3: \*NYI\* Self descriptive.
+0x00000008  SPELL_ATTR6_CAN_ASSIST_IMMUNE_PC  ;; bit 4: Skips checking UNIT_FLAG_IMMUNE_TO_PC and UNIT_FLAG_IMMUNE_TO_NPC flags on assist.
+0x00000010  SPELL_ATTR6_IGNORE_FOR_MOD_TIME_RATE  ;; bit 5: Source: Time rate not implemented. Ambiguous Description and header.
+0x00000020  SPELL_ATTR6_DO_NOT_CONSUME_RESOURCES  ;; bit 6: Source: "Requires power/reagents to cast but doesn't consume them."
+0x00000040  SPELL_ATTR6_FLOATING_COMBAT_TEXT_ON_CAST  ;; bit 7: Used on many spells with a visual UI proc.
+0x00000080  SPELL_ATTR6_AURA_IS_WEAPON_PROC  ;; bit 8: Self descriptive.
+0x00000100  SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS  ;; bit 9: Source: "Implicit targeting (chaining and area targeting) will not impact crowd controlled targets."
+0x00000200  SPELL_ATTR6_ALLOW_ON_CHARMED_TARGETS  ;; bit 10: Self descriptive.
+0x00000400  SPELL_ATTR6_NO_AURA_LOG  ;; bit 11: Self descriptive.
+0x00000800  SPELL_ATTR6_NOT_IN_RAID_INSTANCES  ;; bit 12: Self descriptive.
+0x00001000  SPELL_ATTR6_ALLOW_WHILE_RIDING_VEHICLE  ;; bit 13: Self descriptive.
+0x00002000  SPELL_ATTR6_IGNORE_PHASE_SHIFT  ;; bit 14: Can ignore visibility requirement for targets of the spell.
+0x00004000  SPELL_ATTR6_AI_PRIMARY_RANGED_ATTACK  ;; bit 15: \*NYI\* Related to Shoot? Needs description.
+0x00008000  SPELL_ATTR6_NO_PUSHBACK  ;; bit 16: Not to be confused with knockback. Flag is confirmed for two spells 54368, 67892 on wowhead.
+0x00010000  SPELL_ATTR6_NO_JUMP_PATHING  ;; bit 17: \*NYI\*, currently jumps don't path at all.
+0x00020000  SPELL_ATTR6_ALLOW_EQUIP_WHILE_CASTING  ;; bit 18: Self descriptive. Possible extension beyond relation to gear.
+0x00040000  SPELL_ATTR6_ORIGINATE_FROM_CONTROLLER  ;; bit 19: Source: "Client will prevent casting if not possessed, charmer will be caster for all intents and purposes."
+0x00080000  SPELL_ATTR6_DELAY_COMBAT_TIMER_DURING_CAST  ;; bit 20: Found on spells 47488 and 50782 in 3.3.5a.
+0x00100000  SPELL_ATTR6_AURA_ICON_ONLY_FOR_CASTER_LIMIT_10  ;; bit 21: Source: "Aura icon only for caster, (Limit 10) and (Client only)."
+0x00200000  SPELL_ATTR6_SHOW_MECHANIC_AS_COMBAT_TEXT  ;; bit 22: Ex. "Bleeding" appearing where damage numbers would normally be at.
+0x00400000  SPELL_ATTR6_ABSORB_CANNOT_BE_IGNORE  ;; bit 23: Self descriptive but vague title. Found on spells like Ardent Defender.
+0x00800000  SPELL_ATTR6_TAPS_IMMEDIATELY  ;; bit 24: This could reference a variety of events from creatures to game objects. Ex. Drain Soul.
+0x01000000  SPELL_ATTR6_CAN_TARGET_UNTARGETABLE  ;; bit 25: These spells bypass creatures with UNIT_FLAG_NOT_SELECTABLE and possibly CREATURE_FLAG_EXTRA_TRIGGER.
+0x02000000  SPELL_ATTR6_DOESNT_RESET_SWING_TIMER_IF_INSTANT  ;; bit 26: This could function similar to spells that have no global cooldown.
+0x04000000  SPELL_ATTR6_VEHICLE_IMMUNITY_CATEGORY  ;; bit 27: \*NYI\*, immunity to some buffs for some vehicles.
+0x08000000  SPELL_ATTR6_IGNORE_HEALING_MODIFIERS  ;; bit 28: Source: "This prevents certain healing modifiers from applying - see implementation for about details." (No source ref p
+0x10000000  SPELL_ATTR6_DO_NOT_AUTO_SELECT_TARGET_WITH_INITIATES_COMBAT  ;; bit 29: Found on Death Grip. String title wording is slightly confusing. (Client only).
+0x20000000  SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS  ;; bit 30: Source: "This prevents certain damage modifiers from applying - see implementation for details." (No source ref provided
+0x40000000  SPELL_ATTR6_DISABLE_TIED_EFFECT_POINTS  ;; bit 31: The value used is likely from the [SpellEffect](https://wowdev.wiki/DB/SpellEffect "DB/SpellEffect") column EffectBasePo
+0x80000000  SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS  ;; bit 32: Spells with this attribute skip applying modifiers to category cooldowns found in [Spell Category](https://wowdev.wiki/S
+
+;; === SpellAttr7 (32 flags) ===
+0x00000001  SPELL_ATTR7_ALLOW_SPELL_REFLECTION  ;; bit 1: Allow spell to be reflected. Will likely interfere if used with SPELL_ATTR1_NO_REFLECTION.
+0x00000002  SPELL_ATTR7_NO_TARGET_DURATION_MOD  ;; bit 2: Duration is not affected by duration modifiers.
+0x00000004  SPELL_ATTR7_DISABLE_AURA_WHILE_DEAD  ;; bit 3: Source: "Reactivate at resurrect (client only)". Ex. Paladin auras.
+0x00000008  SPELL_ATTR7_DEBUG_SPELL  ;; bit 4: Cannot cast if caster doesn't have UNIT_FLAG2_ALLOW_CHEAT_SPELLS enabled. Sends a unique error message to the client if 
+0x00000010  SPELL_ATTR7_TREAT_AS_RAID_BUFF  ;; bit 5: Spell assumes certain properties that would classify it as a "raid buff". (This is only a guess.)
+0x00000020  SPELL_ATTR7_CAN_BE_MULTI_CAST  ;; bit 6: Involvement with spells that summon totems; otherwise vague.
+0x00000040  SPELL_ATTR7_DONT_CAUSE_SPELL_PUSHBACK  ;; bit 7: Source: "Damage dealt by this does not cause spell pushback."
+0x00000080  SPELL_ATTR7_PREPARE_FOR_VEHICLE_CONTROL_END  ;; bit 8: Found on 66218 (Launch) spell. Attribute is most likely server side only.
+0x00000100  SPELL_ATTR7_HORDE_SPECIFIC_SPELL  ;; bit 9: Teleports, mounts, and other spells. This should cause these spells to not function or give an error message if Alliance
+0x00000200  SPELL_ATTR7_ALLIANCE_SPECIFIC_SPELL  ;; bit 10: Teleports, mounts, and other spells. This should cause these spells to not function or give an error message if Horde pl
+0x00000400  SPELL_ATTR7_DISPEL_REMOVES_CHARGES  ;; bit 11: Dispel and Spellsteal individual charges instead of whole aura. Ex. More than one stack of lifebloom on a target only st
+0x00000800  SPELL_ATTR7_CAN_CAUSE_INTERRUPT  ;; bit 12: Will only allow this spell to interrupt non-player casting.
+0x00001000  SPELL_ATTR7_CAN_CAUSE_SILENCE  ;; bit 13: Will only Silence NPCs/creatures. (Not confirmed.)
+0x00002000  SPELL_ATTR7_NO_UI_NOT_INTERRUPTIBLE  ;; bit 14: Can always be interrupted, even if caster is immune.
+0x00004000  SPELL_ATTR7_RECAST_ON_RESUMMON  ;; bit 15: Deprecated attribute(unknown when), there is no SPELL_GO sent anymore on pet resummon. Can be found on 52150 Raise Dead.
+0x00008000  SPELL_ATTR7_RESET_SWING_TIMER_AT_SPELL_START  ;; bit 16: Self descriptive.
+0x00010000  SPELL_ATTR7_ONLY_IN_SPELLBOOK_UNTIL_LEARNED  ;; bit 17: Source: "After learning these spells become hidden in spellbook (but are visible when not learned for low level characte
+0x00020000  SPELL_ATTR7_DO_NOT_LOG_PVP_KILL  ;; bit 18: Unknown. (Note: Only used by 1 spell that is already filtered out in PvP credit because it is self targeting.)
+0x00040000  SPELL_ATTR7_ATTACK_ON_CHARGE_TO_UNIT  ;; bit 19: Damage will trigger during animation driven charge and is (possibly) not hindered by it either.
+0x00080000  SPELL_ATTR7_REPORT_SPELL_FAILURE_TO_UNIT_TARGET  ;; bit 20: Combat or other server coded failure message may appear in the combat log for these spells when cast by NPCs. (Unsure if
+0x00100000  SPELL_ATTR7_NO_CLIENT_FAIL_WHILE_STUNNED_FLEEING_CONFUSED  ;; bit 21: Client will skip or bypass checking for stunned, fleeing, and confused states.
+0x00200000  SPELL_ATTR7_RETAIN_COOLDOWN_THROUGH_LOAD  ;; bit 22: Unable to extrapolate any meaningful information from this string.
+0x00400000  SPELL_ATTR7_IGNORES_COLD_WEATHER_FLYING_REQUIREMENT  ;; bit 23: Spell will bypass the flying requirement for Northrend.
+0x00800000  SPELL_ATTR7_NO_ATTACK_DODGE  ;; bit 24: Self descriptive.
+0x01000000  SPELL_ATTR7_NO_ATTACK_PARRY  ;; bit 25: Self descriptive.
+0x02000000  SPELL_ATTR7_NO_ATTACK_MISS  ;; bit 26: Self descriptive.
+0x04000000  SPELL_ATTR7_TREAT_AS_NPC_AOE  ;; bit 27: This may function like a combination of SPELL_ATTR5_TREAT_AS_AREA_EFFECT and other various properties not assigned to/fu
+0x08000000  SPELL_ATTR7_BYPASS_NO_RESURRECT_AURA  ;; bit 28: Possibly created for mechanics such as the end of the lich king encounter. (This is only speculation.)
+0x10000000  SPELL_ATTR7_DO_NOT_COUNT_FOR_PVP_SCOREBOARD  ;; bit 29: Used for certain spells that may inflate or create excessive gaps in the Battleground/Arena statistic sheet.
+0x20000000  SPELL_ATTR7_REFLECTION_ONLY_DEFENDS  ;; bit 30: This possibly allows for a spell to be reflected but not damage the target and instead act more as a deflect. Found on 6
+0x40000000  SPELL_ATTR7_CAN_PROC_FROM_SUPPRESSED_TARGET_PROCS  ;; bit 31: Has a synergistic effect with SPELL_ATTR3_SUPPRESS_TARGET_PROCS as far as attributes go.
+0x80000000  SPELL_ATTR7_ALWAYS_CAST_LOG  ;; bit 32: Source: "Client indicator (client only)."
+
+;; === SpellAttr8 (32 flags) ===
+0x00000001  SPELL_ATTR8_NO_ATTACK_BLOCK  ;; bit 1: Falls in line with SPELL_ATTR7_NO_ATTACK_DODGE, SPELL_ATTR7_NO_ATTACK_PARRY, and SPELL_ATTR7_NO_ATTACK_MISS for individu
+0x00000002  SPELL_ATTR8_IGNORE_DYNAMIC_OBJECT_CASTER  ;; bit 2: Ignores target types of dynamic object. See [Implicit Targets](https://wowdev.wiki/Spell.dbc/EffectImplicitTarget "Spell
+0x00000004  SPELL_ATTR8_REMOVE_OUTSIDE_DUNGEONS_AND_RAIDS  ;; bit 3: Spell (likely an aura effect) is removed when exiting a dungeon or raid it was applied in.
+0x00000008  SPELL_ATTR8_ONLY_TARGET_IF_SAME_CREATOR  ;; bit 4: Vague. Could be summon related.
+0x00000010  SPELL_ATTR8_CAN_HIT_AOE_UNTARGETABLE  ;; bit 5: This implies SPELL_ATTR6_CAN_TARGET_UNTARGETABLE in conjunction with [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectA
+0x00000020  SPELL_ATTR8_ALLOW_WHILE_CHARMED  ;; bit 6: Opposite of SPELL_ATTR5_NOT_AVAILABLE_WHILE_CHARMED. This likely has quest implementations but can be thought of as usin
+0x00000040  SPELL_ATTR8_AURA_REQUIRED_BY_CLIENT  ;; bit 7: All auras are sent to the client with this attribute. These can be found at [Aura Flags](https://wowdev.wiki/Aura_Flags 
+0x00000080  SPELL_ATTR8_IGNORE_SANCTUARY  ;; bit 8: These spells will disregard the effects a sanctuary(Ex. Dalaran) will afford.
+0x00000100  SPELL_ATTR8_USE_TARGETS_LEVEL_FOR_SPELL_SCALING  ;; bit 9: Reduces a spell accordingly when used on a lower level player. Found with "All party and raid" in some descriptions on 5
+0x00000200  SPELL_ATTR8_PERIODIC_CAN_CRIT  ;; bit 10: Allows DoTs and HoTs to be critical. This is not always needed for the effect to function.
+0x00000400  SPELL_ATTR8_MIRROR_CREATURE_NAME  ;; bit 11: Transform auras also override name and is handled clientside. Found in [Effect Aura](https://wowdev.wiki/Spell.dbc/Effec
+0x00000800  SPELL_ATTR8_ONLY_PLAYERS_CAN_CAST_THIS_SPELL  ;; bit 12: Like SPELL_ATTR3_ONLY_ON_PLAYER except on the casting side instead.
+0x00001000  SPELL_ATTR8_AURA_POINTS_ON_CLIENT  ;; bit 13: Aura must have flag AFLAG_ANY_EFFECT_AMOUNT_SENT to send amount(4.x only?). The list of AFLAGS can be found at [Aura Fla
+0x00002000  SPELL_ATTR8_NOT_IN_SPELLBOOK_UNTIL_LEARNED  ;; bit 14: Hides auto learned spells from the spellbook before learning them. Handled only on client side.
+0x00004000  SPELL_ATTR8_TARGET_PROCS_ON_CASTER  ;; bit 15: The target (receives) procs that occur on the caster (source) instead of aura target (destination). (Mildly convoluted e
+0x00008000  SPELL_ATTR8_REQUIRES_LOCATION_TO_BE_ON_LIQUID_SURFACE  ;; bit 16: Self descriptive. Ex. Water mounts such as the Strider.
+0x00010000  SPELL_ATTR8_ONLY_TARGET_OWN_SUMMONS  ;; bit 17: Self descriptive. These spells can only target creatures, objects, etc that only you have summoned.
+0x00020000  SPELL_ATTR8_HASTE_AFFECTS_DURATION  ;; bit 18: Reduces this spells duration relative to your current haste percent. The new value (DoTs, HoTs) is adjusted accordingly 
+0x00040000  SPELL_ATTR8_IGNORE_SPELLCAST_OVERRIDE_COST  ;; bit 19: A spell that has had its resource cost overridden will be ignored with this attribute for better and possibly worse.
+0x00080000  SPELL_ATTR8_ALLOW_TARGETS_HIDDEN_BY_SPAWN_TRACKING  ;; bit 20: Source: No spawn tracking implementation. Spawn Tracking has little information, an example can be found here [Wowhead D
+0x00100000  SPELL_ATTR8_REQUIRES_EQUIPPED_INV_TYPES  ;; bit 21: Self descriptive.
+0x00200000  SPELL_ATTR8_NO_SUMMON_DEST_FROM_CLIENT_TARGETING_PATHING_REQUIREMENT  ;; bit 22: A valid path to a [spell destination](https://wowdev.wiki/Spell.dbc/EffectImplicitTarget "Spell.dbc/EffectImplicitTarget
+0x00400000  SPELL_ATTR8_MELEE_HASTE_AFFECTS_PERIODIC  ;; bit 23: Very similar to [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName "Spell.dbc/EffectApplyAuraName") 416, ex
+0x00800000  SPELL_ATTR8_ENFORCE_IN_COMBAT_RESSURECTION_LIMIT  ;; bit 24: Used to limit the number of battle resurrections in boss encounters.
+0x01000000  SPELL_ATTR8_HEAL_PREDICTION  ;; bit 25: Affects the Heal Prediction. Option must be turned on in Raid Profile from the settings screen to notice.
+0x02000000  SPELL_ATTR8_NO_LEVEL_UP_TOAST  ;; bit 26: Self descriptive.
+0x04000000  SPELL_ATTR8_SKIP_IS_KNOWN_CHECK  ;; bit 27: (Far too vague.) UI related.
+0x08000000  SPELL_ATTR8_AI_FACE_TARGET  ;; bit 28: Opposite of SPELL_ATTR5_AI_DOESNT_FACE_TARGET. See SPELL_ATTR4_USE_FACING_FROM_SPELL for more info.
+0x10000000  SPELL_ATTR8_NOT_IN_BATTLEGROUND  ;; bit 29: Opposite of SPELL_ATTR3_ONLY_BATTLEGROUNDS. Spells and items that are not allowed to be cast or used in Battlegrounds. E
+0x20000000  SPELL_ATTR8_MASTERY_AFFECTS_POINTS  ;; bit 30: Self descriptive. Unclear if the reference is the [Combat Rating](https://wowdev.wiki/CombatRatings "CombatRatings") or 
+0x40000000  SPELL_ATTR8_DISPLAY_LARGE_AURA_ICON_ON_UNIT_FRAMES_BOSS_AURA  ;; bit 31: This is usually a dedicated screen space for an important buff or debuff during an encounter around a portrait.
+0x80000000  SPELL_ATTR8_CAN_ATTACK_IMMUNE_PC  ;; bit 32: This spell will skip/bypass checking a creature with the Unit_Flag(256)UNIT_FLAG_IMMUNE_TO_PC when executing IsValidAtta
+
+;; === SpellAttr9 (32 flags) ===
+0x00000001  SPELL_ATTR9_FORCE_DEST_LOCATION  ;; bit 1: Ignores collision with terrain (unknown if this ignores the z-axis and allows a destination under the zone floor).
+0x00000002  SPELL_ATTR9_MOD_INVIS_INCLUDES_PARTY  ;; bit 2: Causes invisibility auras to ignore the detection of party members who are also invisible.
+0x00000004  SPELL_ATTR9_ONLY_WHEN_ILLEGALLY_MOUNTED  ;; bit 3: No definition for what is considered "Illegally Mounted".
+0x00000008  SPELL_ATTR9_DO_NOT_LOG_AURA_REFRESH  ;; bit 4: The combat log will not show when this spell has its duration refreshed.
+0x00000010  SPELL_ATTR9_MISSILE_SPEED_IS_DELAY_IN_SEC  ;; bit 5: Related to the travel time animation between when a spell has been cast and hits the target. See [SpellMissile](https://
+0x00000020  SPELL_ATTR9_IGNORE_TOTEM_REQUIREMENTS_FOR_CASTING  ;; bit 6: Self descriptive.
+0x00000040  SPELL_ATTR9_ITEM_CAST_GRANTS_SKILL_GAIN  ;; bit 7: Self descriptive.
+0x00000080  SPELL_ATTR9_DO_NOT_ADD_TO_UNLEARN_LIST  ;; bit 8: Source: "The Unlearn List is not maintained by SMSG_SEND_UNLEARN_SPELLS and always remains empty."
+0x00000100  SPELL_ATTR9_COOLDOWN_IGNORES_RANGED_WEAPON  ;; bit 9: Self descriptive. Possible bypass for ranged auto-attack GCD or the need for a ranged weapon as a whole.
+0x00000200  SPELL_ATTR9_NOT_IN_ARENA  ;; bit 10: Similar to SPELL_ATTR8_NOT_IN_BATTLEGROUND but in arena instead.
+0x00000400  SPELL_ATTR9_TARGET_MUST_BE_GROUNDED  ;; bit 11: Spell target must be on the map terrain. The target should be in the "ground" InhabitType but not necessarily restricted
+0x00000800  SPELL_ATTR9_ALLOW_WHILE_BANISHED_AURA_STATE  ;; bit 12: Source: "On clients with version 10.2.7 and forward, this may function the same as SPELL_ATTR5_ALLOW_WHILE_STUNNED."
+0x00001000  SPELL_ATTR9_FACE_UNIT_TARGET_UPON_COMPLETION_OF_JUMP_CHARGE  ;; bit 13: Face the target of a "Jump Charge" (clarity needed). Possibly similar to SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ONLY?
+0x00002000  SPELL_ATTR9_HASTE_AFFECTS_MELEE_ABILITY_CASTTIME  ;; bit 14: Haste will benefit melee-based spells with a cast time. (GCD may also benefit?)
+0x00004000  SPELL_ATTR9_IGNORE_DEFAULT_RATED_BATTLEGROUND_RESTRICTIONS  ;; bit 15: Should be similar to SPELL_ATTR4_IGNORE_DEFAULT_ARENA_RESTRICTIONS and "Makes spell usable despite CD > 10min" is expect
+0x00008000  SPELL_ATTR9_DO_NOT_DISPLAY_POWER_COST  ;; bit 16: Does not display power cost. (Client Only).
+0x00010000  SPELL_ATTR9_NEXT_MODAL_SPELL_REQUIRES_SAME_UNIT_TARGET  ;; bit 17: Source: "Prevents automatically casting the spell from [SpellClassOptions](https://wowdev.wiki/SpellClassOptions.dbc "Sp
+0x00020000  SPELL_ATTR9_AUTOCAST_OFF_BY_DEFAULT  ;; bit 18: Self descriptive.
+0x00040000  SPELL_ATTR9_IGNORE_SCHOOL_LOCKOUT  ;; bit 19: Bypasses a [School](https://wowdev.wiki/Spell.dbc/SchoolMask "Spell.dbc/SchoolMask") lockout (Ex. Shadow was interrupted
+0x00080000  SPELL_ATTR9_ALLOW_DARK_SIMULACRUM  ;; bit 20: Allows the Death Knight spell Dark Simulacrum to properly copy the spell and allow it to be used.
+0x00100000  SPELL_ATTR9_ALLOW_CAST_WHILE_CHANNELING  ;; bit 21: Very similar to SPELL_ATTR5_ALLOW_ACTIONS_DURING_CHANNEL but instead allows the cast of certain spells.
+0x00200000  SPELL_ATTR9_SUPPRESS_VISUAL_KIT_ERRORS  ;; bit 22: This will suppress all or most errors related to [SpellVisualKit](https://wowdev.wiki/DB/SpellVisualKit "DB/SpellVisualK
+0x00400000  SPELL_ATTR9_SPELLCAST_OVERRIDE_IN_SPELLBOOK  ;; bit 23: Vague String. (Client Only).
+0x00800000  SPELL_ATTR9_JUMPCHARGE_NO_FACING_CONTROL  ;; bit 24: Another string related to "Jump Charge". This one seems the opposite of SPELL_ATTR9_FACE_UNIT_TARGET_UPON_COMPLETION_OF_
+0x01000000  SPELL_ATTR9_IGNORE_CASTER_HEALING_MODIFIERS  ;; bit 25: The companion attribute to SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS. Prevents certain healing modifiers from applying.
+0x02000000  SPELL_ATTR9_DONT_CONSUME_CHARGE_IF_ITEM_DELETED  ;; bit 26: Source: "Possibly an attribute created to prevent double item deletion?" This might used as a failsafe.
+0x04000000  SPELL_ATTR9_ITEM_PASSIVE_ON_CLIENT  ;; bit 27: Vague String. (Client Only).
+0x08000000  SPELL_ATTR9_FORCE_CORPSE_TARGET  ;; bit 28: Causes the spell to continue its effects on the target even after one of them causes it to die.
+0x10000000  SPELL_ATTR9_CANNOT_KILL_TARGET  ;; bit 29: This can take the place of UNIT_FLAG_IMMUNE, which only prevents damage. This may also reduce scripting needed for a sol
+0x20000000  SPELL_ATTR9_LOG_PASSIVE  ;; bit 30: Source: "Allows passive auras to trigger the aura applied, refreshed, and removed combat log events."
+0x40000000  SPELL_ATTR9_NO_MOVEMENT_RADIUS_BONUS  ;; bit 31: A larger radius for the spell (if applicable) is granted if the caster is not moving?
+0x80000000  SPELL_ATTR9_CHANNEL_PERSISTS_ON_PET_FOLLOW  ;; bit 32: The channel will not be interrupted by a summoned creature that assumes the pet role.
+
+;; === SpellAttr10 (32 flags) ===
+0x00000001  SPELL_ATTR10_BYPASS_VISIBILITY_CHECK  ;; bit 1: Probably similar to SPELL_ATTR2_IGNORE_LINE_OF_SIGHT. (Ex. Frost Fever.)
+0x00000002  SPELL_ATTR10_IGNORE_POSITIVE_DAMAGE_TAKEN_MODIFIERS  ;; bit 2: Self descriptive.
+0x00000004  SPELL_ATTR10_USES_RANGED_SLOT_COSMETIC_ONLY  ;; bit 3: Will generate a ranged weapon on the caster of this spell if one is not equipped to complete the animation.
+0x00000008  SPELL_ATTR10_DO_NOT_LOG_FULL_OVERHEAL  ;; bit 4: Combat log will ignore any healing past maximum health.
+0x00000010  SPELL_ATTR10_NPC_KNOCKBACK_IGNORE_DOORS  ;; bit 5: Knockout mechanic or other forced movement effects. Alternate Header - WATER_SPOUT.
+0x00000020  SPELL_ATTR10_FORCE_NON_BINARY_RESISTANCE  ;; bit 6: Makes a spell ignore full resistance? Found on Immolate(348) in 5.4.8.
+0x00000040  SPELL_ATTR10_NO_SUMMON_LOG  ;; bit 7: Removes the entry and thus any object created by a spell from the combat log so as not to be clickable.
+0x00000080  SPELL_ATTR10_IGNORE_INSTANCE_LOCK_AND_FARM_LIMIT_ON_TELEPORTATION  ;; bit 8: Ignore instance lock and re-entry limits on teleportation. Alternate Header - TELEPORT_PLAYER.
+0x00000100  SPELL_ATTR10_DONT_CANCEL_WHEN_ALL_EFFECTS_ARE_DISABLED  ;; bit 9: Prevents pre-mature cancellation of spell if effects are nullified? (Found on Cone on Cold(120) in 5.4.8.
+0x00000200  SPELL_ATTR10_CHARGE_JUMP_CHARGE_USE_ABSOLUTE_SPEED  ;; bit 10: Involved with spells that move an entity at a faster than normalized rate of speed such as Death Grip.
+0x00000400  SPELL_ATTR10_PROC_COOLDOWN_ON_A_PER_TARGET_BASIS  ;; bit 11: Self descriptive.
+0x00000800  SPELL_ATTR10_HERB_GATHERING_MINING  ;; bit 12: Lock chest at precast. Likely means to tap the node once clicked.
+0x00001000  SPELL_ATTR10_USE_SPELL_BASE_LEVEL_FOR_SCALING  ;; bit 13: This particular attribute was either swapped or changed at some point with SPELL_ATTR2_RETAIN_ITEM_CAST. Otherwise, Self
+0x00002000  SPELL_ATTR10_RESET_COOLDOWN_ON_ENCOUNTER_END  ;; bit 14: Reset cooldown upon ending an encounter. This can be used to remove longer cooldowns after combat.
+0x00004000  SPELL_ATTR10_ROLLING_PERIODIC  ;; bit 15: Add remaining periodic damage to new aura when refreshed. Ex. Ignite Mastery. May also apply to HoTs.
+0x00008000  SPELL_ATTR10_SPELLBOOK_HIDDEN_UNTIL_OVERRIDDEN  ;; bit 16: Spell is not in spellbook until another takes it place. (Ex. Symbiosis replacing the default null spell with the class s
+0x00010000  SPELL_ATTR10_DEFEND_AGAINST_FRIENDLY_CAST  ;; bit 17: Unknown. Found on Mage spell Living Bomb(44461) in 5.4.8.
+0x00020000  SPELL_ATTR10_CAN_DODGE_PARRY_WHILE_CASTING  ;; bit 18: Allows defensive abilities to continue. Ex. Blooddrinker(DK, Legion).
+0x00040000  SPELL_ATTR10_STARTS_TICKING_AT_AURA_APPLICATION  ;; bit 19: Spell ticks when aura is applied instead of waiting for a specified time. Possibly same or very similar to SPELL_ATTR5_E
+0x00080000  SPELL_ATTR10_UNK19  ;; bit 20: Unknown. Couldn't match any but header may be implemented elsewhere. Only 4 (3 valid) spells in 5.4.8.
+0x00100000  SPELL_ATTR10_MULTI_CLICK_GROUND_TARGETING  ;; bit 21: Involved in certain objects that create spells that must be placed in the world.
+0x00200000  SPELL_ATTR10_AOE_CAN_HIT_SUMMONED_INVIS  ;; bit 22: Allows the spell to interact with certain invisible (possibly trigger or quest entities).
+0x00400000  SPELL_ATTR10_UNK22  ;; bit 23: All of these spells are almost exclusive to bonus loot and active/loot specialization rolls. Header seems like CAN_HIT_A
+0x00800000  SPELL_ATTR10_UNK23  ;; bit 24: Unknown. Unused in 5.4.8.
+0x01000000  SPELL_ATTR10_UPDATE_PASSIVES_ON_APPLY_REMOVE  ;; bit 25: It is likely this attribute will update relevant spells in relation to this spell. Ex. Titan's Grip.
+0x02000000  SPELL_ATTR10_NORMAL_MELEE_ATTACK  ;; bit 26: Treats the spell as if it were a normal (white) melee hit.
+0x04000000  SPELL_ATTR10_IGNORE_FEIGN_DEATH  ;; bit 27: Should produce similar effects to that of having the 65,536(CREATURE_FLAG_EXTRA_IGNORE_FEIGN_DEATH) extra flag set in cr
+0x08000000  SPELL_ATTR10_CASTER_DEATH_CANCELS_PERSISTENT_AREA_AURAS  ;; bit 28: Auras with this flag will disappear immediately when the caster dies. Similar to [Spell Effect](https://wowdev.wiki/Spel
+0x10000000  SPELL_ATTR10_DO_NOT_LOG_ABSORB  ;; bit 29: This prevents spells with an absorb from being logged by the client. Ex. The Overkill absorb from Ardent Defender.
+0x20000000  SPELL_ATTR10_MOUNT_IS_NOT_ACCOUNT_WIDE  ;; bit 30: This Mount is not placed on the account level. This mount is stored per character instead. Ex. PvP Gladiator Mount.
+0x40000000  SPELL_ATTR10_PREVENT_CLIENT_CAST_CANCEL  ;; bit 31: Prevents channeled spells from being cancelled.
+0x80000000  SPELL_ATTR10_CHAIN_BY_MOST_HIT  ;; bit 32: Deals with spells that chain to multiple targets; "most" is usually your initial target.
+
+;; === SpellAttr11 (32 flags) ===
+0x00000001  SPELL_ATTR11_LOCK_CASTER_MOVEMENT_AND_FACING_WHILE_CASTING  ;; bit 1: Locks the current model animation and continually face the destination of the spell. Certain motions can result in a vis
+0x00000002  SPELL_ATTR11_DONT_CANCEL_WHEN_ALL_EFFECTS_ARE_DISABLED  ;; bit 2: Spell aura will not end prematurely if the effects become inactive. Can be found on many spells such as Cripple.
+0x00000004  SPELL_ATTR11_SCALES_WITH_ITEM_LEVEL  ;; bit 3: Self descriptive.
+0x00000008  SPELL_ATTR11_DO_NOT_LOG_ON_LEARN  ;; bit 4: This will prevent the client from logging these spells when learned.
+0x00000010  SPELL_ATTR11_HIDE_SHAPESHIFT_REQUIREMENTS  ;; bit 5: Used mainly in Monk spells to not clutter the combat log with a long error reason. (Must be used in Serpent Stance, Ox S
+0x00000020  SPELL_ATTR11_ABSORB_ENVIRONMENTAL_DAMAGE  ;; bit 6: Alternate header: ABSORB_FALLING_DAMAGE.
+0x00000040  SPELL_ATTR11_UNBREAKABLE_CHANNEL  ;; bit 7: Allows the channel of a spell to only be removed by scripted means. Ex. Spells such as a rope used to gather animals for
+0x00000080  SPELL_ATTR11_RANK_IGNORES_CASTER_LEVEL  ;; bit 8: Alternate header: Ignore Caster's spell. Source: "level Spell_C_GetSpellRank returns SpellLevels->MaxLevel \* 5 instead 
+0x00000100  SPELL_ATTR11_TRANSFER_MOUNT_SPELL  ;; bit 9: Found on Zen Flight in 5.4.8. This probably carries over your ground/flight speed and other mount related properties.
+0x00000200  SPELL_ATTR11_IGNORE_SPELLCAST_OVERRIDE_SHAPESHIFT_REQUIREMENTS  ;; bit 10: Ex. Allows a spell that Dark Simulacrum copies to be used by the Death Knight even if it required a shapeshift.
+0x00000400  SPELL_ATTR11_NEWEST_EXCLUSIVE_COMPLETE  ;; bit 11: Unknown. Can be found on Stealth(1784) Rogue spell and other uncategorized stealth-like spells.
+0x00000800  SPELL_ATTR11_NOT_USABLE_IN_INSTANCES  ;; bit 12: Self descriptive.
+0x00001000  SPELL_ATTR11_NOT_ON_PLAYER_CONTROLLED_NPC  ;; bit 13: Self descriptive. Found on many passive buffs that affect grouped allies such as Unholy Aura, Moonkin Aura, etc.
+0x00002000  SPELL_ATTR11_IGNORE_PVP_POWER  ;; bit 14: Ignore PvP Power. Causes the spell to ignore any additional damage or healing granted by PvP Power.
+0x00004000  SPELL_ATTR11_UNK14  ;; bit 15: Unknown. No information.
+0x00008000  SPELL_ATTR11_UNK15  ;; bit 16: Unknown. No information.
+0x00010000  SPELL_ATTR11_NOT_USABLE_IN_CHALLENGE_MODE  ;; bit 17: Self descriptive. Challenge Mode in MoP was the precursor to Mythic+. Very commonly paired with SPELL_ATTR12_UNK17.
+0x00020000  SPELL_ATTR11_UNK17  ;; bit 18: Unknown. No information.
+0x00040000  SPELL_ATTR11_UNK18  ;; bit 19: Unknown. No information.
+0x00080000  SPELL_ATTR11_IGNORE_TARGET_ABSORB_MODIFIERS  ;; bit 20: Assuming this applies to both positive and negative. Ex. Illuminated Healing (Holy Paladin Mastery).
+0x00100000  SPELL_ATTR11_UNK20  ;; bit 21: Unknown. No information.
+0x00200000  SPELL_ATTR11_ALLOW_HARMFUL_ON_FRIENDLY  ;; bit 22: Spells have the potential to damage allies even if they weren't the intended target. (Ex. The detonation portion of a Li
+0x00400000  SPELL_ATTR11_UNK22  ;; bit 23: Unknown. No information.
+0x00800000  SPELL_ATTR11_UNK23  ;; bit 24: Unknown. No information.
+0x01000000  SPELL_ATTR11_UNK24  ;; bit 25: Unknown. No information.
+0x02000000  SPELL_ATTR11_UNK25  ;; bit 26: Unknown. No information.
+0x04000000  SPELL_ATTR11_UNK26  ;; bit 27: Unknown. No information.
+0x08000000  SPELL_ATTR11_UNK27  ;; bit 28: Unknown. No information.
+0x10000000  SPELL_ATTR11_UNK28  ;; bit 29: Unknown. No information.
+0x20000000  SPELL_ATTR11_UNK29  ;; bit 30: Unknown. No information.
+0x40000000  SPELL_ATTR11_UNK30  ;; bit 31: Unknown. No information.
+0x80000000  SPELL_ATTR11_UNK31  ;; bit 32: Unknown. No information.
+
+;; === SpellAttr12 (32 flags) ===
+0x00000001  SPELL_ATTR12_UNK0  ;; bit 1: Unknown. No information.
+0x00000002  SPELL_ATTR12_UNK1  ;; bit 2: Unknown. No information.
+0x00000004  SPELL_ATTR12_UNK2  ;; bit 3: Unknown. No information.
+0x00000008  SPELL_ATTR12_UNK3  ;; bit 4: Unknown. No information.
+0x00000010  SPELL_ATTR12_TREAT_SELF_CAST_AS_REFLECT  ;; bit 5: If spell is redirected or ignore restrictions to target the caster it will be considered a reflect likely ending the spe
+0x00000020  SPELL_ATTR12_UNK5  ;; bit 6: Unknown. No information.
+0x00000040  SPELL_ATTR12_UNK6  ;; bit 7: Unknown. No information.
+0x00000080  SPELL_ATTR12_UNK7  ;; bit 8: Unknown. No information.
+0x00000100  SPELL_ATTR12_UNK8  ;; bit 9: Unknown. No information.
+0x00000200  SPELL_ATTR12_IGNORE_CASTING_DISABLED  ;; bit 10: Active Passive. Ignores Aura 263 SPELL_AURA_DISABLE_CASTING_EXCEPT_ABILITIES.
+0x00000400  SPELL_ATTR12_UNK10  ;; bit 11: Unknown. No information.
+0x00000800  SPELL_ATTR12_UNK11  ;; bit 12: Unknown. No information.
+0x00001000  SPELL_ATTR12_UNK12  ;; bit 13: Unknown. No information.
+0x00002000  SPELL_ATTR12_UNK13  ;; bit 14: Unknown. No information.
+0x00004000  SPELL_ATTR12_UNK14  ;; bit 15: Unknown. No information.
+0x00008000  SPELL_ATTR12_UNK15  ;; bit 16: Unknown. No information.
+0x00010000  SPELL_ATTR12_UNK16  ;; bit 17: Unknown. No information.
+0x00020000  SPELL_ATTR12_NOT_IN_PROVING_GROUNDS  ;; bit 18: Spell is not active while inside of the proving grounds scenario introduced in MoP.
+0x00040000  SPELL_ATTR12_UNK18  ;; bit 19: Unknown. No information.
+0x00080000  SPELL_ATTR12_UNK19  ;; bit 20: Unknown. No information.
+0x00100000  SPELL_ATTR12_UNK20  ;; bit 21: This is probably "Allow during spell override".
+0x00200000  SPELL_ATTR12_UNK21  ;; bit 22: This is probably "Use float values for scaling amounts".
+0x00400000  SPELL_ATTR12_UNK22  ;; bit 23: This is probably either "Suppress toasts on item push" or "Visible only to caster (conversations only)".
+0x00800000  SPELL_ATTR12_START_COOLDOWN_ON_CAST_START  ;; bit 24: Self descriptive.
+0x01000000  SPELL_ATTR12_IS_GARRISON_BUFF  ;; bit 25: Source: "Never Learn"?
+0x02000000  SPELL_ATTR12_UNK25  ;; bit 26: Unknown. No information.
+0x04000000  SPELL_ATTR12_UNK26  ;; bit 27: Unknown. No information.
+0x08000000  SPELL_ATTR12_IS_READINESS_SPELL  ;; bit 28: Recompute Aura on Mercenary Mode.
+0x10000000  SPELL_ATTR12_USE_WEIGHTED_RANDOM_FOR_FLEX_TARGETS  ;; bit 29: Damage and possibly target(amounts) scaling for Flexible Raid size. (Header is NYI in source.)
+0x20000000  SPELL_ATTR12_UNK29  ;; bit 30: Unknown. No information.
+0x40000000  SPELL_ATTR12_UNK30  ;; bit 31: Unknown. No information.
+0x80000000  SPELL_ATTR12_ONLY_PROC_FROM_CLASS_ABILITIES  ;; bit 32: Self descriptive.
+
+;; === SpellAttr13 (32 flags) ===
+0x00000001  SPELL_ATTR13_ALLOW_CLASS_ABILITY_PROCS  ;; bit 1: Self descriptive.
+0x00000002  SPELL_ATTR13_UNK1  ;; bit 2: Unknown. No information.
+0x00000004  SPELL_ATTR13_PASSIVE_IS_UPGRADE  ;; bit 3: Displays "Upgrade" in spell tooltip instead of "Passive".
+0x00000008  SPELL_ATTR13_UNK3  ;; bit 4: Unknown. No information.
+0x00000010  SPELL_ATTR13_UNK4  ;; bit 5: Unknown. No information.
+0x00000020  SPELL_ATTR13_UNK5  ;; bit 6: Unknown. No information.
+0x00000040  SPELL_ATTR13_UNK6  ;; bit 7: Unknown. No information.
+0x00000080  SPELL_ATTR13_UNK7  ;; bit 8: Unknown. No information.
+0x00000100  SPELL_ATTR13_UNK8  ;; bit 9: Unknown. No information.
+0x00000200  SPELL_ATTR13_UNK9  ;; bit 10: Only two spells in 5.4.8 and both involve gaining currency. (161780 and 161795) as of 5.4.8.
+0x00000400  SPELL_ATTR13_UNK10  ;; bit 11: Unknown. No information.
+0x00000800  SPELL_ATTR13_UNK11  ;; bit 12: Unknown. No information.
+0x00001000  SPELL_ATTR13_UNK12  ;; bit 13: Unknown. No information.
+0x00002000  SPELL_ATTR13_UNK13  ;; bit 14: Unknown. No information.
+0x00004000  SPELL_ATTR13_UNK14  ;; bit 15: Unknown. No information.
+0x00008000  SPELL_ATTR13_DO_NOT_FAIL_IF_NO_TARGET  ;; bit 16: Self descriptive.
+0x00010000  SPELL_ATTR13_UNK16  ;; bit 17: Unknown. No information.
+0x00020000  SPELL_ATTR13_UNK17  ;; bit 18: Unknown. No information.
+0x00040000  SPELL_ATTR13_ACTIVATES_REQUIRED_SHAPESHIFT  ;; bit 19: Do Not Enforce Shapeshift Requirements.
+0x00080000  SPELL_ATTR13_UNK19  ;; bit 20: Unknown. No information.
+0x00100000  SPELL_ATTR13_PERIODIC_REFRESH_EXTENDS_DURATION  ;; bit 21: Ex. Casting Renew after a few seconds will refresh it with a longer duration.
+0x00200000  SPELL_ATTR13_UNK21  ;; bit 22: Unknown. No information.
+0x00400000  SPELL_ATTR13_UNK22  ;; bit 23: Unknown. No information.
+0x00800000  SPELL_ATTR13_UNK23  ;; bit 24: Unknown. No information.
+0x01000000  SPELL_ATTR13_UNK24  ;; bit 25: Unknown. No information.
+0x02000000  SPELL_ATTR13_UNK25  ;; bit 26: Unknown. No information.
+0x04000000  SPELL_ATTR13_ALWAYS_ALLOW_NEGATIVE_HEALING_PERCENT_MODIFIERS  ;; bit 27: Attribute to ensure negative healing percent based modifiers will work as intended.
+0x08000000  SPELL_ATTR13_DO_NOT_ALLOW_DISABLE_MOVEMENT_INTERRUPT  ;; bit 28: Effectively removes an interrupt disable for spells that was in place to a state without one.
+0x10000000  SPELL_ATTR13_UNK28  ;; bit 29: Unknown. No information.
+0x20000000  SPELL_ATTR13_UNK29  ;; bit 30: Unknown. No information.
+0x40000000  SPELL_ATTR13_UNK30  ;; bit 31: Unknown. No information.
+0x80000000  SPELL_ATTR13_UNK31  ;; bit 32: Unknown. No information.
+
+;; === SpellAttr14 (32 flags) ===
+0x00000001  SPELL_ATTR14_UNK0  ;; bit 1: Unknown. No information.
+0x00000002  SPELL_ATTR14_REAGENT_COST_CONSUMES_CHARGES  ;; bit 2: Consumes item charges for reagent costs instead of whole items.
+0x00000004  SPELL_ATTR14_UNK2  ;; bit 3: Unknown. No information.
+0x00000008  SPELL_ATTR14_HIDE_PASSIVE_FROM_TOOLTIP  ;; bit 4: Does not show "Passive" or "Upgrade" in the spell tooltip.
+0x00000010  SPELL_ATTR14_UNK4  ;; bit 5: Unknown. No information.
+0x00000020  SPELL_ATTR14_UNK5  ;; bit 6: Unknown. No information.
+0x00000040  SPELL_ATTR14_UNK6  ;; bit 7: Unknown. No information.
+0x00000080  SPELL_ATTR14_UNK7  ;; bit 8: Unknown. No information.
+0x00000100  SPELL_ATTR14_UNK8  ;; bit 9: Unknown. No information.
+0x00000200  SPELL_ATTR14_UNK9  ;; bit 10: Unknown. No information.
+0x00000400  SPELL_ATTR14_UNK10  ;; bit 11: Unknown. No information.
+0x00000800  SPELL_ATTR14_UNK11  ;; bit 12: Unknown. No information.
+0x00001000  SPELL_ATTR14_UNK12  ;; bit 13: Unknown. No information.
+0x00002000  SPELL_ATTR14_UNK13  ;; bit 14: Unknown. No information.
+0x00004000  SPELL_ATTR14_UNK14  ;; bit 15: Unknown. No information.
+0x00008000  SPELL_ATTR14_UNK15  ;; bit 16: Unknown. No information.
+0x00010000  SPELL_ATTR14_UNK16  ;; bit 17: Unknown. No information.
+0x00020000  SPELL_ATTR14_UNK17  ;; bit 18: Unknown. No information.
+0x00040000  SPELL_ATTR14_UNK18  ;; bit 19: Unknown. No information.
+0x00080000  SPELL_ATTR14_UNK19  ;; bit 20: Unknown. No information.
+0x00100000  SPELL_ATTR14_AURA_IS_PRIVATE  ;; bit 21: Aura is only visible to the player or owner?
+0x00200000  SPELL_ATTR14_UNK21  ;; bit 22: Unknown. No information.
+0x00400000  SPELL_ATTR14_UNK22  ;; bit 23: Unknown. No information.
+0x00800000  SPELL_ATTR14_UNK23  ;; bit 24: Unknown. No information.
+0x01000000  SPELL_ATTR14_UNK24  ;; bit 25: Unknown. No information.
+0x02000000  SPELL_ATTR14_UNK25  ;; bit 26: Unknown. No information.
+0x04000000  SPELL_ATTR14_UNK26  ;; bit 27: Unknown. No information.
+0x08000000  SPELL_ATTR14_UNK27  ;; bit 28: Unknown. No information.
+0x10000000  SPELL_ATTR14_UNK28  ;; bit 29: Unknown. No information.
+0x20000000  SPELL_ATTR14_UNK29  ;; bit 30: Unknown. No information.
+0x40000000  SPELL_ATTR14_UNK30  ;; bit 31: Unknown. No information.
+0x80000000  SPELL_ATTR14_UNK31  ;; bit 32: Unknown. No information.
+
+;; === SpellAttr15 (32 flags) ===
+0x00000001  SPELL_ATTR15_UNK0  ;; bit 1: Unknown. No information.
+0x00000002  SPELL_ATTR15_UNK1  ;; bit 2: Unknown. No information.
+0x00000004  SPELL_ATTR15_UNK2  ;; bit 3: Unknown. No information.
+0x00000008  SPELL_ATTR15_UNK3  ;; bit 4: Unknown. No information.
+0x00000010  SPELL_ATTR15_UNK4  ;; bit 5: Unknown. No information.
+0x00000020  SPELL_ATTR15_UNK5  ;; bit 6: Unknown. No information.
+0x00000040  SPELL_ATTR15_UNK6  ;; bit 7: Unknown. No information.
+0x00000080  SPELL_ATTR15_UNK7  ;; bit 8: Unknown. No information.
+0x00000100  SPELL_ATTR15_UNK8  ;; bit 9: Unknown. No information.
+0x00000200  SPELL_ATTR15_UNK9  ;; bit 10: Unknown. No information.
+0x00000400  SPELL_ATTR15_UNK10  ;; bit 11: Unknown. No information.
+0x00000800  SPELL_ATTR15_UNK11  ;; bit 12: Unknown. No information.
+0x00001000  SPELL_ATTR15_UNK12  ;; bit 13: Unknown. No information.
+0x00002000  SPELL_ATTR15_UNK13  ;; bit 14: Unknown. No information.
+0x00004000  SPELL_ATTR15_UNK14  ;; bit 15: Unknown. No information.
+0x00008000  SPELL_ATTR15_UNK15  ;; bit 16: Unknown. No information.
+0x00010000  SPELL_ATTR15_UNK16  ;; bit 17: Unknown. No information.
+0x00020000  SPELL_ATTR15_UNK17  ;; bit 18: Unknown. No information.
+0x00040000  SPELL_ATTR15_UNK18  ;; bit 19: Unknown. No information.
+0x00080000  SPELL_ATTR15_UNK19  ;; bit 20: Unknown. No information.
+0x00100000  SPELL_ATTR15_UNK20  ;; bit 21: Unknown. No information.
+0x00200000  SPELL_ATTR15_UNK21  ;; bit 22: Unknown. No information.
+0x00400000  SPELL_ATTR15_UNK22  ;; bit 23: Unknown. No information.
+0x00800000  SPELL_ATTR15_UNK23  ;; bit 24: Unknown. No information.
+0x01000000  SPELL_ATTR15_UNK24  ;; bit 25: Unknown. No information.
+0x02000000  SPELL_ATTR15_UNK25  ;; bit 26: Unknown. No information.
+0x04000000  SPELL_ATTR15_UNK26  ;; bit 27: Unknown. No information.
+0x08000000  SPELL_ATTR15_UNK27  ;; bit 28: Unknown. No information.
+0x10000000  SPELL_ATTR15_UNK28  ;; bit 29: Unknown. No information.
+0x20000000  SPELL_ATTR15_UNK29  ;; bit 30: Unknown. No information.
+0x40000000  SPELL_ATTR15_UNK30  ;; bit 31: Unknown. No information.
+0x80000000  SPELL_ATTR15_UNK31  ;; bit 32: Unknown. No information.
+
+;; === ProcFlags (26 flags) ===
+0x00000000  PROC_FLAG_NONE  ;; bit 0: N/A
+0x00000001  PROC_FLAG_HEARTBEAT  ;; bit 1: Occurs when a spell heartbeat checks to see if the aura breaks, used in spells with that attribute at 25/50/75% duration
+0x00000002  PROC_FLAG_KILL  ;; bit 2: Kill target (in most cases need XP/Honor reward).
+0x00000004  PROC_FLAG_DONE_MELEE_AUTO_ATTACK  ;; bit 3: Done melee auto attack.
+0x00000008  PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK  ;; bit 4: Taken melee auto attack.
+0x00000010  PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS  ;; bit 5: Done attack by Spell that has dmg class melee.
+0x00000020  PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS  ;; bit 6: Taken attack by Spell that has dmg class melee.
+0x00000040  PROC_FLAG_DONE_RANGED_AUTO_ATTACK  ;; bit 7: Done ranged auto attack.
+0x00000080  PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK  ;; bit 8: Taken ranged auto attack.
+0x00000100  PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS  ;; bit 9: Done attack by Spell that has dmg class ranged.
+0x00000200  PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS  ;; bit 10: Taken attack by Spell that has dmg class ranged.
+0x00000400  PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS  ;; bit 11: Done positive spell that has dmg class none.
+0x00000800  PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS  ;; bit 12: Taken positive spell that has dmg class none.
+0x00001000  PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG  ;; bit 13: Done negative spell that has dmg class none.
+0x00002000  PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG  ;; bit 14: Taken negative spell that has dmg class none.
+0x00004000  PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS  ;; bit 15: Done positive spell that has dmg class magic.
+0x00008000  PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS  ;; bit 16: Taken positive spell that has dmg class magic.
+0x00010000  PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG  ;; bit 17: Done negative spell that has dmg class magic.
+0x00020000  PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG  ;; bit 18: Taken negative spell that has dmg class magic.
+0x00040000  PROC_FLAG_DONE_PERIODIC  ;; bit 19: Successful do periodic (damage / healing).
+0x00080000  PROC_FLAG_TAKEN_PERIODIC  ;; bit 20: Taken spell periodic (damage / healing).
+0x00100000  PROC_FLAG_TAKEN_DAMAGE  ;; bit 21: Taken any damage.
+0x00200000  PROC_FLAG_DONE_TRAP_ACTIVATION  ;; bit 22: On trap activation.
+0x00400000  PROC_FLAG_DONE_MAINHAND_ATTACK  ;; bit 23: Done main-hand melee attacks (spell and autoattack).
+0x00800000  PROC_FLAG_DONE_OFFHAND_ATTACK  ;; bit 24: Done off-hand melee attacks (spell and autoattack).
+0x01000000  PROC_FLAG_DEATH  ;; bit 25: Died in any way.
+
+;; === InterruptFlags (6 flags) ===
+0x01  INTERRUPT_ON_MOVEMENT  ;; bit 0: Interrupt on movement
+0x02  INTERRUPT_PUSHBACK  ;; bit 1: Pushback on damage
+0x04  INTERRUPT_ON_INTERRUPT_CAST  ;; bit 2: On interrupt cast
+0x08  INTERRUPT_ON_INTERRUPT_SCHOOL  ;; bit 3: On interrupt school
+0x10  INTERRUPT_ON_DAMAGE_TAKEN  ;; bit 4: On damage taken
+0x20  INTERRUPT_ON_INTERRUPT_ALL  ;; bit 5: On interrupt all
+
+;; === AuraInterruptFlags (26 flags) ===
+0x00000001  AURA_INTERRUPT_HITBYSPELL  ;; bit 1: Hit by spell
+0x00000002  AURA_INTERRUPT_TAKE_DAMAGE  ;; bit 2: Take damage
+0x00000004  AURA_INTERRUPT_CAST  ;; bit 3: Cast
+0x00000008  AURA_INTERRUPT_MOVE  ;; bit 4: Move
+0x00000010  AURA_INTERRUPT_TURNING  ;; bit 5: Turning
+0x00000020  AURA_INTERRUPT_JUMP  ;; bit 6: Jump
+0x00000040  AURA_INTERRUPT_NOT_MOUNTED  ;; bit 7: Not mounted
+0x00000080  AURA_INTERRUPT_NOT_ABOVEWATER  ;; bit 8: Not above water
+0x00000100  AURA_INTERRUPT_NOT_UNDERWATER  ;; bit 9: Not underwater
+0x00000200  AURA_INTERRUPT_NOT_SHEATHED  ;; bit 10: Not sheathed
+0x00000400  AURA_INTERRUPT_TALK  ;; bit 11: Talk
+0x00000800  AURA_INTERRUPT_USE  ;; bit 12: Use
+0x00001000  AURA_INTERRUPT_MELEE_ATTACK  ;; bit 13: Melee attack
+0x00002000  AURA_INTERRUPT_SPELL_ATTACK  ;; bit 14: Spell attack
+0x00004000  AURA_INTERRUPT_UNK14  ;; bit 15: Unknown 14
+0x00008000  AURA_INTERRUPT_TRANSFORM  ;; bit 16: Transform
+0x00010000  AURA_INTERRUPT_UNK16  ;; bit 17: Unknown 16
+0x00020000  AURA_INTERRUPT_MOUNT  ;; bit 18: Mount
+0x00040000  AURA_INTERRUPT_NOT_SEATED  ;; bit 19: Not seated
+0x00080000  AURA_INTERRUPT_CHANGE_MAP  ;; bit 20: Change map
+0x00100000  AURA_INTERRUPT_IMMUNE_OR_LOST_SELECTION  ;; bit 21: Immune or lost selection
+0x00200000  AURA_INTERRUPT_UNK21  ;; bit 22: Unknown 21
+0x00400000  AURA_INTERRUPT_TELEPORTED  ;; bit 23: Teleported
+0x00800000  AURA_INTERRUPT_ENTER_PVP_COMBAT  ;; bit 24: Enter PvP combat
+0x01000000  AURA_INTERRUPT_DIRECT_DAMAGE  ;; bit 25: Direct damage
+0x02000000  AURA_INTERRUPT_LANDING  ;; bit 26: Landing
+
+;; === SchoolMask (7 flags) ===
+0x01  SPELL_SCHOOL_NORMAL  ;; bit 0: Physical
+0x02  SPELL_SCHOOL_HOLY  ;; bit 1: Holy
+0x04  SPELL_SCHOOL_FIRE  ;; bit 2: Fire
+0x08  SPELL_SCHOOL_NATURE  ;; bit 3: Nature
+0x10  SPELL_SCHOOL_FROST  ;; bit 4: Frost
+0x20  SPELL_SCHOOL_SHADOW  ;; bit 5: Shadow
+0x40  SPELL_SCHOOL_ARCANE  ;; bit 6: Arcane
+
+;; === CreatureTypeMask (15 flags) ===
+0x0001  CREATURE_TYPE_BEAST  ;; bit 0: Beast
+0x0002  CREATURE_TYPE_DRAGONKIN  ;; bit 1: Dragonkin
+0x0004  CREATURE_TYPE_DEMON  ;; bit 2: Demon
+0x0008  CREATURE_TYPE_ELEMENTAL  ;; bit 3: Elemental
+0x0010  CREATURE_TYPE_GIANT  ;; bit 4: Giant
+0x0020  CREATURE_TYPE_UNDEAD  ;; bit 5: Undead
+0x0040  CREATURE_TYPE_HUMANOID  ;; bit 6: Humanoid
+0x0080  CREATURE_TYPE_CRITTER  ;; bit 7: Critter
+0x0100  CREATURE_TYPE_MECHANICAL  ;; bit 8: Mechanical
+0x0200  CREATURE_TYPE_NOT_SPECIFIED  ;; bit 9: Not specified
+0x0400  CREATURE_TYPE_TOTEM  ;; bit 10: Totem
+0x0800  CREATURE_TYPE_NON_COMBAT_PET  ;; bit 11: Non-combat pet
+0x1000  CREATURE_TYPE_GAS_CLOUD  ;; bit 12: Gas cloud
+0x2000  CREATURE_TYPE_WILD_PET  ;; bit 13: Wild pet
+0x4000  CREATURE_TYPE_ABERRATION  ;; bit 14: Aberration
+
+;; === ShapeshiftFormFlags (17 flags) ===
+0x00001  SHAPESHIFT_STANCE  ;; bit 0: Simulates not being shapeshifted to allow mounts/items/interactions
+0x00002  SHAPESHIFT_NOT_TOGGLEABLE  ;; bit 1: Prevents cancellation
+0x00004  SHAPESHIFT_PERSIST_ON_DEATH  ;; bit 2: Persists on death
+0x00008  SHAPESHIFT_CAN_INTERACT_NPC  ;; bit 3: Allows NPC interaction
+0x00010  SHAPESHIFT_DONT_USE_WEAPON  ;; bit 4: Don't use weapon
+0x00020  SHAPESHIFT_AGILITY_ATTACK_BONUS  ;; bit 5: Enables agility AP bonuses
+0x00040  SHAPESHIFT_CAN_USE_EQUIPPED_ITEMS  ;; bit 6: Can use equipped items
+0x00080  SHAPESHIFT_CAN_USE_ITEMS  ;; bit 7: Can use items
+0x00100  SHAPESHIFT_DONT_AUTO_UNSHIFT  ;; bit 8: Don't auto-unshift
+0x00200  SHAPESHIFT_CONSIDERED_DEAD  ;; bit 9: Considered dead, prevents LFG teleportation
+0x00400  SHAPESHIFT_CAN_ONLY_CAST_SHAPESHIFT_SPELLS  ;; bit 10: Can only cast shapeshift spells
+0x00800  SHAPESHIFT_CANCELS_AT_FLIGHTMASTER  ;; bit 11: Cancels at flight master
+0x01000  SHAPESHIFT_NO_EMOTE_SOUNDS  ;; bit 12: No emote sounds
+0x02000  SHAPESHIFT_NO_TRIGGER_TELEPORT  ;; bit 13: No trigger teleport
+0x04000  SHAPESHIFT_CANNOT_CHANGE_EQUIPPED_ITEMS  ;; bit 14: Cannot change equipped items
+0x08000  SHAPESHIFT_RESUMMON_PETS_ON_UNSHIFT  ;; bit 15: Resummon pets on unshift (deprecated)
+0x10000  SHAPESHIFT_CANNOT_USE_GAME_OBJECTS  ;; bit 16: Cannot use game objects
+
+;; === AuraFlags (10 flags) ===
+0x00  AFLAG_NONE  ;; bit 0: None
+0x01  AFLAG_CASTER  ;; bit 0: Caster (pre-Cata) / NOCASTER (Cata+)
+0x02  AFLAG_POSITIVE  ;; bit 1: Positive aura
+0x04  AFLAG_DURATION  ;; bit 2: Has duration
+0x08  AFLAG_ANY_EFFECT_AMOUNT_SENT  ;; bit 3: Any effect amount sent (pre-Cata) / SCALABLE (Cata+)
+0x10  AFLAG_NEGATIVE  ;; bit 4: Negative aura
+0x20  AFLAG_UNK20  ;; bit 5: Unknown 20 (Cata+)
+0x40  AFLAG_UNK40  ;; bit 6: Unknown 40 (Cata+)
+0x80  AFLAG_UNK80  ;; bit 7: Unknown 80 (Cata+)
+0x0100  AFLAG_MAW_POWER  ;; bit 8: Maw power (Shadowlands+)
+
+;; === ShapeshiftForms (43 enum values) ===
+  0  FORM_NONE  ;; No shapeshift form
+  1  FORM_CAT_FORM  ;; Cat form
+  2  FORM_TREE_OF_LIFE  ;; Tree of Life form
+  3  FORM_TRAVEL_FORM  ;; Travel form
+  4  FORM_AQUATIC_FORM  ;; Aquatic form
+  5  FORM_BEAST_FORM  ;; Bear form
+  6  FORM_AMBIENT  ;; Ambient form
+  7  FORM_GHOUL  ;; Ghoul form
+  8  FORM_DIRE_BEAR_FORM  ;; Dire Bear form
+  9  FORM_CRANE_STANCE  ;; Crane stance
+ 10  FORM_THARONJA_SKELETON  ;; Tharon'ja skeleton
+ 11  FORM_DARKMOON_TEST_OF_STRENGTH  ;; Darkmoon Test of Strength
+ 12  FORM_BLB_PLAYER  ;; BLB player form
+ 13  FORM_SHADOW_DANCE  ;; Shadow Dance
+ 14  FORM_CREATURE_BEAR  ;; Creature Bear form
+ 15  FORM_CREATURE_CAT  ;; Creature Cat form
+ 16  FORM_GHOST_WOLF  ;; Ghost Wolf form
+ 17  FORM_BATTLE_STANCE  ;; Battle Stance
+ 18  FORM_DEFENSIVE_STANCE  ;; Defensive Stance
+ 19  FORM_BERSERKER_STANCE  ;; Berserker Stance
+ 20  FORM_SERPENT_STANCE  ;; Serpent Stance
+ 21  FORM_ZOMBIE  ;; Zombie form
+ 22  FORM_METAMORPHOSIS  ;; Metamorphosis form
+ 23  FORM_OX_STANCE  ;; Ox Stance
+ 24  FORM_TIGER_STANCE  ;; Tiger Stance
+ 25  FORM_UNDEAD  ;; Undead form
+ 26  FORM_FRENZY  ;; Frenzy form
+ 27  FORM_FLIGHT_FORM_EPIC  ;; Epic Flight form
+ 28  FORM_SHADOWFORM  ;; Shadow form
+ 29  FORM_FLIGHT_FORM  ;; Flight form
+ 30  FORM_STEALTH  ;; Stealth form
+ 31  FORM_MOONKIN_FORM  ;; Moonkin form
+ 32  FORM_SPIRIT_OF_REDEMPTION  ;; Spirit of Redemption
+ 33  FORM_GLADIATOR_STANCE  ;; Gladiator Stance
+ 34  FORM_METAMORPHOSIS_2  ;; Metamorphosis 2
+ 35  FORM_MOONKIN_FORM_RESTORATION  ;; Restoration Moonkin form
+ 36  FORM_TREANT_FORM  ;; Treant form
+ 37  FORM_SPIRIT_OWL_FORM  ;; Spirit Owl form
+ 38  FORM_SPIRIT_OWL_FORM_2  ;; Spirit Owl form 2
+ 39  FORM_WISP_FORM  ;; Wisp form
+ 40  FORM_WISP_FORM_2  ;; Wisp form 2
+ 41  FORM_SOULSHAPE  ;; Soulshape
+ 42  FORM_FORGEBORNE_REVERIES  ;; Forgeborn Reveries

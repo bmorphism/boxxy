@@ -1,0 +1,4797 @@
+{
+  "source": "https://wowdev.wiki/Spell.dbc/Attributes",
+  "proc_source": "https://wowdev.wiki/Spell.dbc/procFlags",
+  "last_updated": "2025-08-10",
+  "core_revision": "11.2",
+  "description": "Complete WoW Spell.dbc boolean flags extracted from wowdev wiki. 16 spell attribute groups (SpellAttr0-SpellAttr15 including SpellAttr0 custom flags) plus proc flags.",
+  "statistics": {
+    "total_spell_attribute_flags": 537,
+    "total_proc_flags": 26,
+    "total_boolean_flags": 644,
+    "attribute_groups": 16,
+    "bits_per_group": 32,
+    "note": "SpellAttr0 includes 32 standard + 25 custom (CU) flags = 57 total",
+    "additional_groups": {
+      "interrupt_flags": 6,
+      "aura_interrupt_flags": 26,
+      "school_mask": 7,
+      "creature_type_mask": 15,
+      "shapeshift_form_flags": 17,
+      "aura_flags": 10,
+      "shapeshift_forms": "43 enum values (not bitmask)"
+    }
+  },
+  "spell_attributes": {
+    "SpellAttr0": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR0_PROC_FAILURE_BURNS_CHARGE",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "The spell will consume a charge that is natural or procced even if it fails to apply it's effect."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR0_USES_RANGED_SLOT",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Source: \"Use ammo, ranged attack range modifiers, ranged haste, etc.\""
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR0_ON_NEXT_SWING_NO_DAMAGE",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Source: \"Both \"on next swing\" attributes have identical handling in server & client."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR0_DO_NOT_LOG_IMMUNE_MISSES",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Self descriptive. Not set in 3.0.3. Possibly not used in later versions as well."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR0_IS_ABILITY",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Client puts \"Ability\" instead of \"Spell\" in the strings associated with this spell. Source: \"Cannot be reflected, not affected by cast speed modifiers, etc.\""
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR0_IS_TRADESKILL",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Source: \"Displayed in recipe list, not affected by cast speed modifiers.\""
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR0_PASSIVE",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Passive spell and lists them accordingly. Source: \"Spell is automatically cast on self by core.\""
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR0_DO_NOT_DISPLAY_SPELLBOOK_AURA_ICON_COMBAT_LOG",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "These spells will be hidden from the spellbook, the list of aura icons, and partially from the combat log, but only on the client."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR0_DO_NOT_LOG",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "This attribute controls whether the spell appears in combat logs. This attribute will focus on the removal of all aspects of combat log activity in relation to the spell."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR0_HELD_ITEM_ONLY",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Source: \"Client will automatically select main-hand item as cast target.\""
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR0_ON_NEXT_SWING",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Source: \"Both \"on next swing\" attributes have identical handling in server & client.\""
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR0_WEARER_CASTS_PROC_TRIGGER",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Source: Marker attribute to show auras that trigger another spell (either directly or with a script)."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR0_SERVER_ONLY",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Used for server side scripts? Needs a real description."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR0_ALLOW_ITEM_SPELL_IN_PVP",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Needs a description."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR0_INDOORS_ONLY",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Opposite of SPELL_ATTR0_OUTDOORS_ONLY."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR0_OUTDOORS_ONLY",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Only useable outdoors (Above ground level or not inside of a WMO for example)."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR0_NOT_SHAPESHIFTED",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Spell may not be cast while under the effect of a conditional dependent Shapeshift."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR0_ONLY_STEALTHED",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Must be in stealth (affected by ShapeshiftForm-FORM_STEALTH)."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR0_DO_NOT_SHEATH",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Leaves your weapons (if) sheathed during spell animation. Source: \"Does not sheathe weapons (client only).\""
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR0_SCALES_WITH_CREATURE_LEVEL",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Spell damage depends on level of the caster. Source: \"For non-player casts, scale impact and power cost with caster's level.\""
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR0_CANCELS_AUTO_ATTACK_COMBAT",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Cancels current auto-attack when cast."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR0_NO_ACTIVE_DEFENSE",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Cannot be Dodged, Parried, or Blocked. Prevents physical based avoidance."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ONLY",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Automatically forces player to face the target when casting. Applicable only on the client."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR0_ALLOW_CAST_WHILE_DEAD",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Attribute that allows a spell to be cast while in the dead state as well as ghost state."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR0_ALLOW_WHILE_MOUNTED",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Spell can be cast while mounted."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR0_COOLDOWN_ON_EVENT",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Activate a cooldown after aura expiration, current summon removed, or go script. Spell is unusable while already active and cooldown does not begin until the effects have worn off."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR0_AURA_IS_DEBUFF",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Forces the spell to be handled as negative. Ex. Aura is shown in the debuff bar."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR0_ALLOW_WHILE_SITTING",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Spell can be cast while sitting."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR0_NOT_IN_COMBAT_ONLY_PEACEFUL",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Cannot be used in combat (Only Peaceful)."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR0_NO_IMMUNITIES",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Unaffected by Invulnerability. Source: \"Allows spell to pierce invulnerability, unless the invulnerability spell also has this attribute.\""
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR0_HEARTBEAT_RESIST",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Periodic resistance checks. Source: \"Periodically re-rolls against resistance to potentially expire the aura early.\" Needed for PROC_FLAG_HEARTBEAT."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR0_NO_AURA_CANCEL",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Aura cannot be canceled or right-clicked off. Source: \"Prevents the player from voluntarily canceling a positive aura.\""
+      },
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR0_CU_ENCHANT_PROC",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Spell that procs has enchantment relationship. Ex. Colossus(116631) damage absorb."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR0_CU_CONE_BACK",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Affects the spell cone(path) area. See [Implicit Targets](https://wowdev.wiki/Spell.dbc/EffectImplicitTarget \"Spell.dbc/EffectImplicitTarget\") and [Target Restrictions](https://wowdev.wiki/DB/SpellTargetRestrictions \"DB/SpellTargetRestrictions\") for additional information."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR0_CU_CONE_LINE",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Similar to SPELL_ATTR0_CU_CONE_BACK. Ex. Vehicle attacks affected by the Z-axis."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR0_CU_SHARE_DAMAGE",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Implies [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName \"Spell.dbc/EffectApplyAuraName\") 300 SPELL_AURA_SHARE_DAMAGE_PCT. Ex. Council type bosses that share a health pool."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR0_CU_NO_INITIAL_THREAT",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Seems the same as SPELL_ATTR2_NO_INITIAL_THREAT. Might have uses when the original causes conflicts or is not functioning properly."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR0_CU_AURA_CC",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Can modify functionality to behave with crowd controlled effects like stun, freeze, etc."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR0_CU_DONT_BREAK_STEALTH",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Likely very similar to SPELL_ATTR1_ALLOW_WHILE_STEALTHED. This might also override SPELL_ATTR1_FAILURE_BREAKS_STEALTH."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR0_CU_CAN_CRIT",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "The opposite of SPELL_ATTR2_CANT_CRIT. Bypass restrictive attributes and [combinations](https://wowdev.wiki/Spell.dbc/Effect \"Spell.dbc/Effect\") such as SPELL_EFFECT_NORMALIZED_WEAPON_DMG + SPELL_EFFECT_HEAL_PCT which effectively disable criticals."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR0_CU_DIRECT_DAMAGE",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Could imply spell functionality modification such as (Direct Damage - Spell) from [SpellCategory](https://wowdev.wiki/DB/SpellCategory \"DB/SpellCategory\")."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR0_CU_CHARGE",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "This might imply [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName \"Spell.dbc/EffectApplyAuraName\") 411 SPELL_AURA_MOD_MAX_CHARGES or modify charge timing on spells which can also be found in SpellCategory."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR0_CU_PICKPOCKET",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Allows access to the pickpocket loot table of an enemy."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR0_CU_DEPRECATED_ROLLING_PERIODIC",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Seems like a combination of SPELL_ATTR4_OBSOLETE + SPELL_ATTR10_ROLLING_PERIODIC."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF0",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Possible combination of SPELL_ATTR4_OBSOLETE + SPELL_ATTR0_AURA_IS_DEBUFF."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF1",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Unknown differences between this and SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF0 or SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF2."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF2",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Unknown differences between this and SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF0 or SPELL_ATTR0_CU_DEPRECATED_NEGATIVE_EFF1."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR0_CU_IGNORE_ARMOR",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Implies [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName \"Spell.dbc/EffectApplyAuraName\") 345 SPELL_AURA_BYPASS_ARMOR_FOR_CASTER. Ex. Cleave damage so the calculations does not get reduced multiple times."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR0_CU_REQ_TARGET_FACING_CASTER",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Similar to SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ONLY except the target is affected and this attribute is not client restricted."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR0_CU_REQ_CASTER_BEHIND_TARGET",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Another EffectPos_facing similar attribute. An example for this would be backstab like spells. See SPELL_ATTR4_USE_FACING_FROM_SPELL description for more."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR0_CU_ALLOW_INFLIGHT_TARGET",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "This may allow override for unit InhabitType; and possibly function similar to SPELL_ATTR6_CAN_TARGET_UNTARGETABLE or SpellMisc server side defined attributes."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR0_CU_NEEDS_AMMO_DATA",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "It is likely this is either referring to deprecated(version dependent) hunter ammunition or a vehicle mechanic."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR0_CU_BINARY_SPELL",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Spell can be 1 or 0. Example of spells that can be toggled on or off with an infinite duration would be a primary example."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR0_CU_SCHOOLMASK_NORMAL_WITH_MAGIC",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Sets the school to 1 + 126? In 5.4.8, a value of 127 is Chaos damage. More information at [SchoolMask](https://wowdev.wiki/Spell.dbc/SchoolMask \"Spell.dbc/SchoolMask\")."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR0_CU_DEPRECATED_LIQUID_AURA",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Similar to the other custom deprecated attributes. An example of liquid auras could be the debuff from Naxxramas slime."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR0_CU_IS_TALENT",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "This attribute may deal with talent descriptions; and it might be used in complex spells in identifying the most prominent component ID or simply function like SPELL_ATTR0_IS_ABILITY."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR0_CU_AURA_CANNOT_BE_SAVED",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Aura is not saved in the database. One reason would be to prevent exploits (having a buff where it should not be)."
+      }
+    ],
+    "SpellAttr1": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR1_DISMISS_PET_FIRST",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "For spells without this flag the client doesn't allow summoning a pet if the caster already has a pet."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR1_USE_ALL_MANA",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Uses all power (Ex. Lay on Hands, Bunyanize). Source: \"Ignores listed power cost and drains entire pool instead.\""
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR1_IS_CHANNELED",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Spell is channeled. Spell is handled equally with client and server."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR1_NO_REDIRECTION",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "No redirection to another target. Ignores spells with the \"SPELL_AURA_SPELL_MAGNET\" // [Effect Aura 96](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName \"Spell.dbc/EffectApplyAuraName\"). (Alternate: All spell effects are harmful.)"
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR1_NO_SKILL_INCREASE",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Does not give a skill up point."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR1_ALLOW_WHILE_STEALTHED",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Does not break Stealth."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR1_IS_SELF_CHANNELLED",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Spell is self channeled. Spell is handled equally with client and server."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR1_NO_REFLECTION",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Spell will bypass any reflection effects."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR1_ONLY_PEACEFUL_TARGETS",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Can only target out of combat units."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR1_INITIATES_COMBAT_ENABLES_AUTO_ATTACK",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Player starts melee combat after this spell is cast. Initiates combat (enables auto-attack)."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR1_NO_THREAT",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Does not generate threat on cast and will not initiate combat."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR1_AURA_UNIQUE",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Source: \"Aura will not refresh it's duration when recast\"."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR1_FAILURE_BREAKS_STEALTH",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Failure breaks Stealth. (Pickpocket)."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR1_TOGGLE_FAR_SIGHT",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Client removes Farsight on aura loss."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR1_TRACK_TARGET_IN_CHANNEL",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Client automatically forces player to face target when channeling."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR1_IMMUNITY_PURGES_EFFECT",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Remove negative auras on immunity. Source: \"For immunity spells, cancel all auras that this spell would make you immune to when the spell is applied.\""
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR1_IMMUNITY_TO_HOSTILE_AND_FRIENDLY_EFFECTS",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Causes harmful and helpful spells cast on a target with this to be immune such as Cyclone. (School Immunity Only)."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR1_NO_AUTOCAST_AI",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "No AutoCast by Pet or similar AI."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR1_PREVENTS_ANIM",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Stun, Polymorph, Daze, Hex, etc. Auras apply \"UNIT_FLAG_PREVENT_EMOTES_FROM_CHAT_TEXT\"."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR1_EXCLUDE_CASTER",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Excludes caster from spell effects even if not the primary target."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR1_FINISHING_MOVE_DAMAGE",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Finishing Move - Damage. Combo Point related."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR1_THREAT_ONLY_ON_MISS",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Untested if this implies all functions listed under SpellMissInfo aside from Miss such as Parry, Dodge, Resist, etc."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR1_FINISHING_MOVE_DURATION",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Finishing Move - Duration. Combo Point related."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR1_IGNORE_OWNERS_DEATH",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Unaffected by death of owner. Possibly works with temporary summons as well?"
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR1_SPECIAL_SKILLUP",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Only Fishing spells."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR1_AURA_STAYS_AFTER_COMBAT",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Self descriptive. Not all spells need this to have this effect."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR1_REQUIRE_ALL_TARGETS",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Works correctly with \\[target=focus\\] and \\[target=mouseover\\] macros? (Used in many vehicle type spells)"
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR1_DISCOUNT_POWER_ON_MISS",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "This attribute is almost exclusive with spells that consume combo-point-like secondary resources."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR1_NO_AURA_ICON",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Client doesn't display these spells in aura bar."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR1_NAME_IN_CHANNEL_BAR",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Spell name is displayed in cast bar instead of \"Channeling\" text in Channel Bar. (Client Only)."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR1_DISPEL_ALL_STACKS",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Dispel all stacks instead of one at a time."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR1_CAST_WHEN_LEARNED",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Casts the spell when learned."
+      }
+    ],
+    "SpellAttr10": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR10_BYPASS_VISIBILITY_CHECK",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Probably similar to SPELL_ATTR2_IGNORE_LINE_OF_SIGHT. (Ex. Frost Fever.)"
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR10_IGNORE_POSITIVE_DAMAGE_TAKEN_MODIFIERS",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR10_USES_RANGED_SLOT_COSMETIC_ONLY",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Will generate a ranged weapon on the caster of this spell if one is not equipped to complete the animation."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR10_DO_NOT_LOG_FULL_OVERHEAL",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Combat log will ignore any healing past maximum health."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR10_NPC_KNOCKBACK_IGNORE_DOORS",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Knockout mechanic or other forced movement effects. Alternate Header - WATER_SPOUT."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR10_FORCE_NON_BINARY_RESISTANCE",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Makes a spell ignore full resistance? Found on Immolate(348) in 5.4.8."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR10_NO_SUMMON_LOG",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Removes the entry and thus any object created by a spell from the combat log so as not to be clickable."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR10_IGNORE_INSTANCE_LOCK_AND_FARM_LIMIT_ON_TELEPORTATION",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Ignore instance lock and re-entry limits on teleportation. Alternate Header - TELEPORT_PLAYER."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR10_DONT_CANCEL_WHEN_ALL_EFFECTS_ARE_DISABLED",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Prevents pre-mature cancellation of spell if effects are nullified? (Found on Cone on Cold(120) in 5.4.8."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR10_CHARGE_JUMP_CHARGE_USE_ABSOLUTE_SPEED",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Involved with spells that move an entity at a faster than normalized rate of speed such as Death Grip."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR10_PROC_COOLDOWN_ON_A_PER_TARGET_BASIS",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR10_HERB_GATHERING_MINING",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Lock chest at precast. Likely means to tap the node once clicked."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR10_USE_SPELL_BASE_LEVEL_FOR_SCALING",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "This particular attribute was either swapped or changed at some point with SPELL_ATTR2_RETAIN_ITEM_CAST. Otherwise, Self descriptive."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR10_RESET_COOLDOWN_ON_ENCOUNTER_END",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Reset cooldown upon ending an encounter. This can be used to remove longer cooldowns after combat."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR10_ROLLING_PERIODIC",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Add remaining periodic damage to new aura when refreshed. Ex. Ignite Mastery. May also apply to HoTs."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR10_SPELLBOOK_HIDDEN_UNTIL_OVERRIDDEN",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Spell is not in spellbook until another takes it place. (Ex. Symbiosis replacing the default null spell with the class specific one.)"
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR10_DEFEND_AGAINST_FRIENDLY_CAST",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Unknown. Found on Mage spell Living Bomb(44461) in 5.4.8."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR10_CAN_DODGE_PARRY_WHILE_CASTING",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Allows defensive abilities to continue. Ex. Blooddrinker(DK, Legion)."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR10_STARTS_TICKING_AT_AURA_APPLICATION",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Spell ticks when aura is applied instead of waiting for a specified time. Possibly same or very similar to SPELL_ATTR5_EXTRA_INITIAL_PERIOD."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR10_UNK19",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Unknown. Couldn't match any but header may be implemented elsewhere. Only 4 (3 valid) spells in 5.4.8."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR10_MULTI_CLICK_GROUND_TARGETING",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Involved in certain objects that create spells that must be placed in the world."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR10_AOE_CAN_HIT_SUMMONED_INVIS",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Allows the spell to interact with certain invisible (possibly trigger or quest entities)."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR10_UNK22",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "All of these spells are almost exclusive to bonus loot and active/loot specialization rolls. Header seems like CAN_HIT_AOE_UNTARGETABLE but would not make much sense."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR10_UNK23",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Unknown. Unused in 5.4.8."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR10_UPDATE_PASSIVES_ON_APPLY_REMOVE",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "It is likely this attribute will update relevant spells in relation to this spell. Ex. Titan's Grip."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR10_NORMAL_MELEE_ATTACK",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Treats the spell as if it were a normal (white) melee hit."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR10_IGNORE_FEIGN_DEATH",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Should produce similar effects to that of having the 65,536(CREATURE_FLAG_EXTRA_IGNORE_FEIGN_DEATH) extra flag set in creature templates."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR10_CASTER_DEATH_CANCELS_PERSISTENT_AREA_AURAS",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Auras with this flag will disappear immediately when the caster dies. Similar to [Spell Effect](https://wowdev.wiki/Spell.dbc/Effect \"Spell.dbc/Effect\") 177."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR10_DO_NOT_LOG_ABSORB",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "This prevents spells with an absorb from being logged by the client. Ex. The Overkill absorb from Ardent Defender."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR10_MOUNT_IS_NOT_ACCOUNT_WIDE",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "This Mount is not placed on the account level. This mount is stored per character instead. Ex. PvP Gladiator Mount."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR10_PREVENT_CLIENT_CAST_CANCEL",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Prevents channeled spells from being cancelled."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR10_CHAIN_BY_MOST_HIT",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Deals with spells that chain to multiple targets; \"most\" is usually your initial target."
+      }
+    ],
+    "SpellAttr11": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR11_LOCK_CASTER_MOVEMENT_AND_FACING_WHILE_CASTING",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Locks the current model animation and continually face the destination of the spell. Certain motions can result in a visual glitch of the spell if ignored."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR11_DONT_CANCEL_WHEN_ALL_EFFECTS_ARE_DISABLED",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Spell aura will not end prematurely if the effects become inactive. Can be found on many spells such as Cripple."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR11_SCALES_WITH_ITEM_LEVEL",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR11_DO_NOT_LOG_ON_LEARN",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "This will prevent the client from logging these spells when learned."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR11_HIDE_SHAPESHIFT_REQUIREMENTS",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Used mainly in Monk spells to not clutter the combat log with a long error reason. (Must be used in Serpent Stance, Ox Stance, Tiger Stance.)"
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR11_ABSORB_ENVIRONMENTAL_DAMAGE",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Alternate header: ABSORB_FALLING_DAMAGE."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR11_UNBREAKABLE_CHANNEL",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Allows the channel of a spell to only be removed by scripted means. Ex. Spells such as a rope used to gather animals for a quest."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR11_RANK_IGNORES_CASTER_LEVEL",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Alternate header: Ignore Caster's spell. Source: \"level Spell_C_GetSpellRank returns SpellLevels->MaxLevel \\* 5 instead of std::min(SpellLevels->MaxLevel, caster->Level) \\* 5\"."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR11_TRANSFER_MOUNT_SPELL",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Found on Zen Flight in 5.4.8. This probably carries over your ground/flight speed and other mount related properties."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR11_IGNORE_SPELLCAST_OVERRIDE_SHAPESHIFT_REQUIREMENTS",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Ex. Allows a spell that Dark Simulacrum copies to be used by the Death Knight even if it required a shapeshift."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR11_NEWEST_EXCLUSIVE_COMPLETE",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Unknown. Can be found on Stealth(1784) Rogue spell and other uncategorized stealth-like spells."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR11_NOT_USABLE_IN_INSTANCES",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR11_NOT_ON_PLAYER_CONTROLLED_NPC",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Self descriptive. Found on many passive buffs that affect grouped allies such as Unholy Aura, Moonkin Aura, etc."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR11_IGNORE_PVP_POWER",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Ignore PvP Power. Causes the spell to ignore any additional damage or healing granted by PvP Power."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR11_UNK14",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR11_UNK15",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR11_NOT_USABLE_IN_CHALLENGE_MODE",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Self descriptive. Challenge Mode in MoP was the precursor to Mythic+. Very commonly paired with SPELL_ATTR12_UNK17."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR11_UNK17",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR11_UNK18",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR11_IGNORE_TARGET_ABSORB_MODIFIERS",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Assuming this applies to both positive and negative. Ex. Illuminated Healing (Holy Paladin Mastery)."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR11_UNK20",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR11_ALLOW_HARMFUL_ON_FRIENDLY",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Spells have the potential to damage allies even if they weren't the intended target. (Ex. The detonation portion of a Living Bomb reflected by to the Mage.)"
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR11_UNK22",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR11_UNK23",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR11_UNK24",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR11_UNK25",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR11_UNK26",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR11_UNK27",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR11_UNK28",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR11_UNK29",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR11_UNK30",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR11_UNK31",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Unknown. No information."
+      }
+    ],
+    "SpellAttr12": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR12_UNK0",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR12_UNK1",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR12_UNK2",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR12_UNK3",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR12_TREAT_SELF_CAST_AS_REFLECT",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "If spell is redirected or ignore restrictions to target the caster it will be considered a reflect likely ending the spell."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR12_UNK5",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR12_UNK6",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR12_UNK7",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR12_UNK8",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR12_IGNORE_CASTING_DISABLED",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Active Passive. Ignores Aura 263 SPELL_AURA_DISABLE_CASTING_EXCEPT_ABILITIES."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR12_UNK10",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR12_UNK11",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR12_UNK12",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR12_UNK13",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR12_UNK14",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR12_UNK15",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR12_UNK16",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR12_NOT_IN_PROVING_GROUNDS",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Spell is not active while inside of the proving grounds scenario introduced in MoP."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR12_UNK18",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR12_UNK19",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR12_UNK20",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "This is probably \"Allow during spell override\"."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR12_UNK21",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "This is probably \"Use float values for scaling amounts\"."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR12_UNK22",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "This is probably either \"Suppress toasts on item push\" or \"Visible only to caster (conversations only)\"."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR12_START_COOLDOWN_ON_CAST_START",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR12_IS_GARRISON_BUFF",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Source: \"Never Learn\"?"
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR12_UNK25",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR12_UNK26",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR12_IS_READINESS_SPELL",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Recompute Aura on Mercenary Mode."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR12_USE_WEIGHTED_RANDOM_FOR_FLEX_TARGETS",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Damage and possibly target(amounts) scaling for Flexible Raid size. (Header is NYI in source.)"
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR12_UNK29",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR12_UNK30",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR12_ONLY_PROC_FROM_CLASS_ABILITIES",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Self descriptive."
+      }
+    ],
+    "SpellAttr13": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR13_ALLOW_CLASS_ABILITY_PROCS",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR13_UNK1",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR13_PASSIVE_IS_UPGRADE",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Displays \"Upgrade\" in spell tooltip instead of \"Passive\"."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR13_UNK3",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR13_UNK4",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR13_UNK5",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR13_UNK6",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR13_UNK7",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR13_UNK8",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR13_UNK9",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Only two spells in 5.4.8 and both involve gaining currency. (161780 and 161795) as of 5.4.8."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR13_UNK10",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR13_UNK11",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR13_UNK12",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR13_UNK13",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR13_UNK14",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR13_DO_NOT_FAIL_IF_NO_TARGET",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR13_UNK16",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR13_UNK17",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR13_ACTIVATES_REQUIRED_SHAPESHIFT",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Do Not Enforce Shapeshift Requirements."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR13_UNK19",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR13_PERIODIC_REFRESH_EXTENDS_DURATION",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Ex. Casting Renew after a few seconds will refresh it with a longer duration."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR13_UNK21",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR13_UNK22",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR13_UNK23",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR13_UNK24",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR13_UNK25",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR13_ALWAYS_ALLOW_NEGATIVE_HEALING_PERCENT_MODIFIERS",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Attribute to ensure negative healing percent based modifiers will work as intended."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR13_DO_NOT_ALLOW_DISABLE_MOVEMENT_INTERRUPT",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Effectively removes an interrupt disable for spells that was in place to a state without one."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR13_UNK28",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR13_UNK29",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR13_UNK30",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR13_UNK31",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Unknown. No information."
+      }
+    ],
+    "SpellAttr14": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR14_UNK0",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR14_REAGENT_COST_CONSUMES_CHARGES",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Consumes item charges for reagent costs instead of whole items."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR14_UNK2",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR14_HIDE_PASSIVE_FROM_TOOLTIP",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Does not show \"Passive\" or \"Upgrade\" in the spell tooltip."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR14_UNK4",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR14_UNK5",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR14_UNK6",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR14_UNK7",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR14_UNK8",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR14_UNK9",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR14_UNK10",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR14_UNK11",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR14_UNK12",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR14_UNK13",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR14_UNK14",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR14_UNK15",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR14_UNK16",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR14_UNK17",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR14_UNK18",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR14_UNK19",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR14_AURA_IS_PRIVATE",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Aura is only visible to the player or owner?"
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR14_UNK21",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR14_UNK22",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR14_UNK23",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR14_UNK24",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR14_UNK25",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR14_UNK26",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR14_UNK27",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR14_UNK28",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR14_UNK29",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR14_UNK30",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR14_UNK31",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Unknown. No information."
+      }
+    ],
+    "SpellAttr15": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR15_UNK0",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR15_UNK1",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR15_UNK2",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR15_UNK3",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR15_UNK4",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR15_UNK5",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR15_UNK6",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR15_UNK7",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR15_UNK8",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR15_UNK9",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR15_UNK10",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR15_UNK11",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR15_UNK12",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR15_UNK13",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR15_UNK14",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR15_UNK15",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR15_UNK16",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR15_UNK17",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR15_UNK18",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR15_UNK19",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR15_UNK20",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR15_UNK21",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR15_UNK22",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR15_UNK23",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR15_UNK24",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR15_UNK25",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR15_UNK26",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR15_UNK27",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR15_UNK28",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR15_UNK29",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR15_UNK30",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Unknown. No information."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR15_UNK31",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Unknown. No information."
+      }
+    ],
+    "SpellAttr2": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR2_ALLOW_DEAD_TARGET",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Can target a dead unit or corpse."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR2_NO_SHAPESHIFT_UI",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "No shapeshift UI such as Stealth, Shadowform, Druid shapeshifts, etc. Also certain custom scripted ones for quests or other various gameplay."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR2_IGNORE_LINE_OF_SIGHT",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR2_ALLOW_LOW_LEVEL_BUFF",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Allow low level buff. Allow casting lower level buffs? Maybe rank specific? This has relation to SpellLevels.dbc."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR2_USE_SHAPESHIFT_BAR",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Client displays icon in stance bar when learned, even if not shapeshift. Will still appear even if this is not listed in ShapeShift.dbc."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR2_AUTO_REPEAT",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Wand attacks. Possibly others."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR2_CANNOT_CAST_ON_TAPPED",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Target must be tapped by caster. \"Cannot cast on tapped\". Relates to Dynamic Flags on creature (UNIT_DYNFLAG_TAPPED)."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR2_DO_NOT_REPORT_SPELL_FAILURE",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Do not report spell failure. Combat log or error string related."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR2_INCLUDE_IN_ADVANCED_COMBAT_LOG",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Source: \"Determines whether to include this aura in list of auras in SMSG_ENCOUNTER_START.\""
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR2_ALWAYS_CAST_AS_UNIT",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "\\*NYI\\* Unclear what the differences of casting a spell in this way would do."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR2_SPECIAL_TAMING_FLAG",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Special taming flag."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR2_NO_TARGET_PER_SECOND_COSTS",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Ignore power cost if listed in seconds."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR2_CHAIN_FROM_CASTER",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Effectively a point blank AoE with the source as the caster but seems to only apply to melee abilities (Ex. Cleave, Heart Strike)."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR2_ENCHANT_OWN_ITEM_ONLY",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Items enchanted by spells with this flag also preserve the enchant in arenas."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR2_ALLOW_WHILE_INVISIBLE",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Allow spell to be used while invisible and the many different types of invisibility as well."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR2_DO_NOT_CONSUME_IF_GAINED_DURING_CAST",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Not set in 3.0.3. Still unused in 5.4.8."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR2_NO_ACTIVE_PETS",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Tame Beast."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR2_DO_NOT_RESET_COMBAT_TIMERS",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Don't reset timers for melee auto-attacks (swings) or ranged auto-attacks (autoshot)."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR2_NO_JUMP_WHILE_CAST_PENDING",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Self descriptive. Client only."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR2_ALLOW_WHILE_NOT_SHAPESHIFTED_CASTER_FORM",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Source: \"Even if Stances are nonzero, allow spell to be cast outside of shapeshift (though not in a different shapeshift).\" Ex. Desperate Prayer in Shadowform."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR2_INITIATE_COMBAT_POST_CAST_ENABLES_AUTO_ATTACK",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Enable auto-attacks after the first spell is cast when in combat."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR2_FAIL_ON_ALL_TARGETS_IMMUNE",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Will invalidate certain auras on immunity gain. Source: \"Causes BG flags to be dropped if combined with SPELL_ATTR1_IMMUNITY_PURGES_EFFECT.\""
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR2_NO_INITIAL_THREAT",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Can be found on several spells that deal damage and break stealth or are affected by a particular aura."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR2_PROC_COOLDOWN_ON_FAILURE",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR2_ITEM_CAST_WITH_OWNER_SKILL",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Needs a description."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR2_DONT_BLOCK_MANA_REGEN",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Mana regeneration is not affected."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR2_NO_SCHOOL_IMMUNITIES",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "In relation to SpellImmunity/IMMUNITY_SCHOOL/SpellSchoolMask. Source: \"Allow aura to be applied despite target being immune to new aura applications.\""
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR2_IGNORE_WEAPONSKILL",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Ignore skill level of a weapon."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR2_NOT_AN_ACTION",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Self descriptive. Unsure if anything besides spells and object interactions constitute an \"action\"."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR2_CANT_CRIT",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Spell is not capable of being critical."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR2_ACTIVE_THREAT",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Spell can trigger even if triggered. Unknown if this has impact on actual \"threat\"."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR2_RETAIN_ITEM_CAST",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Food or Drink Buff (Ex. Well Fed)."
+      }
+    ],
+    "SpellAttr3": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR3_PVP_ENABLING",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Enables the PvP state when cast."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR3_NO_PROC_EQUIP_REQUIREMENT",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Proc can trigger even if the trigger spell is not active? Needs testing."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR3_NO_CASTING_BAR_TEXT",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "No casting bar text."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR3_COMPLETELY_BLOCKED",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Applies only to Melee classes in 3.1.3."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR3_NO_RES_TIMER",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "You don't have to wait to be resurrected with these spells."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR3_NO_DURABILTIY_LOSS",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR3_NO_AVOIDANCE",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Self descriptive. No AoE reduction modifiers will be calculated."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR3_DOT_STACKING_RULE",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Separate stack for every caster. Worth noting that not every DoT has this attribute even though it might seem like it should."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR3_ONLY_ON_PLAYER",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Can only target players. Opposite of SPELL_ATTR5_NOT_ON_PLAYER."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR3_NOT_A_PROC",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Triggered from effect? In 4.0+ some Mastery spells use this."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR3_REQUIRES_MAIN_HAND_WEAPON",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Main hand weapon required."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR3_ONLY_BATTLEGROUNDS",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Can only be cast in Battlegrounds."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR3_ONLY_ON_GHOSTS",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Can only be cast on targets in the Ghost state."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR3_HIDE_CHANNEL_BAR",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Clientside attribute - Will not display channeling bar."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR3_HIDE_IN_RAID_FILTER",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Could also relate to \"Hide messages like this one\" when right clicking in combat log?"
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR3_NORMAL_RANGED_ATTACK",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Auto Shoot, Shoot, Throw, (Autoshot flag)."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR3_SUPPRESS_CASTER_PROCS",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "This will suppress any procs that could otherwise trigger (Ex. Spell/Item/Hidden)."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR3_SUPPRESS_TARGET_PROCS",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "This will suppress any procs the target could trigger from this spell. Similar to SPELL_ATTR3_SUPPRESS_CASTER_PROCS."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR3_ALWAYS_HIT",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Spell cannot miss, or be dodged/parried/blocked. Could still miss if overridden by another flag from caster or target."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR3_INSTANT_TARGET_PROCS",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Proc events are triggered before spell batching processes the spell hit on target."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR3_ALLOW_AURA_WHILE_DEAD",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Death persistent spells. Allow aura while dead. Ex. Flasks and certain self class buffs with infinite duration."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR3_ONLY_PROC_OUTDOORS",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Unused in 3.3.5. Self descriptive."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR3_DO_NOT_TRIGGER_TARGET_STAND",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Casting cancels autorepeat(SPELL_ATTR2_AUTO_REPEAT)."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR3_NO_DAMAGE_HISTORY",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Possible combat log or scripting relation."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR3_REQUIRES_OFF_HAND_WEAPON",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR3_TREAT_AS_PERIODIC",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Makes the spell appear as Periodic in client combat logs (Ex. Vampiric Embrace). Also used by spells that trigger another spell on each tick."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR3_CAN_PROC_FROM_PROCS",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Auras with this attribute can proc from other spell procs. (Ex. from SpellAuraDefines in the dbcs or server side from Proc_Events.)"
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR3_ONLY_PROC_ON_CASTER",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Only Drain Soul has this flag. \\*Recheck and update needed.\\*"
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR3_IGNORE_CASTER_AND_TARGET_RESTRICTIONS",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Ignore caster and target restrictions."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR3_IGNORE_CASTER_MODIFIERS",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Does not inherit any of the casters spell, ability, or stat modifiers."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR3_DO_NOT_DISPLAY_RANGE",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Client does not display range in tooltip for these spells."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR3_NOT_ON_AOE_IMMUNE",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "A descriptor for spells that implement Area of Effect Immunity and can serve as a handler for scripts that call for this."
+      }
+    ],
+    "SpellAttr4": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR4_NO_CAST_LOG",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Does not put \"Player casts X spell/ability\" preceding the actual spell in the Combat Log."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR4_CLASS_TRIGGER_ONLY_ON_TARGET",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Proc only on effects with TARGET_UNIT_CASTER?"
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR4_AURA_EXPIRES_OFFLINE",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Most debuffs (with exceptions such as Resurrection Sickness) will automatically do this."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR4_NO_HELPFUL_THREAT",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR4_NO_HARMFUL_THREAT",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Self descriptive. May influence certain situations in towns with guard aggro in respect to PvP."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR4_ALLOW_CLIENT_TARGETING",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Allow client targeting. Applies only to pet spells, if this is not applied then opcode CMSG_PET_ACTION is sent instead of CMSG_PET_CAST_SPELL."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR4_CANNOT_BE_STOLEN",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Although such auras might be dispellable, they cannot be stolen."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR4_ALLOW_CAST_WHILE_CASTING",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Can be cast while another cast is in progress. Ignores already in-progress cast and still casts."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR4_IGNORE_DAMAGE_TAKEN_MODIFIERS",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Ignores resilience and any damage or\u00a0% damage taken auras on target. Notes: Some effects/flags may override this and Mechanic related damage may not be affected."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR4_COMBAT_FEEDBACK_WHEN_USABLE",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Combat Feedback When Usable (client only). Initially disabled / trigger activate from event. Ex. Execute, Riposte, Deep Freeze."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR4_WEAPON_SPEED_COST_SCALING",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Source: \"Adds 10 to power cost for each 1s of weapon speed.\""
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR4_NO_PARTIAL_IMMUNITY",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR4_AURA_IS_BUFF",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Self descriptive. Mostly applied to spells that would result in such spell showing as a debuff."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR4_DO_NOT_LOG_CASTER",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "No caster object is sent to client combat log."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR4_REACTIVE_DAMAGE_PROC",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Doesn't break auras by damage from these spells. Source: \"Damage from spells with this attribute doesn't break auras that normally break on damage taken.\""
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR4_NOT_IN_SPELLBOOK",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR4_NOT_IN_ARENA_OR_RATED_BATTLEGROUND",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Cannot be used in Arenas or Rated Battlegrounds. Source: \"Makes spell unusable despite CD <= 10min.\""
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR4_IGNORE_DEFAULT_ARENA_RESTRICTIONS",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Opposite of SPELL_ATTR4_NOT_IN_ARENA_OR_RATED_BATTLEGROUND attribute. Source: \"Makes spell usable despite CD > 10min.\""
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR4_BOUNCY_CHAIN_MISSILES",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Source: \"Hits area targets over time instead of all at once.\""
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR4_ALLOW_PROC_WHILE_SITTING",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR4_AURA_NEVER_BOUNCES",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Static Aura. Pally aura, DK presence, Warrior stance, Mage armors; these auras persist under many conditions."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR4_ALLOW_ENTERING_ARENA",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Aura/Buff is not removed upon entering an arena match?"
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR4_PROC_SUPPRESS_SWING_ANIM",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Disables client side weapon swing animation."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR4_SUPPRESS_WEAPON_PROCS",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Suppress weapon procs. Similar to SPELL_ATTR3_SUPPRESS_CASTER_PROCS."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR4_AUTO_RANGED_COMBAT",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR4_OWNER_POWER_SCALING",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Pet scaling auras."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR4_ONLY_FLYING_AREAS",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR4_FORCE_DISPLAY_CASTBAR",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR4_IGNORE_COMBAT_TIMER",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR4_AURA_BOUNCE_FAILS_SPELL",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Self descriptive. Need description/example."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR4_OBSOLETE",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Deprecates the spell making it greyed out and gives \"You can't use that here\" error. Still usable with the triggered flag command though."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR4_USE_FACING_FROM_SPELL",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Affects orientation. The value used is likely from the [SpellEffect](https://wowdev.wiki/DB/SpellEffect \"DB/SpellEffect\") column EffectPos_facing post 5.0.1 and related to FacingCasterFlags in [Spell.dbc](https://wowdev.wiki/DB/Spell \"DB/Spell\") for 3.3.5."
+      }
+    ],
+    "SpellAttr5": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR5_ALLOW_ACTIONS_DURING_CHANNEL",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Allows actions during a channeled spell such as moving and jumping."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR5_NO_REAGENT_COST_WITH_AURA",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Reagents will not be required in conjunction with UNIT_FLAG_PREPARATION."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR5_REMOVE_ENTERING_ARENA",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Source: \"Force this aura to be removed on entering arena, regardless of other properties.\""
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR5_ALLOW_WHILE_STUNNED",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR5_TRIGGERS_CHANNELING",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Self descriptive. Likely more script oriented."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR5_LIMIT_N",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Can only have one buff on the target at a time. Prevents multiple unique applications."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR5_IGNORE_AREA_EFFECT_PVP_CHECK",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Possible world PvP flag for objectives such as Spirit Towers?"
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR5_NOT_ON_PLAYER",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Opposite of SPELL_ATTR3_ONLY_ON_PLAYER."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR5_NOT_ON_PLAYER_CONTROLLED_NPC",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Self descriptive. (Ex. Pets, Minions)."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR5_EXTRA_INITIAL_PERIOD",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Source: \"Immediately do periodic tick on apply.\""
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR5_DO_NOT_DISPLAY_DURATION",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Does not send duration to the client."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR5_IMPLIED_TARGETING",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Uses target of target if original target not valid (Ex. Intervene)."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR5_MELEE_CHAIN_TARGETING",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Possible cleave type flag?"
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR5_SPELL_HASTE_AFFECTS_PERIODIC",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Causes haste to affect the duration of periodic spells."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR5_NOT_AVAILABLE_WHILE_CHARMED",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR5_TREAT_AS_AREA_EFFECT",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Similar to SPELL_ATTR3_TREAT_AS_PERIODIC."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR5_AURA_AFFECTS_NOT_JUST_REQ_EQUIPPED_ITEM",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR5_ALLOW_WHILE_FLEEING",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR5_ALLOW_WHILE_CONFUSED",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR5_AI_DOESNT_FACE_TARGET",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Client does not automatically turn caster's model to face target. Opposite of SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ONLY."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR5_DO_NOT_ATTEMPT_A_PET_RESUMMON_WHEN_DISMOUNTING",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Source: \"No generic handling possible, used by scripted dismount spells.\""
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR5_IGNORE_TARGET_REQUIREMENTS",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "\\*NYI\\* Self descriptive."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR5_NOT_ON_TRIVIAL",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "\\*NYI\\* Self descriptive. Most likely in relation to low level(grey) enemies."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR5_NO_PARTIAL_RESISTS",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Spell will either be fully resisted or deal the full amount of damage."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR5_IGNORE_CASTER_REQUIREMENTS",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR5_ALWAYS_LINE_OF_SIGHT",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Constant line of sight required for spell duration."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR5_ALWAYS_AOE_LINE_OF_SIGHT",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Same as SPELL_ATTR5_ALWAYS_LINE_OF_SIGHT but with area of effect spells instead."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR5_NO_CASTER_AURA_ICON",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Auras with this attribute are not visible on units that are the spell caster."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR5_NO_TARGET_AURA_ICON",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Auras with this attribute are not visible on units that are the spell target."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR5_AURA_UNIQUE_PER_CASTER",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Similar to SPELL_ATTR3_STACK_FOR_DIFF_CASTERS. Could be used for debuff grouping."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR5_ALWAYS_SHOW_GROUND_TEXTURE",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Likely refers to the Projected Texture setting and will cause this spell to ignore its value."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR5_ADD_MELEE_HIT_RATING",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Self descriptive."
+      }
+    ],
+    "SpellAttr6": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR6_NO_COOLDOWN_ON_TOOLTIP",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Client does not display cooldown in the tooltip for these spells."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR6_DO_NOT_RESET_COOLDOWN_IN_ARENA",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR6_NOT_AN_ATTACK",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "\\*NYI\\* Self descriptive."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR6_CAN_ASSIST_IMMUNE_PC",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Skips checking UNIT_FLAG_IMMUNE_TO_PC and UNIT_FLAG_IMMUNE_TO_NPC flags on assist."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR6_IGNORE_FOR_MOD_TIME_RATE",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Source: Time rate not implemented. Ambiguous Description and header."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR6_DO_NOT_CONSUME_RESOURCES",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Source: \"Requires power/reagents to cast but doesn't consume them.\""
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR6_FLOATING_COMBAT_TEXT_ON_CAST",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Used on many spells with a visual UI proc."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR6_AURA_IS_WEAPON_PROC",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR6_DO_NOT_CHAIN_TO_CROWD_CONTROLLED_TARGETS",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Source: \"Implicit targeting (chaining and area targeting) will not impact crowd controlled targets.\""
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR6_ALLOW_ON_CHARMED_TARGETS",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR6_NO_AURA_LOG",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR6_NOT_IN_RAID_INSTANCES",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR6_ALLOW_WHILE_RIDING_VEHICLE",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR6_IGNORE_PHASE_SHIFT",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Can ignore visibility requirement for targets of the spell."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR6_AI_PRIMARY_RANGED_ATTACK",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "\\*NYI\\* Related to Shoot? Needs description."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR6_NO_PUSHBACK",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Not to be confused with knockback. Flag is confirmed for two spells 54368, 67892 on wowhead."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR6_NO_JUMP_PATHING",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "\\*NYI\\*, currently jumps don't path at all."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR6_ALLOW_EQUIP_WHILE_CASTING",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Self descriptive. Possible extension beyond relation to gear."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR6_ORIGINATE_FROM_CONTROLLER",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Source: \"Client will prevent casting if not possessed, charmer will be caster for all intents and purposes.\""
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR6_DELAY_COMBAT_TIMER_DURING_CAST",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Found on spells 47488 and 50782 in 3.3.5a."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR6_AURA_ICON_ONLY_FOR_CASTER_LIMIT_10",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Source: \"Aura icon only for caster, (Limit 10) and (Client only).\""
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR6_SHOW_MECHANIC_AS_COMBAT_TEXT",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Ex. \"Bleeding\" appearing where damage numbers would normally be at."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR6_ABSORB_CANNOT_BE_IGNORE",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Self descriptive but vague title. Found on spells like Ardent Defender."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR6_TAPS_IMMEDIATELY",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "This could reference a variety of events from creatures to game objects. Ex. Drain Soul."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR6_CAN_TARGET_UNTARGETABLE",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "These spells bypass creatures with UNIT_FLAG_NOT_SELECTABLE and possibly CREATURE_FLAG_EXTRA_TRIGGER."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR6_DOESNT_RESET_SWING_TIMER_IF_INSTANT",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "This could function similar to spells that have no global cooldown."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR6_VEHICLE_IMMUNITY_CATEGORY",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "\\*NYI\\*, immunity to some buffs for some vehicles."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR6_IGNORE_HEALING_MODIFIERS",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Source: \"This prevents certain healing modifiers from applying - see implementation for about details.\" (No source ref provided.)"
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR6_DO_NOT_AUTO_SELECT_TARGET_WITH_INITIATES_COMBAT",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Found on Death Grip. String title wording is slightly confusing. (Client only)."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Source: \"This prevents certain damage modifiers from applying - see implementation for details.\" (No source ref provided.)"
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR6_DISABLE_TIED_EFFECT_POINTS",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "The value used is likely from the [SpellEffect](https://wowdev.wiki/DB/SpellEffect \"DB/SpellEffect\") column EffectBasePoints post 5.0.1 and of the same name in [Spell.dbc](https://wowdev.wiki/DB/Spell \"DB/Spell\") for 3.3.5."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR6_NO_CATEGORY_COOLDOWN_MODS",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Spells with this attribute skip applying modifiers to category cooldowns found in [Spell Category](https://wowdev.wiki/SpellCategory.dbc \"SpellCategory.dbc\") or possibly [Spell Categories](https://wowdev.wiki/DB/SpellCategories \"DB/SpellCategories\") pending game version."
+      }
+    ],
+    "SpellAttr7": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR7_ALLOW_SPELL_REFLECTION",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Allow spell to be reflected. Will likely interfere if used with SPELL_ATTR1_NO_REFLECTION."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR7_NO_TARGET_DURATION_MOD",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Duration is not affected by duration modifiers."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR7_DISABLE_AURA_WHILE_DEAD",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Source: \"Reactivate at resurrect (client only)\". Ex. Paladin auras."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR7_DEBUG_SPELL",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Cannot cast if caster doesn't have UNIT_FLAG2_ALLOW_CHEAT_SPELLS enabled. Sends a unique error message to the client if unusable."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR7_TREAT_AS_RAID_BUFF",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Spell assumes certain properties that would classify it as a \"raid buff\". (This is only a guess.)"
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR7_CAN_BE_MULTI_CAST",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Involvement with spells that summon totems; otherwise vague."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR7_DONT_CAUSE_SPELL_PUSHBACK",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Source: \"Damage dealt by this does not cause spell pushback.\""
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR7_PREPARE_FOR_VEHICLE_CONTROL_END",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Found on 66218 (Launch) spell. Attribute is most likely server side only."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR7_HORDE_SPECIFIC_SPELL",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Teleports, mounts, and other spells. This should cause these spells to not function or give an error message if Alliance player."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR7_ALLIANCE_SPECIFIC_SPELL",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Teleports, mounts, and other spells. This should cause these spells to not function or give an error message if Horde player."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR7_DISPEL_REMOVES_CHARGES",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Dispel and Spellsteal individual charges instead of whole aura. Ex. More than one stack of lifebloom on a target only steals one."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR7_CAN_CAUSE_INTERRUPT",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Will only allow this spell to interrupt non-player casting."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR7_CAN_CAUSE_SILENCE",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Will only Silence NPCs/creatures. (Not confirmed.)"
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR7_NO_UI_NOT_INTERRUPTIBLE",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Can always be interrupted, even if caster is immune."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR7_RECAST_ON_RESUMMON",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Deprecated attribute(unknown when), there is no SPELL_GO sent anymore on pet resummon. Can be found on 52150 Raise Dead."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR7_RESET_SWING_TIMER_AT_SPELL_START",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR7_ONLY_IN_SPELLBOOK_UNTIL_LEARNED",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Source: \"After learning these spells become hidden in spellbook (but are visible when not learned for low level characters)\" Ex. Mount skillup."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR7_DO_NOT_LOG_PVP_KILL",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Unknown. (Note: Only used by 1 spell that is already filtered out in PvP credit because it is self targeting.)"
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR7_ATTACK_ON_CHARGE_TO_UNIT",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Damage will trigger during animation driven charge and is (possibly) not hindered by it either."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR7_REPORT_SPELL_FAILURE_TO_UNIT_TARGET",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Combat or other server coded failure message may appear in the combat log for these spells when cast by NPCs. (Unsure if any soundbyte is sent.)"
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR7_NO_CLIENT_FAIL_WHILE_STUNNED_FLEEING_CONFUSED",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Client will skip or bypass checking for stunned, fleeing, and confused states."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR7_RETAIN_COOLDOWN_THROUGH_LOAD",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "Unable to extrapolate any meaningful information from this string."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR7_IGNORES_COLD_WEATHER_FLYING_REQUIREMENT",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Spell will bypass the flying requirement for Northrend."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR7_NO_ATTACK_DODGE",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR7_NO_ATTACK_PARRY",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR7_NO_ATTACK_MISS",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR7_TREAT_AS_NPC_AOE",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "This may function like a combination of SPELL_ATTR5_TREAT_AS_AREA_EFFECT and other various properties not assigned to/function differently than the player."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR7_BYPASS_NO_RESURRECT_AURA",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Possibly created for mechanics such as the end of the lich king encounter. (This is only speculation.)"
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR7_DO_NOT_COUNT_FOR_PVP_SCOREBOARD",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Used for certain spells that may inflate or create excessive gaps in the Battleground/Arena statistic sheet."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR7_REFLECTION_ONLY_DEFENDS",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "This possibly allows for a spell to be reflected but not damage the target and instead act more as a deflect. Found on 69028 and 71237 in 3.3.5a."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR7_CAN_PROC_FROM_SUPPRESSED_TARGET_PROCS",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "Has a synergistic effect with SPELL_ATTR3_SUPPRESS_TARGET_PROCS as far as attributes go."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR7_ALWAYS_CAST_LOG",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "Source: \"Client indicator (client only).\""
+      }
+    ],
+    "SpellAttr8": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR8_NO_ATTACK_BLOCK",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Falls in line with SPELL_ATTR7_NO_ATTACK_DODGE, SPELL_ATTR7_NO_ATTACK_PARRY, and SPELL_ATTR7_NO_ATTACK_MISS for individual avoidances."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR8_IGNORE_DYNAMIC_OBJECT_CASTER",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Ignores target types of dynamic object. See [Implicit Targets](https://wowdev.wiki/Spell.dbc/EffectImplicitTarget \"Spell.dbc/EffectImplicitTarget\") for values."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR8_REMOVE_OUTSIDE_DUNGEONS_AND_RAIDS",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "Spell (likely an aura effect) is removed when exiting a dungeon or raid it was applied in."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR8_ONLY_TARGET_IF_SAME_CREATOR",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "Vague. Could be summon related."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR8_CAN_HIT_AOE_UNTARGETABLE",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "This implies SPELL_ATTR6_CAN_TARGET_UNTARGETABLE in conjunction with [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName \"Spell.dbc/EffectApplyAuraName\") of 229 and SPELL_ATTR3_NOT_ON_AOE_IMMUNE if necessary."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR8_ALLOW_WHILE_CHARMED",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Opposite of SPELL_ATTR5_NOT_AVAILABLE_WHILE_CHARMED. This likely has quest implementations but can be thought of as using Divine Shield while Mind Controlled."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR8_AURA_REQUIRED_BY_CLIENT",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "All auras are sent to the client with this attribute. These can be found at [Aura Flags](https://wowdev.wiki/Aura_Flags \"Aura Flags\")."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR8_IGNORE_SANCTUARY",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "These spells will disregard the effects a sanctuary(Ex. Dalaran) will afford."
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR8_USE_TARGETS_LEVEL_FOR_SPELL_SCALING",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Reduces a spell accordingly when used on a lower level player. Found with \"All party and raid\" in some descriptions on 5.4.8."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR8_PERIODIC_CAN_CRIT",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Allows DoTs and HoTs to be critical. This is not always needed for the effect to function."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR8_MIRROR_CREATURE_NAME",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Transform auras also override name and is handled clientside. Found in [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName \"Spell.dbc/EffectApplyAuraName\") 56."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR8_ONLY_PLAYERS_CAN_CAST_THIS_SPELL",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Like SPELL_ATTR3_ONLY_ON_PLAYER except on the casting side instead."
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR8_AURA_POINTS_ON_CLIENT",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Aura must have flag AFLAG_ANY_EFFECT_AMOUNT_SENT to send amount(4.x only?). The list of AFLAGS can be found at [Aura Flags](https://wowdev.wiki/Aura_Flags \"Aura Flags\")."
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR8_NOT_IN_SPELLBOOK_UNTIL_LEARNED",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Hides auto learned spells from the spellbook before learning them. Handled only on client side."
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR8_TARGET_PROCS_ON_CASTER",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "The target (receives) procs that occur on the caster (source) instead of aura target (destination). (Mildly convoluted explanation; seems very niche)"
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR8_REQUIRES_LOCATION_TO_BE_ON_LIQUID_SURFACE",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Self descriptive. Ex. Water mounts such as the Strider."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR8_ONLY_TARGET_OWN_SUMMONS",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Self descriptive. These spells can only target creatures, objects, etc that only you have summoned."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR8_HASTE_AFFECTS_DURATION",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Reduces this spells duration relative to your current haste percent. The new value (DoTs, HoTs) is adjusted accordingly as well."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR8_IGNORE_SPELLCAST_OVERRIDE_COST",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "A spell that has had its resource cost overridden will be ignored with this attribute for better and possibly worse."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR8_ALLOW_TARGETS_HIDDEN_BY_SPAWN_TRACKING",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Source: No spawn tracking implementation. Spawn Tracking has little information, an example can be found here [Wowhead Debug Quest](https://www.wowhead.com/quest=60474/spawn-tracking-unit-specified-world-effect-in-a-wmo-bug)"
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR8_REQUIRES_EQUIPPED_INV_TYPES",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR8_NO_SUMMON_DEST_FROM_CLIENT_TARGETING_PATHING_REQUIREMENT",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "A valid path to a [spell destination](https://wowdev.wiki/Spell.dbc/EffectImplicitTarget \"Spell.dbc/EffectImplicitTarget\") is not required if the current destination comes from client when using this attribute."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR8_MELEE_HASTE_AFFECTS_PERIODIC",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Very similar to [Effect Aura](https://wowdev.wiki/Spell.dbc/EffectApplyAuraName \"Spell.dbc/EffectApplyAuraName\") 416, except this involves periodic ticks and not cooldowns."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR8_ENFORCE_IN_COMBAT_RESSURECTION_LIMIT",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Used to limit the number of battle resurrections in boss encounters."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR8_HEAL_PREDICTION",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "Affects the Heal Prediction. Option must be turned on in Raid Profile from the settings screen to notice."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR8_NO_LEVEL_UP_TOAST",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR8_SKIP_IS_KNOWN_CHECK",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "(Far too vague.) UI related."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR8_AI_FACE_TARGET",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Opposite of SPELL_ATTR5_AI_DOESNT_FACE_TARGET. See SPELL_ATTR4_USE_FACING_FROM_SPELL for more info."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR8_NOT_IN_BATTLEGROUND",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "Opposite of SPELL_ATTR3_ONLY_BATTLEGROUNDS. Spells and items that are not allowed to be cast or used in Battlegrounds. Ex. Mass Resurrection Guild Perk."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR8_MASTERY_AFFECTS_POINTS",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Self descriptive. Unclear if the reference is the [Combat Rating](https://wowdev.wiki/CombatRatings \"CombatRatings\") or a flat amount."
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR8_DISPLAY_LARGE_AURA_ICON_ON_UNIT_FRAMES_BOSS_AURA",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "This is usually a dedicated screen space for an important buff or debuff during an encounter around a portrait."
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR8_CAN_ATTACK_IMMUNE_PC",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "This spell will skip/bypass checking a creature with the Unit_Flag(256)UNIT_FLAG_IMMUNE_TO_PC when executing IsValidAttackTarget."
+      }
+    ],
+    "SpellAttr9": [
+      {
+        "flag": 1,
+        "name": "SPELL_ATTR9_FORCE_DEST_LOCATION",
+        "bitmask": "0x00000001",
+        "bit": 1,
+        "comment": "Ignores collision with terrain (unknown if this ignores the z-axis and allows a destination under the zone floor)."
+      },
+      {
+        "flag": 2,
+        "name": "SPELL_ATTR9_MOD_INVIS_INCLUDES_PARTY",
+        "bitmask": "0x00000002",
+        "bit": 2,
+        "comment": "Causes invisibility auras to ignore the detection of party members who are also invisible."
+      },
+      {
+        "flag": 4,
+        "name": "SPELL_ATTR9_ONLY_WHEN_ILLEGALLY_MOUNTED",
+        "bitmask": "0x00000004",
+        "bit": 3,
+        "comment": "No definition for what is considered \"Illegally Mounted\"."
+      },
+      {
+        "flag": 8,
+        "name": "SPELL_ATTR9_DO_NOT_LOG_AURA_REFRESH",
+        "bitmask": "0x00000008",
+        "bit": 4,
+        "comment": "The combat log will not show when this spell has its duration refreshed."
+      },
+      {
+        "flag": 16,
+        "name": "SPELL_ATTR9_MISSILE_SPEED_IS_DELAY_IN_SEC",
+        "bitmask": "0x00000010",
+        "bit": 5,
+        "comment": "Related to the travel time animation between when a spell has been cast and hits the target. See [SpellMissile](https://wowdev.wiki/DB/SpellMissile \"DB/SpellMissile\") for more information."
+      },
+      {
+        "flag": 32,
+        "name": "SPELL_ATTR9_IGNORE_TOTEM_REQUIREMENTS_FOR_CASTING",
+        "bitmask": "0x00000020",
+        "bit": 6,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 64,
+        "name": "SPELL_ATTR9_ITEM_CAST_GRANTS_SKILL_GAIN",
+        "bitmask": "0x00000040",
+        "bit": 7,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 128,
+        "name": "SPELL_ATTR9_DO_NOT_ADD_TO_UNLEARN_LIST",
+        "bitmask": "0x00000080",
+        "bit": 8,
+        "comment": "Source: \"The Unlearn List is not maintained by SMSG_SEND_UNLEARN_SPELLS and always remains empty.\""
+      },
+      {
+        "flag": 256,
+        "name": "SPELL_ATTR9_COOLDOWN_IGNORES_RANGED_WEAPON",
+        "bitmask": "0x00000100",
+        "bit": 9,
+        "comment": "Self descriptive. Possible bypass for ranged auto-attack GCD or the need for a ranged weapon as a whole."
+      },
+      {
+        "flag": 512,
+        "name": "SPELL_ATTR9_NOT_IN_ARENA",
+        "bitmask": "0x00000200",
+        "bit": 10,
+        "comment": "Similar to SPELL_ATTR8_NOT_IN_BATTLEGROUND but in arena instead."
+      },
+      {
+        "flag": 1024,
+        "name": "SPELL_ATTR9_TARGET_MUST_BE_GROUNDED",
+        "bitmask": "0x00000400",
+        "bit": 11,
+        "comment": "Spell target must be on the map terrain. The target should be in the \"ground\" InhabitType but not necessarily restricted to it."
+      },
+      {
+        "flag": 2048,
+        "name": "SPELL_ATTR9_ALLOW_WHILE_BANISHED_AURA_STATE",
+        "bitmask": "0x00000800",
+        "bit": 12,
+        "comment": "Source: \"On clients with version 10.2.7 and forward, this may function the same as SPELL_ATTR5_ALLOW_WHILE_STUNNED.\""
+      },
+      {
+        "flag": 4096,
+        "name": "SPELL_ATTR9_FACE_UNIT_TARGET_UPON_COMPLETION_OF_JUMP_CHARGE",
+        "bitmask": "0x00001000",
+        "bit": 13,
+        "comment": "Face the target of a \"Jump Charge\" (clarity needed). Possibly similar to SPELL_ATTR0_TRACK_TARGET_IN_CAST_PLAYER_ONLY?"
+      },
+      {
+        "flag": 8192,
+        "name": "SPELL_ATTR9_HASTE_AFFECTS_MELEE_ABILITY_CASTTIME",
+        "bitmask": "0x00002000",
+        "bit": 14,
+        "comment": "Haste will benefit melee-based spells with a cast time. (GCD may also benefit?)"
+      },
+      {
+        "flag": 16384,
+        "name": "SPELL_ATTR9_IGNORE_DEFAULT_RATED_BATTLEGROUND_RESTRICTIONS",
+        "bitmask": "0x00004000",
+        "bit": 15,
+        "comment": "Should be similar to SPELL_ATTR4_IGNORE_DEFAULT_ARENA_RESTRICTIONS and \"Makes spell usable despite CD > 10min\" is expected."
+      },
+      {
+        "flag": 32768,
+        "name": "SPELL_ATTR9_DO_NOT_DISPLAY_POWER_COST",
+        "bitmask": "0x00008000",
+        "bit": 16,
+        "comment": "Does not display power cost. (Client Only)."
+      },
+      {
+        "flag": 65536,
+        "name": "SPELL_ATTR9_NEXT_MODAL_SPELL_REQUIRES_SAME_UNIT_TARGET",
+        "bitmask": "0x00010000",
+        "bit": 17,
+        "comment": "Source: \"Prevents automatically casting the spell from [SpellClassOptions](https://wowdev.wiki/SpellClassOptions.dbc \"SpellClassOptions.dbc\")::ModalNextSpell after the current spell if a target was changed (client only)."
+      },
+      {
+        "flag": 131072,
+        "name": "SPELL_ATTR9_AUTOCAST_OFF_BY_DEFAULT",
+        "bitmask": "0x00020000",
+        "bit": 18,
+        "comment": "Self descriptive."
+      },
+      {
+        "flag": 262144,
+        "name": "SPELL_ATTR9_IGNORE_SCHOOL_LOCKOUT",
+        "bitmask": "0x00040000",
+        "bit": 19,
+        "comment": "Bypasses a [School](https://wowdev.wiki/Spell.dbc/SchoolMask \"Spell.dbc/SchoolMask\") lockout (Ex. Shadow was interrupted for X seconds) and allows casting anyway."
+      },
+      {
+        "flag": 524288,
+        "name": "SPELL_ATTR9_ALLOW_DARK_SIMULACRUM",
+        "bitmask": "0x00080000",
+        "bit": 20,
+        "comment": "Allows the Death Knight spell Dark Simulacrum to properly copy the spell and allow it to be used."
+      },
+      {
+        "flag": 1048576,
+        "name": "SPELL_ATTR9_ALLOW_CAST_WHILE_CHANNELING",
+        "bitmask": "0x00100000",
+        "bit": 21,
+        "comment": "Very similar to SPELL_ATTR5_ALLOW_ACTIONS_DURING_CHANNEL but instead allows the cast of certain spells."
+      },
+      {
+        "flag": 2097152,
+        "name": "SPELL_ATTR9_SUPPRESS_VISUAL_KIT_ERRORS",
+        "bitmask": "0x00200000",
+        "bit": 22,
+        "comment": "This will suppress all or most errors related to [SpellVisualKit](https://wowdev.wiki/DB/SpellVisualKit \"DB/SpellVisualKit\"). (Client Only)."
+      },
+      {
+        "flag": 4194304,
+        "name": "SPELL_ATTR9_SPELLCAST_OVERRIDE_IN_SPELLBOOK",
+        "bitmask": "0x00400000",
+        "bit": 23,
+        "comment": "Vague String. (Client Only)."
+      },
+      {
+        "flag": 8388608,
+        "name": "SPELL_ATTR9_JUMPCHARGE_NO_FACING_CONTROL",
+        "bitmask": "0x00800000",
+        "bit": 24,
+        "comment": "Another string related to \"Jump Charge\". This one seems the opposite of SPELL_ATTR9_FACE_UNIT_TARGET_UPON_COMPLETION_OF_JUMP_CHARGE."
+      },
+      {
+        "flag": 16777216,
+        "name": "SPELL_ATTR9_IGNORE_CASTER_HEALING_MODIFIERS",
+        "bitmask": "0x01000000",
+        "bit": 25,
+        "comment": "The companion attribute to SPELL_ATTR6_IGNORE_CASTER_DAMAGE_MODIFIERS. Prevents certain healing modifiers from applying."
+      },
+      {
+        "flag": 33554432,
+        "name": "SPELL_ATTR9_DONT_CONSUME_CHARGE_IF_ITEM_DELETED",
+        "bitmask": "0x02000000",
+        "bit": 26,
+        "comment": "Source: \"Possibly an attribute created to prevent double item deletion?\" This might used as a failsafe."
+      },
+      {
+        "flag": 67108864,
+        "name": "SPELL_ATTR9_ITEM_PASSIVE_ON_CLIENT",
+        "bitmask": "0x04000000",
+        "bit": 27,
+        "comment": "Vague String. (Client Only)."
+      },
+      {
+        "flag": 134217728,
+        "name": "SPELL_ATTR9_FORCE_CORPSE_TARGET",
+        "bitmask": "0x08000000",
+        "bit": 28,
+        "comment": "Causes the spell to continue its effects on the target even after one of them causes it to die."
+      },
+      {
+        "flag": 268435456,
+        "name": "SPELL_ATTR9_CANNOT_KILL_TARGET",
+        "bitmask": "0x10000000",
+        "bit": 29,
+        "comment": "This can take the place of UNIT_FLAG_IMMUNE, which only prevents damage. This may also reduce scripting needed for a sole purpose."
+      },
+      {
+        "flag": 536870912,
+        "name": "SPELL_ATTR9_LOG_PASSIVE",
+        "bitmask": "0x20000000",
+        "bit": 30,
+        "comment": "Source: \"Allows passive auras to trigger the aura applied, refreshed, and removed combat log events.\""
+      },
+      {
+        "flag": 1073741824,
+        "name": "SPELL_ATTR9_NO_MOVEMENT_RADIUS_BONUS",
+        "bitmask": "0x40000000",
+        "bit": 31,
+        "comment": "A larger radius for the spell (if applicable) is granted if the caster is not moving?"
+      },
+      {
+        "flag": 2147483648,
+        "name": "SPELL_ATTR9_CHANNEL_PERSISTS_ON_PET_FOLLOW",
+        "bitmask": "0x80000000",
+        "bit": 32,
+        "comment": "The channel will not be interrupted by a summoned creature that assumes the pet role."
+      }
+    ]
+  },
+  "proc_flags": [
+    {
+      "flag": 0,
+      "name": "PROC_FLAG_NONE",
+      "bitmask": "0x00000000",
+      "bit": 0,
+      "comment": "N/A"
+    },
+    {
+      "flag": 1,
+      "name": "PROC_FLAG_HEARTBEAT",
+      "bitmask": "0x00000001",
+      "bit": 1,
+      "comment": "Occurs when a spell heartbeat checks to see if the aura breaks, used in spells with that attribute at 25/50/75% duration to see if the spell breaks based on resistances."
+    },
+    {
+      "flag": 2,
+      "name": "PROC_FLAG_KILL",
+      "bitmask": "0x00000002",
+      "bit": 2,
+      "comment": "Kill target (in most cases need XP/Honor reward)."
+    },
+    {
+      "flag": 4,
+      "name": "PROC_FLAG_DONE_MELEE_AUTO_ATTACK",
+      "bitmask": "0x00000004",
+      "bit": 3,
+      "comment": "Done melee auto attack."
+    },
+    {
+      "flag": 8,
+      "name": "PROC_FLAG_TAKEN_MELEE_AUTO_ATTACK",
+      "bitmask": "0x00000008",
+      "bit": 4,
+      "comment": "Taken melee auto attack."
+    },
+    {
+      "flag": 16,
+      "name": "PROC_FLAG_DONE_SPELL_MELEE_DMG_CLASS",
+      "bitmask": "0x00000010",
+      "bit": 5,
+      "comment": "Done attack by Spell that has dmg class melee."
+    },
+    {
+      "flag": 32,
+      "name": "PROC_FLAG_TAKEN_SPELL_MELEE_DMG_CLASS",
+      "bitmask": "0x00000020",
+      "bit": 6,
+      "comment": "Taken attack by Spell that has dmg class melee."
+    },
+    {
+      "flag": 64,
+      "name": "PROC_FLAG_DONE_RANGED_AUTO_ATTACK",
+      "bitmask": "0x00000040",
+      "bit": 7,
+      "comment": "Done ranged auto attack."
+    },
+    {
+      "flag": 128,
+      "name": "PROC_FLAG_TAKEN_RANGED_AUTO_ATTACK",
+      "bitmask": "0x00000080",
+      "bit": 8,
+      "comment": "Taken ranged auto attack."
+    },
+    {
+      "flag": 256,
+      "name": "PROC_FLAG_DONE_SPELL_RANGED_DMG_CLASS",
+      "bitmask": "0x00000100",
+      "bit": 9,
+      "comment": "Done attack by Spell that has dmg class ranged."
+    },
+    {
+      "flag": 512,
+      "name": "PROC_FLAG_TAKEN_SPELL_RANGED_DMG_CLASS",
+      "bitmask": "0x00000200",
+      "bit": 10,
+      "comment": "Taken attack by Spell that has dmg class ranged."
+    },
+    {
+      "flag": 1024,
+      "name": "PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_POS",
+      "bitmask": "0x00000400",
+      "bit": 11,
+      "comment": "Done positive spell that has dmg class none."
+    },
+    {
+      "flag": 2048,
+      "name": "PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_POS",
+      "bitmask": "0x00000800",
+      "bit": 12,
+      "comment": "Taken positive spell that has dmg class none."
+    },
+    {
+      "flag": 4096,
+      "name": "PROC_FLAG_DONE_SPELL_NONE_DMG_CLASS_NEG",
+      "bitmask": "0x00001000",
+      "bit": 13,
+      "comment": "Done negative spell that has dmg class none."
+    },
+    {
+      "flag": 8192,
+      "name": "PROC_FLAG_TAKEN_SPELL_NONE_DMG_CLASS_NEG",
+      "bitmask": "0x00002000",
+      "bit": 14,
+      "comment": "Taken negative spell that has dmg class none."
+    },
+    {
+      "flag": 16384,
+      "name": "PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_POS",
+      "bitmask": "0x00004000",
+      "bit": 15,
+      "comment": "Done positive spell that has dmg class magic."
+    },
+    {
+      "flag": 32768,
+      "name": "PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_POS",
+      "bitmask": "0x00008000",
+      "bit": 16,
+      "comment": "Taken positive spell that has dmg class magic."
+    },
+    {
+      "flag": 65536,
+      "name": "PROC_FLAG_DONE_SPELL_MAGIC_DMG_CLASS_NEG",
+      "bitmask": "0x00010000",
+      "bit": 17,
+      "comment": "Done negative spell that has dmg class magic."
+    },
+    {
+      "flag": 131072,
+      "name": "PROC_FLAG_TAKEN_SPELL_MAGIC_DMG_CLASS_NEG",
+      "bitmask": "0x00020000",
+      "bit": 18,
+      "comment": "Taken negative spell that has dmg class magic."
+    },
+    {
+      "flag": 262144,
+      "name": "PROC_FLAG_DONE_PERIODIC",
+      "bitmask": "0x00040000",
+      "bit": 19,
+      "comment": "Successful do periodic (damage / healing)."
+    },
+    {
+      "flag": 524288,
+      "name": "PROC_FLAG_TAKEN_PERIODIC",
+      "bitmask": "0x00080000",
+      "bit": 20,
+      "comment": "Taken spell periodic (damage / healing)."
+    },
+    {
+      "flag": 1048576,
+      "name": "PROC_FLAG_TAKEN_DAMAGE",
+      "bitmask": "0x00100000",
+      "bit": 21,
+      "comment": "Taken any damage."
+    },
+    {
+      "flag": 2097152,
+      "name": "PROC_FLAG_DONE_TRAP_ACTIVATION",
+      "bitmask": "0x00200000",
+      "bit": 22,
+      "comment": "On trap activation."
+    },
+    {
+      "flag": 4194304,
+      "name": "PROC_FLAG_DONE_MAINHAND_ATTACK",
+      "bitmask": "0x00400000",
+      "bit": 23,
+      "comment": "Done main-hand melee attacks (spell and autoattack)."
+    },
+    {
+      "flag": 8388608,
+      "name": "PROC_FLAG_DONE_OFFHAND_ATTACK",
+      "bitmask": "0x00800000",
+      "bit": 24,
+      "comment": "Done off-hand melee attacks (spell and autoattack)."
+    },
+    {
+      "flag": 16777216,
+      "name": "PROC_FLAG_DEATH",
+      "bitmask": "0x01000000",
+      "bit": 25,
+      "comment": "Died in any way."
+    }
+  ],
+  "interrupt_flags": [
+    {
+      "flag": 1,
+      "name": "INTERRUPT_ON_MOVEMENT",
+      "bitmask": "0x01",
+      "bit": 0,
+      "comment": "Interrupt on movement"
+    },
+    {
+      "flag": 2,
+      "name": "INTERRUPT_PUSHBACK",
+      "bitmask": "0x02",
+      "bit": 1,
+      "comment": "Pushback on damage"
+    },
+    {
+      "flag": 4,
+      "name": "INTERRUPT_ON_INTERRUPT_CAST",
+      "bitmask": "0x04",
+      "bit": 2,
+      "comment": "On interrupt cast"
+    },
+    {
+      "flag": 8,
+      "name": "INTERRUPT_ON_INTERRUPT_SCHOOL",
+      "bitmask": "0x08",
+      "bit": 3,
+      "comment": "On interrupt school"
+    },
+    {
+      "flag": 16,
+      "name": "INTERRUPT_ON_DAMAGE_TAKEN",
+      "bitmask": "0x10",
+      "bit": 4,
+      "comment": "On damage taken"
+    },
+    {
+      "flag": 32,
+      "name": "INTERRUPT_ON_INTERRUPT_ALL",
+      "bitmask": "0x20",
+      "bit": 5,
+      "comment": "On interrupt all"
+    }
+  ],
+  "aura_interrupt_flags": [
+    {
+      "flag": 1,
+      "name": "AURA_INTERRUPT_HITBYSPELL",
+      "bitmask": "0x00000001",
+      "bit": 1,
+      "comment": "Hit by spell"
+    },
+    {
+      "flag": 2,
+      "name": "AURA_INTERRUPT_TAKE_DAMAGE",
+      "bitmask": "0x00000002",
+      "bit": 2,
+      "comment": "Take damage"
+    },
+    {
+      "flag": 4,
+      "name": "AURA_INTERRUPT_CAST",
+      "bitmask": "0x00000004",
+      "bit": 3,
+      "comment": "Cast"
+    },
+    {
+      "flag": 8,
+      "name": "AURA_INTERRUPT_MOVE",
+      "bitmask": "0x00000008",
+      "bit": 4,
+      "comment": "Move"
+    },
+    {
+      "flag": 16,
+      "name": "AURA_INTERRUPT_TURNING",
+      "bitmask": "0x00000010",
+      "bit": 5,
+      "comment": "Turning"
+    },
+    {
+      "flag": 32,
+      "name": "AURA_INTERRUPT_JUMP",
+      "bitmask": "0x00000020",
+      "bit": 6,
+      "comment": "Jump"
+    },
+    {
+      "flag": 64,
+      "name": "AURA_INTERRUPT_NOT_MOUNTED",
+      "bitmask": "0x00000040",
+      "bit": 7,
+      "comment": "Not mounted"
+    },
+    {
+      "flag": 128,
+      "name": "AURA_INTERRUPT_NOT_ABOVEWATER",
+      "bitmask": "0x00000080",
+      "bit": 8,
+      "comment": "Not above water"
+    },
+    {
+      "flag": 256,
+      "name": "AURA_INTERRUPT_NOT_UNDERWATER",
+      "bitmask": "0x00000100",
+      "bit": 9,
+      "comment": "Not underwater"
+    },
+    {
+      "flag": 512,
+      "name": "AURA_INTERRUPT_NOT_SHEATHED",
+      "bitmask": "0x00000200",
+      "bit": 10,
+      "comment": "Not sheathed"
+    },
+    {
+      "flag": 1024,
+      "name": "AURA_INTERRUPT_TALK",
+      "bitmask": "0x00000400",
+      "bit": 11,
+      "comment": "Talk"
+    },
+    {
+      "flag": 2048,
+      "name": "AURA_INTERRUPT_USE",
+      "bitmask": "0x00000800",
+      "bit": 12,
+      "comment": "Use"
+    },
+    {
+      "flag": 4096,
+      "name": "AURA_INTERRUPT_MELEE_ATTACK",
+      "bitmask": "0x00001000",
+      "bit": 13,
+      "comment": "Melee attack"
+    },
+    {
+      "flag": 8192,
+      "name": "AURA_INTERRUPT_SPELL_ATTACK",
+      "bitmask": "0x00002000",
+      "bit": 14,
+      "comment": "Spell attack"
+    },
+    {
+      "flag": 16384,
+      "name": "AURA_INTERRUPT_UNK14",
+      "bitmask": "0x00004000",
+      "bit": 15,
+      "comment": "Unknown 14"
+    },
+    {
+      "flag": 32768,
+      "name": "AURA_INTERRUPT_TRANSFORM",
+      "bitmask": "0x00008000",
+      "bit": 16,
+      "comment": "Transform"
+    },
+    {
+      "flag": 65536,
+      "name": "AURA_INTERRUPT_UNK16",
+      "bitmask": "0x00010000",
+      "bit": 17,
+      "comment": "Unknown 16"
+    },
+    {
+      "flag": 131072,
+      "name": "AURA_INTERRUPT_MOUNT",
+      "bitmask": "0x00020000",
+      "bit": 18,
+      "comment": "Mount"
+    },
+    {
+      "flag": 262144,
+      "name": "AURA_INTERRUPT_NOT_SEATED",
+      "bitmask": "0x00040000",
+      "bit": 19,
+      "comment": "Not seated"
+    },
+    {
+      "flag": 524288,
+      "name": "AURA_INTERRUPT_CHANGE_MAP",
+      "bitmask": "0x00080000",
+      "bit": 20,
+      "comment": "Change map"
+    },
+    {
+      "flag": 1048576,
+      "name": "AURA_INTERRUPT_IMMUNE_OR_LOST_SELECTION",
+      "bitmask": "0x00100000",
+      "bit": 21,
+      "comment": "Immune or lost selection"
+    },
+    {
+      "flag": 2097152,
+      "name": "AURA_INTERRUPT_UNK21",
+      "bitmask": "0x00200000",
+      "bit": 22,
+      "comment": "Unknown 21"
+    },
+    {
+      "flag": 4194304,
+      "name": "AURA_INTERRUPT_TELEPORTED",
+      "bitmask": "0x00400000",
+      "bit": 23,
+      "comment": "Teleported"
+    },
+    {
+      "flag": 8388608,
+      "name": "AURA_INTERRUPT_ENTER_PVP_COMBAT",
+      "bitmask": "0x00800000",
+      "bit": 24,
+      "comment": "Enter PvP combat"
+    },
+    {
+      "flag": 16777216,
+      "name": "AURA_INTERRUPT_DIRECT_DAMAGE",
+      "bitmask": "0x01000000",
+      "bit": 25,
+      "comment": "Direct damage"
+    },
+    {
+      "flag": 33554432,
+      "name": "AURA_INTERRUPT_LANDING",
+      "bitmask": "0x02000000",
+      "bit": 26,
+      "comment": "Landing"
+    }
+  ],
+  "school_mask": [
+    {
+      "flag": 1,
+      "name": "SPELL_SCHOOL_NORMAL",
+      "bitmask": "0x01",
+      "bit": 0,
+      "comment": "Physical"
+    },
+    {
+      "flag": 2,
+      "name": "SPELL_SCHOOL_HOLY",
+      "bitmask": "0x02",
+      "bit": 1,
+      "comment": "Holy"
+    },
+    {
+      "flag": 4,
+      "name": "SPELL_SCHOOL_FIRE",
+      "bitmask": "0x04",
+      "bit": 2,
+      "comment": "Fire"
+    },
+    {
+      "flag": 8,
+      "name": "SPELL_SCHOOL_NATURE",
+      "bitmask": "0x08",
+      "bit": 3,
+      "comment": "Nature"
+    },
+    {
+      "flag": 16,
+      "name": "SPELL_SCHOOL_FROST",
+      "bitmask": "0x10",
+      "bit": 4,
+      "comment": "Frost"
+    },
+    {
+      "flag": 32,
+      "name": "SPELL_SCHOOL_SHADOW",
+      "bitmask": "0x20",
+      "bit": 5,
+      "comment": "Shadow"
+    },
+    {
+      "flag": 64,
+      "name": "SPELL_SCHOOL_ARCANE",
+      "bitmask": "0x40",
+      "bit": 6,
+      "comment": "Arcane"
+    }
+  ],
+  "creature_type_mask": [
+    {
+      "flag": 1,
+      "name": "CREATURE_TYPE_BEAST",
+      "bitmask": "0x0001",
+      "bit": 0,
+      "comment": "Beast"
+    },
+    {
+      "flag": 2,
+      "name": "CREATURE_TYPE_DRAGONKIN",
+      "bitmask": "0x0002",
+      "bit": 1,
+      "comment": "Dragonkin"
+    },
+    {
+      "flag": 4,
+      "name": "CREATURE_TYPE_DEMON",
+      "bitmask": "0x0004",
+      "bit": 2,
+      "comment": "Demon"
+    },
+    {
+      "flag": 8,
+      "name": "CREATURE_TYPE_ELEMENTAL",
+      "bitmask": "0x0008",
+      "bit": 3,
+      "comment": "Elemental"
+    },
+    {
+      "flag": 16,
+      "name": "CREATURE_TYPE_GIANT",
+      "bitmask": "0x0010",
+      "bit": 4,
+      "comment": "Giant"
+    },
+    {
+      "flag": 32,
+      "name": "CREATURE_TYPE_UNDEAD",
+      "bitmask": "0x0020",
+      "bit": 5,
+      "comment": "Undead"
+    },
+    {
+      "flag": 64,
+      "name": "CREATURE_TYPE_HUMANOID",
+      "bitmask": "0x0040",
+      "bit": 6,
+      "comment": "Humanoid"
+    },
+    {
+      "flag": 128,
+      "name": "CREATURE_TYPE_CRITTER",
+      "bitmask": "0x0080",
+      "bit": 7,
+      "comment": "Critter"
+    },
+    {
+      "flag": 256,
+      "name": "CREATURE_TYPE_MECHANICAL",
+      "bitmask": "0x0100",
+      "bit": 8,
+      "comment": "Mechanical"
+    },
+    {
+      "flag": 512,
+      "name": "CREATURE_TYPE_NOT_SPECIFIED",
+      "bitmask": "0x0200",
+      "bit": 9,
+      "comment": "Not specified"
+    },
+    {
+      "flag": 1024,
+      "name": "CREATURE_TYPE_TOTEM",
+      "bitmask": "0x0400",
+      "bit": 10,
+      "comment": "Totem"
+    },
+    {
+      "flag": 2048,
+      "name": "CREATURE_TYPE_NON_COMBAT_PET",
+      "bitmask": "0x0800",
+      "bit": 11,
+      "comment": "Non-combat pet"
+    },
+    {
+      "flag": 4096,
+      "name": "CREATURE_TYPE_GAS_CLOUD",
+      "bitmask": "0x1000",
+      "bit": 12,
+      "comment": "Gas cloud"
+    },
+    {
+      "flag": 8192,
+      "name": "CREATURE_TYPE_WILD_PET",
+      "bitmask": "0x2000",
+      "bit": 13,
+      "comment": "Wild pet"
+    },
+    {
+      "flag": 16384,
+      "name": "CREATURE_TYPE_ABERRATION",
+      "bitmask": "0x4000",
+      "bit": 14,
+      "comment": "Aberration"
+    }
+  ],
+  "shapeshift_form_flags": [
+    {
+      "flag": 1,
+      "name": "SHAPESHIFT_STANCE",
+      "bitmask": "0x00001",
+      "bit": 0,
+      "comment": "Simulates not being shapeshifted to allow mounts/items/interactions"
+    },
+    {
+      "flag": 2,
+      "name": "SHAPESHIFT_NOT_TOGGLEABLE",
+      "bitmask": "0x00002",
+      "bit": 1,
+      "comment": "Prevents cancellation"
+    },
+    {
+      "flag": 4,
+      "name": "SHAPESHIFT_PERSIST_ON_DEATH",
+      "bitmask": "0x00004",
+      "bit": 2,
+      "comment": "Persists on death"
+    },
+    {
+      "flag": 8,
+      "name": "SHAPESHIFT_CAN_INTERACT_NPC",
+      "bitmask": "0x00008",
+      "bit": 3,
+      "comment": "Allows NPC interaction"
+    },
+    {
+      "flag": 16,
+      "name": "SHAPESHIFT_DONT_USE_WEAPON",
+      "bitmask": "0x00010",
+      "bit": 4,
+      "comment": "Don't use weapon"
+    },
+    {
+      "flag": 32,
+      "name": "SHAPESHIFT_AGILITY_ATTACK_BONUS",
+      "bitmask": "0x00020",
+      "bit": 5,
+      "comment": "Enables agility AP bonuses"
+    },
+    {
+      "flag": 64,
+      "name": "SHAPESHIFT_CAN_USE_EQUIPPED_ITEMS",
+      "bitmask": "0x00040",
+      "bit": 6,
+      "comment": "Can use equipped items"
+    },
+    {
+      "flag": 128,
+      "name": "SHAPESHIFT_CAN_USE_ITEMS",
+      "bitmask": "0x00080",
+      "bit": 7,
+      "comment": "Can use items"
+    },
+    {
+      "flag": 256,
+      "name": "SHAPESHIFT_DONT_AUTO_UNSHIFT",
+      "bitmask": "0x00100",
+      "bit": 8,
+      "comment": "Don't auto-unshift"
+    },
+    {
+      "flag": 512,
+      "name": "SHAPESHIFT_CONSIDERED_DEAD",
+      "bitmask": "0x00200",
+      "bit": 9,
+      "comment": "Considered dead, prevents LFG teleportation"
+    },
+    {
+      "flag": 1024,
+      "name": "SHAPESHIFT_CAN_ONLY_CAST_SHAPESHIFT_SPELLS",
+      "bitmask": "0x00400",
+      "bit": 10,
+      "comment": "Can only cast shapeshift spells"
+    },
+    {
+      "flag": 2048,
+      "name": "SHAPESHIFT_CANCELS_AT_FLIGHTMASTER",
+      "bitmask": "0x00800",
+      "bit": 11,
+      "comment": "Cancels at flight master"
+    },
+    {
+      "flag": 4096,
+      "name": "SHAPESHIFT_NO_EMOTE_SOUNDS",
+      "bitmask": "0x01000",
+      "bit": 12,
+      "comment": "No emote sounds"
+    },
+    {
+      "flag": 8192,
+      "name": "SHAPESHIFT_NO_TRIGGER_TELEPORT",
+      "bitmask": "0x02000",
+      "bit": 13,
+      "comment": "No trigger teleport"
+    },
+    {
+      "flag": 16384,
+      "name": "SHAPESHIFT_CANNOT_CHANGE_EQUIPPED_ITEMS",
+      "bitmask": "0x04000",
+      "bit": 14,
+      "comment": "Cannot change equipped items"
+    },
+    {
+      "flag": 32768,
+      "name": "SHAPESHIFT_RESUMMON_PETS_ON_UNSHIFT",
+      "bitmask": "0x08000",
+      "bit": 15,
+      "comment": "Resummon pets on unshift (deprecated)"
+    },
+    {
+      "flag": 65536,
+      "name": "SHAPESHIFT_CANNOT_USE_GAME_OBJECTS",
+      "bitmask": "0x10000",
+      "bit": 16,
+      "comment": "Cannot use game objects"
+    }
+  ],
+  "shapeshift_forms": [
+    {
+      "id": 0,
+      "name": "FORM_NONE",
+      "comment": "No shapeshift form"
+    },
+    {
+      "id": 1,
+      "name": "FORM_CAT_FORM",
+      "comment": "Cat form"
+    },
+    {
+      "id": 2,
+      "name": "FORM_TREE_OF_LIFE",
+      "comment": "Tree of Life form"
+    },
+    {
+      "id": 3,
+      "name": "FORM_TRAVEL_FORM",
+      "comment": "Travel form"
+    },
+    {
+      "id": 4,
+      "name": "FORM_AQUATIC_FORM",
+      "comment": "Aquatic form"
+    },
+    {
+      "id": 5,
+      "name": "FORM_BEAST_FORM",
+      "comment": "Bear form"
+    },
+    {
+      "id": 6,
+      "name": "FORM_AMBIENT",
+      "comment": "Ambient form"
+    },
+    {
+      "id": 7,
+      "name": "FORM_GHOUL",
+      "comment": "Ghoul form"
+    },
+    {
+      "id": 8,
+      "name": "FORM_DIRE_BEAR_FORM",
+      "comment": "Dire Bear form"
+    },
+    {
+      "id": 9,
+      "name": "FORM_CRANE_STANCE",
+      "comment": "Crane stance"
+    },
+    {
+      "id": 10,
+      "name": "FORM_THARONJA_SKELETON",
+      "comment": "Tharon'ja skeleton"
+    },
+    {
+      "id": 11,
+      "name": "FORM_DARKMOON_TEST_OF_STRENGTH",
+      "comment": "Darkmoon Test of Strength"
+    },
+    {
+      "id": 12,
+      "name": "FORM_BLB_PLAYER",
+      "comment": "BLB player form"
+    },
+    {
+      "id": 13,
+      "name": "FORM_SHADOW_DANCE",
+      "comment": "Shadow Dance"
+    },
+    {
+      "id": 14,
+      "name": "FORM_CREATURE_BEAR",
+      "comment": "Creature Bear form"
+    },
+    {
+      "id": 15,
+      "name": "FORM_CREATURE_CAT",
+      "comment": "Creature Cat form"
+    },
+    {
+      "id": 16,
+      "name": "FORM_GHOST_WOLF",
+      "comment": "Ghost Wolf form"
+    },
+    {
+      "id": 17,
+      "name": "FORM_BATTLE_STANCE",
+      "comment": "Battle Stance"
+    },
+    {
+      "id": 18,
+      "name": "FORM_DEFENSIVE_STANCE",
+      "comment": "Defensive Stance"
+    },
+    {
+      "id": 19,
+      "name": "FORM_BERSERKER_STANCE",
+      "comment": "Berserker Stance"
+    },
+    {
+      "id": 20,
+      "name": "FORM_SERPENT_STANCE",
+      "comment": "Serpent Stance"
+    },
+    {
+      "id": 21,
+      "name": "FORM_ZOMBIE",
+      "comment": "Zombie form"
+    },
+    {
+      "id": 22,
+      "name": "FORM_METAMORPHOSIS",
+      "comment": "Metamorphosis form"
+    },
+    {
+      "id": 23,
+      "name": "FORM_OX_STANCE",
+      "comment": "Ox Stance"
+    },
+    {
+      "id": 24,
+      "name": "FORM_TIGER_STANCE",
+      "comment": "Tiger Stance"
+    },
+    {
+      "id": 25,
+      "name": "FORM_UNDEAD",
+      "comment": "Undead form"
+    },
+    {
+      "id": 26,
+      "name": "FORM_FRENZY",
+      "comment": "Frenzy form"
+    },
+    {
+      "id": 27,
+      "name": "FORM_FLIGHT_FORM_EPIC",
+      "comment": "Epic Flight form"
+    },
+    {
+      "id": 28,
+      "name": "FORM_SHADOWFORM",
+      "comment": "Shadow form"
+    },
+    {
+      "id": 29,
+      "name": "FORM_FLIGHT_FORM",
+      "comment": "Flight form"
+    },
+    {
+      "id": 30,
+      "name": "FORM_STEALTH",
+      "comment": "Stealth form"
+    },
+    {
+      "id": 31,
+      "name": "FORM_MOONKIN_FORM",
+      "comment": "Moonkin form"
+    },
+    {
+      "id": 32,
+      "name": "FORM_SPIRIT_OF_REDEMPTION",
+      "comment": "Spirit of Redemption"
+    },
+    {
+      "id": 33,
+      "name": "FORM_GLADIATOR_STANCE",
+      "comment": "Gladiator Stance"
+    },
+    {
+      "id": 34,
+      "name": "FORM_METAMORPHOSIS_2",
+      "comment": "Metamorphosis 2"
+    },
+    {
+      "id": 35,
+      "name": "FORM_MOONKIN_FORM_RESTORATION",
+      "comment": "Restoration Moonkin form"
+    },
+    {
+      "id": 36,
+      "name": "FORM_TREANT_FORM",
+      "comment": "Treant form"
+    },
+    {
+      "id": 37,
+      "name": "FORM_SPIRIT_OWL_FORM",
+      "comment": "Spirit Owl form"
+    },
+    {
+      "id": 38,
+      "name": "FORM_SPIRIT_OWL_FORM_2",
+      "comment": "Spirit Owl form 2"
+    },
+    {
+      "id": 39,
+      "name": "FORM_WISP_FORM",
+      "comment": "Wisp form"
+    },
+    {
+      "id": 40,
+      "name": "FORM_WISP_FORM_2",
+      "comment": "Wisp form 2"
+    },
+    {
+      "id": 41,
+      "name": "FORM_SOULSHAPE",
+      "comment": "Soulshape"
+    },
+    {
+      "id": 42,
+      "name": "FORM_FORGEBORNE_REVERIES",
+      "comment": "Forgeborn Reveries"
+    }
+  ],
+  "aura_flags": [
+    {
+      "flag": 0,
+      "name": "AFLAG_NONE",
+      "bitmask": "0x00",
+      "bit": 0,
+      "comment": "None"
+    },
+    {
+      "flag": 1,
+      "name": "AFLAG_CASTER",
+      "bitmask": "0x01",
+      "bit": 0,
+      "comment": "Caster (pre-Cata) / NOCASTER (Cata+)"
+    },
+    {
+      "flag": 2,
+      "name": "AFLAG_POSITIVE",
+      "bitmask": "0x02",
+      "bit": 1,
+      "comment": "Positive aura"
+    },
+    {
+      "flag": 4,
+      "name": "AFLAG_DURATION",
+      "bitmask": "0x04",
+      "bit": 2,
+      "comment": "Has duration"
+    },
+    {
+      "flag": 8,
+      "name": "AFLAG_ANY_EFFECT_AMOUNT_SENT",
+      "bitmask": "0x08",
+      "bit": 3,
+      "comment": "Any effect amount sent (pre-Cata) / SCALABLE (Cata+)"
+    },
+    {
+      "flag": 16,
+      "name": "AFLAG_NEGATIVE",
+      "bitmask": "0x10",
+      "bit": 4,
+      "comment": "Negative aura"
+    },
+    {
+      "flag": 32,
+      "name": "AFLAG_UNK20",
+      "bitmask": "0x20",
+      "bit": 5,
+      "comment": "Unknown 20 (Cata+)"
+    },
+    {
+      "flag": 64,
+      "name": "AFLAG_UNK40",
+      "bitmask": "0x40",
+      "bit": 6,
+      "comment": "Unknown 40 (Cata+)"
+    },
+    {
+      "flag": 128,
+      "name": "AFLAG_UNK80",
+      "bitmask": "0x80",
+      "bit": 7,
+      "comment": "Unknown 80 (Cata+)"
+    },
+    {
+      "flag": 256,
+      "name": "AFLAG_MAW_POWER",
+      "bitmask": "0x0100",
+      "bit": 8,
+      "comment": "Maw power (Shadowlands+)"
+    }
+  ]
+}
