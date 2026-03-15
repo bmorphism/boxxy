@@ -67,6 +67,74 @@ func TestDaemonStartStop(t *testing.T) {
 	}
 }
 
+func TestHotSwapAppliesParams(t *testing.T) {
+	// Verify that hot-swap actually modifies the recorder's capture behavior
+	captureCount := 0
+	capFn := func() (string, int, int, error) {
+		captureCount++
+		return "hotswap frame content", 80, 24, nil
+	}
+
+	rec := NewRecorder("hotswap-test", "test", capFn)
+
+	// Apply params with compression enabled (skips duplicate frames)
+	rec.ApplyParams(CaptureParams{
+		MaxContentLen:  100,
+		CompressFrames: true,
+		DiffThreshold:  0.0,
+	})
+
+	// First call should succeed
+	content, _, _, err := rec.capture()
+	if err != nil {
+		t.Fatalf("first capture should succeed: %v", err)
+	}
+	if len(content) > 100 {
+		t.Fatalf("content should be truncated to 100, got %d", len(content))
+	}
+
+	// Second identical call should be compressed (error)
+	_, _, _, err = rec.capture()
+	if err == nil {
+		t.Fatal("second identical capture should be compressed away")
+	}
+}
+
+func TestApplyParamsDiffThreshold(t *testing.T) {
+	callNum := 0
+	capFn := func() (string, int, int, error) {
+		callNum++
+		if callNum <= 2 {
+			return "same content", 80, 24, nil
+		}
+		return "very different content now!!!", 80, 24, nil
+	}
+
+	rec := NewRecorder("diff-test", "test", capFn)
+	rec.ApplyParams(CaptureParams{
+		DiffThreshold: 0.5, // require 50% difference
+		MaxContentLen: 1024,
+	})
+
+	// First call: no previous content, should pass
+	_, _, _, err := rec.capture()
+	if err != nil {
+		t.Fatalf("first capture should pass: %v", err)
+	}
+
+	// Second call: identical content, below threshold
+	_, _, _, err = rec.capture()
+	if err == nil {
+		t.Fatal("identical content should be below diff threshold")
+	}
+
+	// Third call: very different content, should pass
+	_, _, _, err = rec.capture()
+	if err != nil {
+		t.Fatalf("different content should pass threshold: %v", err)
+	}
+}
+
 func TestDaemonPersistence(t *testing.T) {
 	dir := t.TempDir()
 	archivePath := dir + "/persist-archive.jsonl"

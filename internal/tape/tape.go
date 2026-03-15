@@ -159,6 +159,46 @@ func (r *Recorder) Tape() *Tape {
 	return r.tape
 }
 
+// ApplyParams wraps the capture function with evolved CaptureParams,
+// applying diff-thresholding, content truncation, and compression.
+// This is the hot-swap mechanism: the DGM daemon calls this when
+// it discovers a better capture strategy.
+func (r *Recorder) ApplyParams(params CaptureParams) {
+	r.mu.Lock()
+	defer r.mu.Unlock()
+
+	original := r.capture
+	var lastContent string
+
+	r.capture = func() (string, int, int, error) {
+		content, w, h, err := original()
+		if err != nil {
+			return content, w, h, err
+		}
+
+		// Apply max content length
+		if params.MaxContentLen > 0 && len(content) > params.MaxContentLen {
+			content = content[:params.MaxContentLen]
+		}
+
+		// Apply diff threshold (skip near-identical frames)
+		if params.DiffThreshold > 0 && lastContent != "" {
+			diff := diffRatio(lastContent, content)
+			if diff < params.DiffThreshold {
+				return "", 0, 0, fmt.Errorf("below diff threshold")
+			}
+		}
+
+		// Apply compression (skip exact duplicates)
+		if params.CompressFrames && content == lastContent {
+			return "", 0, 0, fmt.Errorf("duplicate frame compressed")
+		}
+
+		lastContent = content
+		return content, w, h, nil
+	}
+}
+
 // IngestRemoteFrame processes a frame received from the network,
 // advancing the Lamport clock to maintain causal ordering.
 func (r *Recorder) IngestRemoteFrame(f Frame) {

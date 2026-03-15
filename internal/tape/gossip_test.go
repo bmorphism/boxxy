@@ -101,6 +101,39 @@ func TestGossipConvergenceStatus(t *testing.T) {
 	}
 }
 
+func TestGossipRunnerLifecycle(t *testing.T) {
+	capFn := func() (string, int, int, error) {
+		return "gossip runner frame", 80, 24, nil
+	}
+
+	rec := NewRecorder("gossip-runner-test", "test", capFn)
+	rec.Start()
+	defer rec.Stop()
+
+	srv, err := NewServer("127.0.0.1:0", rec)
+	if err != nil {
+		t.Fatalf("create server: %v", err)
+	}
+	go srv.Serve()
+	defer srv.Stop()
+
+	gs := NewGossipState("gossip-runner-test")
+	gr := NewGossipRunner(gs, rec, srv, 500*time.Millisecond)
+	gr.Start()
+
+	// Let gossip run a few cycles
+	time.Sleep(2 * time.Second)
+
+	gr.Stop()
+
+	// Verify the gossip state was updated
+	lamport := gs.lamport.Now()
+	if lamport == 0 {
+		t.Fatal("expected non-zero Lamport after gossip runner cycles")
+	}
+	t.Logf("gossip runner: lamport=%d after 2s", lamport)
+}
+
 func TestGossipMergeRequest(t *testing.T) {
 	gs := NewGossipState("requester")
 	msg := gs.MergeRequest()

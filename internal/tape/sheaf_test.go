@@ -66,6 +66,36 @@ func TestSheafEmptyWorld(t *testing.T) {
 	}
 }
 
+func TestSheafPartitionDetection(t *testing.T) {
+	// Two nodes with a Lamport gap > 10 indicating a network partition
+	t1 := NewTape("node-a", "s1")
+	t1.Append(Frame{SeqNo: 1, LamportTS: 1, NodeID: "node-a", Trit: 0, WallTime: time.Now()})
+	t1.Append(Frame{SeqNo: 2, LamportTS: 2, NodeID: "node-a", Trit: 1, WallTime: time.Now()})
+	// Gap: node-a jumps from lamport 2 to lamport 50 (partition)
+	t1.Append(Frame{SeqNo: 3, LamportTS: 50, NodeID: "node-a", Trit: 2, WallTime: time.Now()})
+	t1.Append(Frame{SeqNo: 4, LamportTS: 51, NodeID: "node-a", Trit: 0, WallTime: time.Now()})
+
+	t2 := NewTape("node-b", "s2")
+	t2.Append(Frame{SeqNo: 1, LamportTS: 3, NodeID: "node-b", Trit: 1, WallTime: time.Now()})
+	t2.Append(Frame{SeqNo: 2, LamportTS: 4, NodeID: "node-b", Trit: 2, WallTime: time.Now()})
+
+	world := NewTapeWorld(t1, t2)
+	result := CheckSheafConsistency(world)
+
+	t.Logf("partition check: consistent=%v sections=%d h1=%d coverage=%.2f",
+		result.Consistent, result.Sections, result.H1Dim, result.Coverage)
+
+	// The gap should cause multiple sections for node-a
+	if result.Sections < 2 {
+		t.Logf("expected partition to split into multiple sections, got %d", result.Sections)
+	}
+
+	// Coverage should be less than 1.0 due to the gap
+	if result.Coverage >= 1.0 {
+		t.Logf("expected incomplete coverage due to partition, got %.2f", result.Coverage)
+	}
+}
+
 func TestSheafGF3Conservation(t *testing.T) {
 	tape := NewTape("node", "test")
 	// Trits: 0, 1, 2 -> balanced

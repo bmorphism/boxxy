@@ -221,9 +221,12 @@ func (d *Daemon) evolveStep(startTime time.Time) {
 		})
 	}
 
-	// Check for hot-swap
+	// Check for hot-swap: if a better agent is found, apply its params to the live recorder
 	newBest := d.archive.Best()
 	if d.config.HotSwap && newBest != nil && newBest.ID != prevBestID {
+		// Actually apply the evolved params to the running recorder
+		d.recorder.ApplyParams(newBest.Params)
+
 		d.mu.Lock()
 		d.stats.HotSwaps++
 		d.stats.BestFitness = newBest.Fitness
@@ -235,7 +238,7 @@ func (d *Daemon) evolveStep(startTime time.Time) {
 			Generation: newBest.Generation,
 			Fitness:    newBest.Fitness,
 			AgentID:    newBest.ID,
-			Message:    fmt.Sprintf("hot-swap: new best agent %s (fitness=%.3f, interval=%dms)", newBest.ID, newBest.Fitness, newBest.Params.IntervalMs),
+			Message:    fmt.Sprintf("hot-swap: applied agent %s (fitness=%.3f, interval=%dms, diff=%.2f)", newBest.ID, newBest.Fitness, newBest.Params.IntervalMs, newBest.Params.DiffThreshold),
 		})
 	}
 
