@@ -112,3 +112,8 @@ haiku-gui: deps
 	CGO_ENABLED=1 go build $(LDFLAGS) $(GOFLAGS) -o haiku-gui ./cmd/haiku-gui
 	codesign --force --entitlements entitlements.plist --sign - haiku-gui
 	@echo "✓ Built haiku-gui - run with ./haiku-gui"
+
+# Build TUI QuickTime alternative (causal tape recorder + self-evolving daemon)
+tapeqt: deps
+	CGO_ENABLED=1 go build $(LDFLAGS) $(GOFLAGS) -o tapeqt ./cmd/tapeqt
+	@echo "✓ Built tapeqt - TUI QuickTime with causal 1-FPS tapes + DGM self-evolution"
