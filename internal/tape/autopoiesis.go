@@ -24,13 +24,14 @@ import (
 
 // AutopoieticRecorder combines recording with self-evolving capture.
 type AutopoieticRecorder struct {
-	mu       sync.Mutex
-	recorder *Recorder
-	daemon   *Daemon
-	gossip   *GossipState
-	colors   *SessionColorStream
-	events   []DaemonEvent
-	maxEvents int
+	mu            sync.Mutex
+	recorder      *Recorder
+	daemon        *Daemon
+	gossip        *GossipState
+	gossipRunner  *GossipRunner
+	colors        *SessionColorStream
+	events        []DaemonEvent
+	maxEvents     int
 }
 
 // AutopoieticConfig configures the self-evolving recorder.
@@ -60,11 +61,17 @@ func NewAutopoieticRecorder(cfg AutopoieticConfig) (*AutopoieticRecorder, error)
 
 	if cfg.GossipNode {
 		ar.gossip = NewGossipState(cfg.NodeID)
+		// Make gossip state globally visible for Lisp bindings
+		activeGossipState = ar.gossip
 	}
 
-	// Wire color stream to frames
+	// Wire color stream to frames, annotate frame metadata with color
 	rec.OnFrame(func(f Frame) {
 		ar.colors.FeedFrame(f)
+		if f.Meta == nil {
+			f.Meta = make(map[string]string)
+		}
+		f.Meta["hex_color"] = ar.colors.ColorFor(int(f.SeqNo))
 	})
 
 	// Collect daemon events
@@ -80,6 +87,18 @@ func NewAutopoieticRecorder(cfg AutopoieticConfig) (*AutopoieticRecorder, error)
 	return ar, nil
 }
 
+// StartWithServer begins recording, self-evolution, and gossip with a network server.
+func (ar *AutopoieticRecorder) StartWithServer(server *Server) error {
+	if err := ar.recorder.Start(); err != nil {
+		return err
+	}
+	if ar.gossip != nil && server != nil {
+		ar.gossipRunner = NewGossipRunner(ar.gossip, ar.recorder, server, 5*time.Second)
+		ar.gossipRunner.Start()
+	}
+	return ar.daemon.Start()
+}
+
 // Start begins both recording and self-evolution.
 func (ar *AutopoieticRecorder) Start() error {
 	if err := ar.recorder.Start(); err != nil {
@@ -88,8 +107,11 @@ func (ar *AutopoieticRecorder) Start() error {
 	return ar.daemon.Start()
 }
 
-// Stop halts recording and evolution, persisting the archive.
+// Stop halts recording, evolution, and gossip, persisting the archive.
 func (ar *AutopoieticRecorder) Stop() *Tape {
+	if ar.gossipRunner != nil {
+		ar.gossipRunner.Stop()
+	}
 	ar.daemon.Stop()
 	return ar.recorder.Stop()
 }

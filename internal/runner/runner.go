@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/bmorphism/boxxy/internal/lisp"
+	"github.com/bmorphism/boxxy/internal/tape"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
 
@@ -139,9 +140,12 @@ func RunScript(path string) error {
 		return fmt.Errorf("failed to read script: %w", err)
 	}
 
-	// Initialize environment
+	// Initialize environment with all namespaces
 	env := lisp.CreateStandardEnv()
 	vm.RegisterNamespace(env)
+	tape.RegisterNamespace(env)
+	tape.RegisterEvolveNamespace(env)
+	tape.RegisterDaemonNamespace(env)
 
 	reader := lisp.NewReader(strings.NewReader(string(content)))
 	exprs, err := reader.ReadAll()

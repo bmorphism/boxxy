@@ -27,6 +27,10 @@ func RegisterDaemonNamespace(env *lisp.Env) {
 	env.Set("tape/autopoietic-stop!", &lisp.Fn{Name: "tape/autopoietic-stop!", Func: autopoieticStopLisp})
 	env.Set("tape/autopoietic-status", &lisp.Fn{Name: "tape/autopoietic-status", Func: autopoieticStatusLisp})
 
+	// Gossip runner
+	env.Set("tape/gossip-start!", &lisp.Fn{Name: "tape/gossip-start!", Func: gossipStartLisp})
+	env.Set("tape/gossip-stop!", &lisp.Fn{Name: "tape/gossip-stop!", Func: gossipStopLisp})
+
 	// Sheaf consistency
 	env.Set("tape/sheaf-check", &lisp.Fn{Name: "tape/sheaf-check", Func: sheafCheckLisp})
 }
@@ -225,6 +229,51 @@ func autopoieticStatusLisp(args []lisp.Value) lisp.Value {
 		lisp.Keyword("generations"): lisp.Int(int64(dStatus["generations"].(int))),
 		lisp.Keyword("hot-swaps"):   lisp.Int(int64(dStatus["hot_swaps"].(int))),
 		lisp.Keyword("best-fitness"): lisp.Float(dStatus["best_fitness"].(float64)),
+	}
+}
+
+// --- Gossip runner ---
+
+var activeGossipRunner *GossipRunner
+
+func gossipStartLisp(args []lisp.Value) lisp.Value {
+	if len(args) < 2 {
+		panic("tape/gossip-start! requires a recorder and a server")
+	}
+	rec := args[0].(*lisp.ExternalValue).Value.(*Recorder)
+	srv := args[1].(*lisp.ExternalValue).Value.(*Server)
+
+	nodeID := rec.tape.NodeID
+	gs := NewGossipState(nodeID)
+	activeGossipState = gs
+
+	interval := 5 * time.Second
+	if len(args) > 2 {
+		interval = time.Duration(args[2].(lisp.Int)) * time.Second
+	}
+
+	gr := NewGossipRunner(gs, rec, srv, interval)
+	gr.Start()
+	activeGossipRunner = gr
+
+	return lisp.HashMap{
+		lisp.Keyword("node"):     lisp.String(nodeID),
+		lisp.Keyword("interval"): lisp.String(interval.String()),
+	}
+}
+
+func gossipStopLisp(args []lisp.Value) lisp.Value {
+	if activeGossipRunner == nil {
+		return lisp.Bool(false)
+	}
+	activeGossipRunner.Stop()
+	status := activeGossipState.ConvergenceStatus()
+	activeGossipRunner = nil
+	activeGossipState = nil
+
+	return lisp.HashMap{
+		lisp.Keyword("peers"):       lisp.Int(int64(status["peers"].(int))),
+		lisp.Keyword("total-frames"): lisp.Int(int64(status["total_frames"].(int))),
 	}
 }
 
