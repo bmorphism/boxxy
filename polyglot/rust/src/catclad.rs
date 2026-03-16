@@ -197,7 +197,7 @@ impl From<Trit> for u8 {
 // ---------------------------------------------------------------------------
 
 /// An N-element trit sequence over GF(3), stored inline (no heap allocation).
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Eq)]
 pub struct GF3<const N: usize> {
     trits: [Trit; N],
 }
