@@ -172,28 +172,29 @@ type ManipulationPattern struct {
 	Severity float64 `json:"severity"`
 }
 
+// Pre-compiled manipulation patterns — compiled once, reused on every call.
+var manipulationChecks = []struct {
+	kind    string
+	pattern *regexp.Regexp
+	weight  float64
+}{
+	{"emotional_fear", regexp.MustCompile(`(?i)(fear|terrif|alarm|panic|dread|catastroph)`), 0.7},
+	{"urgency", regexp.MustCompile(`(?i)(act now|limited time|don't wait|expires|hurry|last chance|before it's too late)`), 0.8},
+	{"false_consensus", regexp.MustCompile(`(?i)(everyone knows|nobody (believes|wants|thinks)|all experts|unanimous|widely accepted)`), 0.6},
+	{"appeal_authority", regexp.MustCompile(`(?i)(experts say|scientists (claim|prove)|studies show|research proves|doctors recommend)`), 0.5},
+	{"artificial_scarcity", regexp.MustCompile(`(?i)(exclusive|rare opportunity|only \d+ left|limited (edition|supply|spots))`), 0.7},
+	{"social_pressure", regexp.MustCompile(`(?i)(you don't want to be|don't miss out|join .* (others|people)|be the first)`), 0.6},
+	{"loaded_language", regexp.MustCompile(`(?i)(obviously|clearly|undeniably|unquestionably|beyond doubt)`), 0.4},
+	{"false_dichotomy", regexp.MustCompile(`(?i)(either .* or|only (two|2) (options|choices)|if you don't .* then)`), 0.6},
+	{"circular_reasoning", regexp.MustCompile(`(?i)(because .* therefore .* because|true because .* which is true)`), 0.9},
+	{"ad_hominem", regexp.MustCompile(`(?i)(stupid|idiot|moron|fool|ignorant|naive) .* (think|believe|say)`), 0.8},
+}
+
 // DetectManipulation checks for manipulation patterns in text.
 func DetectManipulation(text string) []ManipulationPattern {
 	var patterns []ManipulationPattern
 
-	checks := []struct {
-		kind    string
-		pattern *regexp.Regexp
-		weight  float64
-	}{
-		{"emotional_fear", regexp.MustCompile(`(?i)(fear|terrif|alarm|panic|dread|catastroph)`), 0.7},
-		{"urgency", regexp.MustCompile(`(?i)(act now|limited time|don't wait|expires|hurry|last chance|before it's too late)`), 0.8},
-		{"false_consensus", regexp.MustCompile(`(?i)(everyone knows|nobody (believes|wants|thinks)|all experts|unanimous|widely accepted)`), 0.6},
-		{"appeal_authority", regexp.MustCompile(`(?i)(experts say|scientists (claim|prove)|studies show|research proves|doctors recommend)`), 0.5},
-		{"artificial_scarcity", regexp.MustCompile(`(?i)(exclusive|rare opportunity|only \d+ left|limited (edition|supply|spots))`), 0.7},
-		{"social_pressure", regexp.MustCompile(`(?i)(you don't want to be|don't miss out|join .* (others|people)|be the first)`), 0.6},
-		{"loaded_language", regexp.MustCompile(`(?i)(obviously|clearly|undeniably|unquestionably|beyond doubt)`), 0.4},
-		{"false_dichotomy", regexp.MustCompile(`(?i)(either .* or|only (two|2) (options|choices)|if you don't .* then)`), 0.6},
-		{"circular_reasoning", regexp.MustCompile(`(?i)(because .* therefore .* because|true because .* which is true)`), 0.9},
-		{"ad_hominem", regexp.MustCompile(`(?i)(stupid|idiot|moron|fool|ignorant|naive) .* (think|believe|say)`), 0.8},
-	}
-
-	for _, c := range checks {
+	for _, c := range manipulationChecks {
 		matches := c.pattern.FindAllString(text, -1)
 		for _, m := range matches {
 			patterns = append(patterns, ManipulationPattern{
@@ -250,21 +251,22 @@ func contentHash(text string) string {
 	return hex.EncodeToString(h[:])
 }
 
-func extractSources(text string) []*Source {
-	patterns := []struct {
-		re   *regexp.Regexp
-		kind string
-	}{
-		{regexp.MustCompile(`(?i)(?:according to|cited by|reported by)\s+([^,\.]+)`), "authority"},
-		{regexp.MustCompile(`(?i)(?:study|research|paper)\s+(?:by|from|in)\s+([^,\.]+)`), "academic"},
-		{regexp.MustCompile(`(?i)(?:published in|journal of)\s+([^,\.]+)`), "academic"},
-		{regexp.MustCompile(`(?i)(https?://\S+)`), "url"},
-	}
+// Pre-compiled source extraction patterns.
+var sourcePatterns = []struct {
+	re   *regexp.Regexp
+	kind string
+}{
+	{regexp.MustCompile(`(?i)(?:according to|cited by|reported by)\s+([^,\.]+)`), "authority"},
+	{regexp.MustCompile(`(?i)(?:study|research|paper)\s+(?:by|from|in)\s+([^,\.]+)`), "academic"},
+	{regexp.MustCompile(`(?i)(?:published in|journal of)\s+([^,\.]+)`), "academic"},
+	{regexp.MustCompile(`(?i)(https?://\S+)`), "url"},
+}
 
+func extractSources(text string) []*Source {
 	var sources []*Source
 	seen := make(map[string]bool)
 
-	for _, p := range patterns {
+	for _, p := range sourcePatterns {
 		matches := p.re.FindAllStringSubmatch(text, -1)
 		for _, m := range matches {
 			if len(m) < 2 {

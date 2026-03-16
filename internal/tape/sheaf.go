@@ -140,19 +140,26 @@ func buildSections(world *TapeWorld) []SheafSection {
 }
 
 // checkCocycles checks the cocycle condition between overlapping sections.
+// Sorted by LamportLo for early break when no further overlaps possible.
 func checkCocycles(sections []SheafSection) []SheafCocycle {
+	// Sort by LamportLo for sweep-line efficiency
+	sort.Slice(sections, func(i, j int) bool {
+		return sections[i].LamportLo < sections[j].LamportLo
+	})
+
 	var cocycles []SheafCocycle
 
 	for i := 0; i < len(sections); i++ {
 		for j := i + 1; j < len(sections); j++ {
 			a, b := sections[i], sections[j]
 
-			// Only check overlapping sections (from different nodes)
+			// Early break: if b starts after a ends, no further j can overlap a
+			if b.LamportLo > a.LamportHi {
+				break
+			}
+
 			if a.NodeID == b.NodeID {
 				continue
-			}
-			if a.LamportHi < b.LamportLo || b.LamportHi < a.LamportLo {
-				continue // no overlap
 			}
 
 			// Check for gaps in the overlap region

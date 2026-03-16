@@ -12,6 +12,7 @@ package tape
 
 import (
 	"encoding/json"
+	"sort"
 	"sync"
 	"sync/atomic"
 )
@@ -108,16 +109,10 @@ func MergeTapes(tapes ...*Tape) *Tape {
 }
 
 func sortFrames(frames []Frame) {
-	n := len(frames)
-	for i := 1; i < n; i++ {
-		key := frames[i]
-		j := i - 1
-		for j >= 0 && CausalOrder(frames[j].LamportTS, frames[j].NodeID, key.LamportTS, key.NodeID) > 0 {
-			frames[j+1] = frames[j]
-			j--
-		}
-		frames[j+1] = key
-	}
+	sort.Slice(frames, func(i, j int) bool {
+		return CausalOrder(frames[i].LamportTS, frames[i].NodeID,
+			frames[j].LamportTS, frames[j].NodeID) < 0
+	})
 }
 
 // VectorClock tracks causal dependencies across multiple nodes.
