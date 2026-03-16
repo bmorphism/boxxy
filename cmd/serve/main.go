@@ -28,6 +28,8 @@ import (
 	"sync"
 
 	"github.com/bmorphism/boxxy/internal/lisp"
+	"github.com/bmorphism/boxxy/internal/streams"
+	"github.com/bmorphism/boxxy/internal/tape"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
 
@@ -47,9 +49,13 @@ func main() {
 	corsOrigin := flag.String("cors-origin", "*", "CORS allowed origin")
 	flag.Parse()
 
-	// Create shared Lisp environment with vz namespace
+	// Create shared Lisp environment with all namespaces
 	env := lisp.CreateStandardEnv()
 	vm.RegisterNamespace(env)
+	streams.RegisterNamespace(env)
+	tape.RegisterNamespace(env)
+	tape.RegisterEvolveNamespace(env)
+	tape.RegisterDaemonNamespace(env)
 	var evalMu sync.Mutex
 
 	// HTTP handler for WebSocket upgrade

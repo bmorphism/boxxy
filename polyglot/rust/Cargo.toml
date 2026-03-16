@@ -1,0 +1,16 @@
+[package]
+name = "catclad-mcp"
+version = "0.1.0"
+edition = "2021"
+description = "Cat-clad anti-bullshit MCP server — epistemological verification over GF(3)"
+license = "MIT"
+
+[[bin]]
+name = "catclad-mcp"
+path = "src/main.rs"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+regex = "1"
