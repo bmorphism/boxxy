@@ -746,7 +746,7 @@ fun main() {
     }
     println("    Sources: ${world.sources.size}")
     world.sources.values.forEach { s ->
-        println("      - [$s.kind] \"${s.citation}\" trit=${s.trit}")
+        println("      - [${s.kind}] \"${s.citation}\" trit=${s.trit}")
     }
     println("    Derivations: ${world.derivations.size}")
     println("    Witnesses: ${world.witnesses.size}")
