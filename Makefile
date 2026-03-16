@@ -117,3 +117,8 @@ haiku-gui: deps
 tapeqt: deps
 	CGO_ENABLED=1 go build $(LDFLAGS) $(GOFLAGS) -o tapeqt ./cmd/tapeqt
 	@echo "✓ Built tapeqt - TUI QuickTime with causal 1-FPS tapes + DGM self-evolution"
+
+# Build CatColab anti-bullshit MCP server
+antibullshit: deps
+	CGO_ENABLED=1 go build $(LDFLAGS) $(GOFLAGS) -o antibullshit-mcp ./cmd/antibullshit
+	@echo "✓ Built antibullshit-mcp - CatColab DblTheory epistemological verification"
