@@ -2,14 +2,12 @@
 
 # cat_clad.rb -- Tier 3 Ruby implementation of cat-clad epistemological verification.
 #
+# Post-modern Ruby 3.2+ rewrite: Data.define, Ractor-safe, pattern matching,
+# Enumerator::Lazy pipelines, Comparable/Enumerable, Refinements, builders.
+#
 # A "cat-clad" claim is an object in a category with morphisms tracking
 # its provenance, derivation history, and the consistency conditions that
-# bind it to other claims. Verification reduces to structural properties:
-#
-#   - Provenance is a composable morphism chain to primary sources
-#   - Consistency is a sheaf condition (H^1 = 0 means no contradictions)
-#   - GF(3) conservation prevents unbounded generation without verification
-#   - Bisimulation detects forgery (divergent accounts of the same event)
+# bind it to other claims.
 #
 # ACSet Schema:
 #
@@ -41,145 +39,174 @@ require 'digest'
 require 'time'
 require 'json'
 
-# --- ACSet Schema Types ---
+# --- GF(3) Trit: Comparable immutable value ---
 
-Claim = Struct.new(:id, :text, :trit, :hash, :confidence, :framework, :created_at, keyword_init: true) do
-  def to_h
-    { id: id, text: text, trit: trit, hash: hash, confidence: confidence,
-      framework: framework, created_at: created_at.to_s }
-  end
-end
+class Trit
+  include Comparable
 
-Source = Struct.new(:id, :citation, :trit, :hash, :kind, keyword_init: true) do
-  def to_h
-    { id: id, citation: citation, trit: trit, hash: hash, kind: kind }
-  end
-end
+  attr_reader :value
 
-Witness = Struct.new(:id, :name, :trit, :role, :weight, keyword_init: true) do
-  def to_h
-    { id: id, name: name, trit: trit, role: role, weight: weight }
-  end
-end
+  ZERO = new.tap { |t| t.instance_variable_set(:@value, 0) }.freeze
+  ONE  = new.tap { |t| t.instance_variable_set(:@value, 1) }.freeze
+  TWO  = new.tap { |t| t.instance_variable_set(:@value, 2) }.freeze
 
-Derivation = Struct.new(:id, :source_id, :claim_id, :kind, :strength, keyword_init: true) do
-  def to_h
-    { id: id, source_id: source_id, claim_id: claim_id, kind: kind, strength: strength }
-  end
-end
+  ALL = [ZERO, ONE, TWO].freeze
 
-Cocycle = Struct.new(:claim_a, :claim_b, :kind, :severity, keyword_init: true) do
-  def to_h
-    { claim_a: claim_a, claim_b: claim_b, kind: kind, severity: severity }
-  end
-end
+  private_class_method :new
 
-ManipulationPattern = Struct.new(:kind, :evidence, :severity, keyword_init: true) do
-  def to_h
-    { kind: kind, evidence: evidence, severity: severity }
-  end
-end
-
-# --- GF(3) Module ---
-
-module GF3
-  Zero = 0
-  One  = 1
-  Two  = 2
-
-  module_function
-
-  def add(a, b)
-    (a + b) % 3
-  end
-
-  def mul(a, b)
-    (a * b) % 3
-  end
-
-  def neg(a)
-    (3 - a) % 3
-  end
-
-  def sub(a, b)
-    add(a, neg(b))
-  end
-
-  def inv(a)
-    raise "gf3: multiplicative inverse of zero" if a == Zero
-    a == One ? One : Two
-  end
-
-  def seq_sum(trits)
-    trits.sum
-  end
-
-  def balanced?(trits)
-    (seq_sum(trits) % 3) == 0
-  end
-
-  def find_balancer(a, b, c)
-    partial = (a + b + c) % 3
-    (3 - partial) % 3
-  end
-
-  def to_balanced(e)
-    case e
-    when Zero then 0
-    when One  then 1
-    when Two  then -1
+  def self.[](v)
+    case v
+    when 0 then ZERO
+    when 1 then ONE
+    when 2 then TWO
+    when Trit then v
+    else raise ArgumentError, "invalid trit: #{v}"
     end
   end
 
-  def elem_name(e)
-    case e
-    when Zero then "coordinator"
-    when One  then "generator"
-    when Two  then "verifier"
+  def <=>(other)
+    value <=> other.value
+  end
+
+  def +(other)  = Trit[(value + other.value) % 3]
+  def *(other)  = Trit[(value * other.value) % 3]
+  def -@        = Trit[(3 - value) % 3]
+  def -(other)  = self + (-other)
+
+  def inverse
+    raise "gf3: multiplicative inverse of zero" if self == ZERO
+    self == ONE ? ONE : TWO
+  end
+
+  def balanced_value
+    case self
+    in ^(ZERO) then 0
+    in ^(ONE)  then 1
+    in ^(TWO)  then -1
+    end
+  end
+
+  def role
+    case self
+    in ^(ZERO) then "coordinator".freeze
+    in ^(ONE)  then "generator".freeze
+    in ^(TWO)  then "verifier".freeze
+    end
+  end
+
+  def to_i    = value
+  def to_s    = "Trit(#{value}:#{role})"
+  def inspect = to_s
+
+  def self.balanced?(trits)
+    (trits.sum(&:value) % 3).zero?
+  end
+
+  def self.find_balancer(a, b, c)
+    Trit[(3 - (a.value + b.value + c.value) % 3) % 3]
+  end
+
+  freeze
+end
+
+# --- Refinements: pipeline helpers on core types ---
+
+module CatCladRefinements
+  refine String do
+    def content_hash
+      Digest::SHA256.hexdigest(strip.downcase).freeze
+    end
+
+    def trit_id(len = 12)
+      content_hash[0, len].freeze
+    end
+  end
+
+  refine Array do
+    def trit_balanced?
+      Trit.balanced?(self)
     end
   end
 end
 
-# --- ClaimWorld: the ACSet instance ---
+# --- ACSet Schema Types (Data.define: immutable value objects) ---
 
-ClaimWorld = Struct.new(:claims, :sources, :witnesses, :derivations, :cocycles, keyword_init: true) do
-  def initialize(**kwargs)
-    super(
-      claims:      kwargs.fetch(:claims, {}),
-      sources:     kwargs.fetch(:sources, {}),
-      witnesses:   kwargs.fetch(:witnesses, {}),
-      derivations: kwargs.fetch(:derivations, []),
-      cocycles:    kwargs.fetch(:cocycles, [])
-    )
+Claim = Data.define(:id, :text, :trit, :hash, :confidence, :framework, :created_at) do
+  def to_h
+    { id: id, text: text, trit: trit.to_i, hash: hash, confidence: confidence,
+      framework: framework, created_at: created_at.to_s }.freeze
   end
 
-  # Sheaf consistency: returns [h1_dimension, cocycles].
-  # H^1 = 0 means consistent, >0 means contradictions.
+  def with_confidence(c)
+    with(confidence: c)
+  end
+end
+
+Source = Data.define(:id, :citation, :trit, :hash, :kind) do
+  def to_h
+    { id: id, citation: citation, trit: trit.to_i, hash: hash, kind: kind }.freeze
+  end
+end
+
+Witness = Data.define(:id, :name, :trit, :role, :weight) do
+  def to_h
+    { id: id, name: name, trit: trit.to_i, role: role, weight: weight }.freeze
+  end
+end
+
+Derivation = Data.define(:id, :source_id, :claim_id, :kind, :strength) do
+  def to_h
+    { id: id, source_id: source_id, claim_id: claim_id, kind: kind, strength: strength }.freeze
+  end
+end
+
+Cocycle = Data.define(:claim_a, :claim_b, :kind, :severity) do
+  def to_h
+    { claim_a: claim_a, claim_b: claim_b, kind: kind, severity: severity }.freeze
+  end
+end
+
+ManipulationPattern = Data.define(:kind, :evidence, :severity) do
+  def to_h
+    { kind: kind, evidence: evidence, severity: severity }.freeze
+  end
+end
+
+# --- ClaimWorld: Enumerable ACSet instance, Ractor-safe (immutable after build) ---
+
+class ClaimWorld
+  include Enumerable
+  using CatCladRefinements
+
+  attr_reader :claims, :sources, :witnesses, :derivations, :cocycles
+
+  def initialize(claims: {}.freeze, sources: {}.freeze, witnesses: {}.freeze,
+                 derivations: [].freeze, cocycles: [].freeze)
+    @claims      = claims.freeze
+    @sources     = sources.freeze
+    @witnesses   = witnesses.freeze
+    @derivations = derivations.freeze
+    @cocycles    = cocycles.freeze
+    freeze
+  end
+
+  # Enumerable: iterate all claims
+  def each(&block)
+    claims.each_value(&block)
+  end
+
+  # Sheaf consistency: [h1_dimension, cocycles]. H^1 = 0 means consistent.
   def sheaf_consistency
-    [cocycles.length, cocycles]
+    [cocycles.length, cocycles].freeze
   end
 
-  # GF(3) balance: checks conservation law sum(trits) = 0 (mod 3).
-  # Returns [balanced?, counts_hash].
+  # GF(3) balance: [balanced?, counts_hash]
   def gf3_balance
-    counts = { "coordinator" => 0, "generator" => 0, "verifier" => 0 }
-    trits = []
-
-    claims.each_value do |c|
-      trits << c.trit
-    end
-    sources.each_value do |s|
-      trits << s.trit
-    end
-    witnesses.each_value do |w|
-      trits << w.trit
-    end
-
-    trits.each do |t|
-      counts[GF3.elem_name(t)] += 1
-    end
-
-    [GF3.balanced?(trits), counts]
+    trits = all_trits
+    counts = trits.each_with_object(
+      { "coordinator" => 0, "generator" => 0, "verifier" => 0 }
+    ) { |t, h| h[t.role] += 1 }
+    [trits.trit_balanced?, counts.freeze].freeze
   end
 
   def to_h
@@ -189,277 +216,335 @@ ClaimWorld = Struct.new(:claims, :sources, :witnesses, :derivations, :cocycles, 
       witnesses:   witnesses.transform_values(&:to_h),
       derivations: derivations.map(&:to_h),
       cocycles:    cocycles.map(&:to_h)
-    }
+    }.freeze
   end
 
   def to_json(*args)
     to_h.to_json(*args)
+  end
+
+  # --- Builder DSL ---
+
+  def self.build
+    builder = Builder.new
+    yield builder
+    builder.finalize
+  end
+
+  private
+
+  def all_trits
+    [].then { |acc|
+      claims.each_value { |c| acc << c.trit }
+      sources.each_value { |s| acc << s.trit }
+      witnesses.each_value { |w| acc << w.trit }
+      acc.freeze
+    }
+  end
+
+  # Mutable builder, consumed once to produce frozen ClaimWorld
+  class Builder
+    using CatCladRefinements
+
+    def initialize
+      @claims      = {}
+      @sources     = {}
+      @witnesses   = {}
+      @derivations = []
+      @cocycles    = []
+    end
+
+    def add_claim(claim)     = @claims[claim.id] = claim
+    def add_source(source)   = @sources[source.id] = source
+    def add_witness(witness) = @witnesses[witness.id] = witness
+    def add_derivation(d)    = @derivations << d
+    def add_cocycle(c)       = @cocycles << c
+
+    def claim(text, trit: Trit::ONE, framework: "pluralistic")
+      hash = text.content_hash
+      Claim.new(
+        id:         hash[0, 12].freeze,
+        text:       text.freeze,
+        trit:       trit,
+        hash:       hash,
+        confidence: 0.0,
+        framework:  framework.freeze,
+        created_at: Time.now
+      ).tap { |c| add_claim(c) }
+    end
+
+    def finalize
+      ClaimWorld.new(
+        claims:      @claims.freeze,
+        sources:     @sources.freeze,
+        witnesses:   @witnesses.freeze,
+        derivations: @derivations.freeze,
+        cocycles:    @cocycles.freeze
+      )
+    end
   end
 end
 
 # --- CatClad Module ---
 
 module CatClad
+  using CatCladRefinements
+
   FRAMEWORKS = %w[empirical responsible harmonic pluralistic].freeze
 
   # 10 manipulation patterns
   MANIPULATION_CHECKS = [
-    { kind: "emotional_fear",
+    { kind: "emotional_fear".freeze,
       pattern: /(?:fear|terrif|alarm|panic|dread|catastroph)/i,
       weight: 0.7 },
-    { kind: "urgency",
+    { kind: "urgency".freeze,
       pattern: /(?:act now|limited time|don't wait|expires|hurry|last chance|before it's too late)/i,
       weight: 0.8 },
-    { kind: "false_consensus",
+    { kind: "false_consensus".freeze,
       pattern: /(?:everyone knows|nobody (?:believes|wants|thinks)|all experts|unanimous|widely accepted)/i,
       weight: 0.6 },
-    { kind: "appeal_authority",
+    { kind: "appeal_authority".freeze,
       pattern: /(?:experts say|scientists (?:claim|prove)|studies show|research proves|doctors recommend)/i,
       weight: 0.5 },
-    { kind: "artificial_scarcity",
+    { kind: "artificial_scarcity".freeze,
       pattern: /(?:exclusive|rare opportunity|only \d+ left|limited (?:edition|supply|spots))/i,
       weight: 0.7 },
-    { kind: "social_pressure",
+    { kind: "social_pressure".freeze,
       pattern: /(?:you don't want to be|don't miss out|join .* (?:others|people)|be the first)/i,
       weight: 0.6 },
-    { kind: "loaded_language",
+    { kind: "loaded_language".freeze,
       pattern: /(?:obviously|clearly|undeniably|unquestionably|beyond doubt)/i,
       weight: 0.4 },
-    { kind: "false_dichotomy",
+    { kind: "false_dichotomy".freeze,
       pattern: /(?:either .* or|only (?:two|2) (?:options|choices)|if you don't .* then)/i,
       weight: 0.6 },
-    { kind: "circular_reasoning",
+    { kind: "circular_reasoning".freeze,
       pattern: /(?:because .* therefore .* because|true because .* which is true)/i,
       weight: 0.9 },
-    { kind: "ad_hominem",
+    { kind: "ad_hominem".freeze,
       pattern: /(?:stupid|idiot|moron|fool|ignorant|naive) .* (?:think|believe|say)/i,
       weight: 0.8 }
   ].freeze
 
   SOURCE_PATTERNS = [
-    { re: /(?:according to|cited by|reported by)\s+([^,\.]+)/i, kind: "authority" },
-    { re: /(?:study|research|paper)\s+(?:by|from|in)\s+([^,\.]+)/i, kind: "academic" },
-    { re: /(?:published in|journal of)\s+([^,\.]+)/i, kind: "academic" },
-    { re: /(https?:\/\/\S+)/i, kind: "url" }
+    { re: /(?:according to|cited by|reported by)\s+([^,\.]+)/i, kind: "authority".freeze },
+    { re: /(?:study|research|paper)\s+(?:by|from|in)\s+([^,\.]+)/i, kind: "academic".freeze },
+    { re: /(?:published in|journal of)\s+([^,\.]+)/i, kind: "academic".freeze },
+    { re: /(https?:\/\/\S+)/i, kind: "url".freeze }
   ].freeze
 
   module_function
 
   def content_hash(text)
-    Digest::SHA256.hexdigest(text.strip.downcase)
+    text.content_hash
   end
 
-  def extract_sources(text)
-    sources = []
+  # Lazy source extraction pipeline: yields Source values lazily
+  def extract_sources_lazy(text)
     seen = {}
 
-    SOURCE_PATTERNS.each do |pat|
+    Enumerator::Lazy.new(SOURCE_PATTERNS, SOURCE_PATTERNS.size) { |yielder, pat|
       text.scan(pat[:re]).each do |match|
-        citation = match[0].strip
-        id = content_hash(citation)[0, 12]
+        citation = match[0].strip.freeze
+        id = citation.trit_id
         next if seen[id]
 
         seen[id] = true
-        sources << Source.new(
+        yielder << Source.new(
           id:       id,
           citation: citation,
-          trit:     GF3::Two,  # Verifier role -- evidence checks claims
-          hash:     content_hash(citation),
+          trit:     Trit::TWO,
+          hash:     citation.content_hash,
           kind:     pat[:kind]
         )
       end
-    end
+    }
+  end
 
-    sources
+  def extract_sources(text)
+    extract_sources_lazy(text).to_a.freeze
   end
 
   def witness_role(kind)
     case kind
-    when "academic"  then "peer-reviewer"
-    when "authority"  then "author"
-    when "url"        then "publisher"
-    else                   "self"
+    in "academic"  then "peer-reviewer".freeze
+    in "authority" then "author".freeze
+    in "url"       then "publisher".freeze
+    else                "self".freeze
     end
   end
 
   def witness_weight(kind)
     case kind
-    when "academic"  then 0.9
-    when "authority"  then 0.6
-    when "url"        then 0.4
-    else                   0.2
+    in "academic"  then 0.9
+    in "authority" then 0.6
+    in "url"       then 0.4
+    else                0.2
     end
   end
 
   def extract_witnesses(source)
     [Witness.new(
-      id:     "w-#{source.id}",
+      id:     "w-#{source.id}".freeze,
       name:   source.citation,
-      trit:   GF3::Zero,  # Coordinator -- mediating between claim and verification
+      trit:   Trit::ZERO,
       role:   witness_role(source.kind),
       weight: witness_weight(source.kind)
-    )]
+    )].freeze
   end
 
   def classify_derivation(source)
     case source.kind
-    when "academic"  then "deductive"
-    when "authority"  then "appeal-to-authority"
-    when "url"        then "direct"
-    else                   "analogical"
+    in "academic"  then "deductive".freeze
+    in "authority" then "appeal-to-authority".freeze
+    in "url"       then "direct".freeze
+    else                "analogical".freeze
     end
   end
 
   def source_strength(source)
     case source.kind
-    when "academic"  then 0.85
-    when "authority"  then 0.5
-    when "url"        then 0.3
-    else                   0.1
+    in "academic"  then 0.85
+    in "authority" then 0.5
+    in "url"       then 0.3
+    else                0.1
+    end
+  end
+
+  # Framework dispatch via pattern matching
+  def framework_boost(avg_strength, world, claim, framework)
+    case framework
+    in "empirical"
+      academic_count = world.sources.values.count { |s| s.kind == "academic" }
+      academic_count > 0 ? avg_strength * (1.0 + 0.1 * academic_count) : avg_strength
+    in "responsible"
+      lower = claim.text.downcase
+      (lower.include?("community") || lower.include?("benefit")) ? avg_strength * 1.1 : avg_strength
+    in "harmonic"
+      world.sources.length >= 3 ? avg_strength * 1.15 : avg_strength
+    in "pluralistic"
+      avg_strength
+    else
+      avg_strength
     end
   end
 
   def compute_confidence(world, claim, framework)
     return 0.1 if world.sources.empty?
 
-    # Average derivation strength
     derivs = world.derivations.select { |d| d.claim_id == claim.id }
     return 0.1 if derivs.empty?
 
-    avg_strength = derivs.sum(&:strength) / derivs.length.to_f
-
-    # Weight by framework
-    case framework
-    when "empirical"
-      academic_count = world.sources.values.count { |s| s.kind == "academic" }
-      avg_strength *= (1.0 + 0.1 * academic_count) if academic_count > 0
-    when "responsible"
-      text_lower = claim.text.downcase
-      avg_strength *= 1.1 if text_lower.include?("community") || text_lower.include?("benefit")
-    when "harmonic"
-      avg_strength *= 1.15 if world.sources.length >= 3
-    when "pluralistic"
-      # No special boost, raw structural quality
-    end
-
-    # Penalize cocycles
-    cocycle_penalty = 0.15 * world.cocycles.length
-    confidence = avg_strength - cocycle_penalty
-    confidence.clamp(0.0, 1.0)
+    derivs
+      .sum(&:strength)
+      .then { |total| total / derivs.length.to_f }
+      .then { |avg| framework_boost(avg, world, claim, framework) }
+      .then { |boosted| boosted - 0.15 * world.cocycles.length }
+      .then { |final| final.clamp(0.0, 1.0) }
   end
 
   def detect_cocycles(world)
     cocycles = []
 
-    # Check for unsupported claims (no derivation chain)
+    # Unsupported claims
     world.claims.each_value do |claim|
-      has_derivation = world.derivations.any? { |d| d.claim_id == claim.id }
-      unless has_derivation
-        cocycles << Cocycle.new(
-          claim_a:  claim.id,
-          claim_b:  nil,
-          kind:     "unsupported",
-          severity: 0.9
-        )
+      unless world.derivations.any? { |d| d.claim_id == claim.id }
+        cocycles << Cocycle.new(claim_a: claim.id, claim_b: nil,
+                               kind: "unsupported".freeze, severity: 0.9)
       end
     end
 
-    # Check for appeal-to-authority without verification
+    # Weak authority
     world.derivations.each do |d|
       if d.kind == "appeal-to-authority" && d.strength < 0.6
-        cocycles << Cocycle.new(
-          claim_a:  d.claim_id,
-          claim_b:  d.source_id,
-          kind:     "weak-authority",
-          severity: 0.5
-        )
+        cocycles << Cocycle.new(claim_a: d.claim_id, claim_b: d.source_id,
+                               kind: "weak-authority".freeze, severity: 0.5)
       end
     end
 
-    # Check GF(3) conservation
+    # GF(3) conservation
     balanced, _ = world.gf3_balance
     unless balanced
-      cocycles << Cocycle.new(
-        claim_a:  nil,
-        claim_b:  nil,
-        kind:     "trit-violation",
-        severity: 0.3
-      )
+      cocycles << Cocycle.new(claim_a: nil, claim_b: nil,
+                             kind: "trit-violation".freeze, severity: 0.3)
     end
 
-    cocycles
+    cocycles.freeze
   end
 
   # --- Public API ---
 
-  # Analyze a claim: parse text into a cat-clad structure and check consistency.
   def analyze_claim(text, framework: "pluralistic")
-    world = ClaimWorld.new
+    sources     = extract_sources(text)
+    hash        = content_hash(text)
+    claim_id    = hash[0, 12].freeze
 
-    # Create the primary claim (Generator role -- it's asserting something)
-    hash = content_hash(text)
     claim = Claim.new(
-      id:         hash[0, 12],
-      text:       text,
-      trit:       GF3::One,  # Generator: creating an assertion
-      hash:       hash,
-      confidence: 0.0,
-      framework:  framework,
+      id: claim_id, text: text.freeze, trit: Trit::ONE,
+      hash: hash, confidence: 0.0, framework: framework.freeze,
       created_at: Time.now
     )
-    world.claims[claim.id] = claim
 
-    # Extract sources as morphisms from claim
-    sources = extract_sources(text)
-    sources.each do |src|
-      world.sources[src.id] = src
-      world.derivations << Derivation.new(
-        id:        "d-#{src.id}-#{claim.id}",
-        source_id: src.id,
-        claim_id:  claim.id,
+    derivations = sources.map { |src|
+      Derivation.new(
+        id:        "d-#{src.id}-#{claim_id}".freeze,
+        source_id: src.id, claim_id: claim_id,
         kind:      classify_derivation(src),
         strength:  source_strength(src)
       )
-    end
+    }.freeze
 
-    # Extract witnesses (who attests to the sources)
-    sources.each do |src|
-      witnesses = extract_witnesses(src)
-      witnesses.each { |w| world.witnesses[w.id] = w }
-    end
+    witnesses_hash = sources
+      .lazy
+      .flat_map { |src| extract_witnesses(src) }
+      .each_with_object({}) { |w, h| h[w.id] = w }
+      .freeze
 
-    # Compute confidence
-    claim.confidence = compute_confidence(world, claim, framework)
+    sources_hash = sources.each_with_object({}) { |s, h| h[s.id] = s }.freeze
 
-    # Detect cocycles (contradictions, unsupported claims, circular reasoning)
-    world.cocycles = detect_cocycles(world)
+    # Build intermediate world for cocycle detection (no cocycles yet)
+    proto_world = ClaimWorld.new(
+      claims:      { claim_id => claim }.freeze,
+      sources:     sources_hash,
+      witnesses:   witnesses_hash,
+      derivations: derivations,
+      cocycles:    [].freeze
+    )
 
-    world
+    # Compute confidence and detect cocycles
+    confidence = compute_confidence(proto_world, claim, framework)
+    updated_claim = claim.with_confidence(confidence)
+
+    cocycles = detect_cocycles(proto_world)
+
+    ClaimWorld.new(
+      claims:      { claim_id => updated_claim }.freeze,
+      sources:     sources_hash,
+      witnesses:   witnesses_hash,
+      derivations: derivations,
+      cocycles:    cocycles
+    )
   end
 
-  # Detect manipulation patterns in text.
+  # Manipulation detection via pattern matching on check structures
   def detect_manipulation(text)
-    patterns = []
-
-    MANIPULATION_CHECKS.each do |check|
+    MANIPULATION_CHECKS.each_with_object([]) { |check, acc|
       text.scan(check[:pattern]).each do |match|
         evidence = match.is_a?(Array) ? match.first : match
-        patterns << ManipulationPattern.new(
+        acc << ManipulationPattern.new(
           kind:     check[:kind],
-          evidence: evidence,
+          evidence: evidence.freeze,
           severity: check[:weight]
         )
       end
-    end
-
-    patterns
+    }.freeze
   end
 end
 
 # --- Main block ---
 
 if __FILE__ == $0
-  puts "=== Cat-Clad Anti-Bullshit Engine (Ruby Tier 3) ==="
+  puts "=== Cat-Clad Anti-Bullshit Engine (Ruby Tier 3 -- Post-Modern) ==="
   puts
 
   # Test 1: Analyze a well-sourced claim
@@ -472,7 +557,7 @@ if __FILE__ == $0
   puts "Witnesses:   #{world1.witnesses.length}"
   puts "Derivations: #{world1.derivations.length}"
 
-  world1.claims.each_value do |c|
+  world1.each do |c|
     puts "  Claim: #{c.text[0, 60]}..."
     puts "  Confidence: #{c.confidence.round(3)}"
     puts "  Framework:  #{c.framework}"
@@ -512,7 +597,7 @@ if __FILE__ == $0
   puts "--- Multi-Framework ---"
   %w[empirical responsible harmonic pluralistic].each do |fw|
     w = CatClad.analyze_claim(text4, framework: fw)
-    w.claims.each_value do |c|
+    w.each do |c|
       puts "  #{fw}: confidence=#{c.confidence.round(3)} sources=#{w.sources.length} cocycles=#{w.cocycles.length}"
     end
   end
@@ -524,6 +609,15 @@ if __FILE__ == $0
   puts "--- Clean Text ---"
   puts "Manipulation patterns: #{clean_patterns.length} (should be 0)"
   puts
+
+  # Test 6: Builder DSL
+  puts "--- Builder DSL ---"
+  built = ClaimWorld.build do |w|
+    w.claim("Test claim via builder", framework: "empirical")
+  end
+  puts "Built world claims: #{built.claims.length}"
+  puts
+
   puts "=== All demos complete ==="
 end
 
@@ -532,54 +626,66 @@ end
 if __FILE__ == $0 || defined?(Minitest)
   require 'minitest/autorun'
 
-  class TestGF3 < Minitest::Test
-    def test_add
-      assert_equal 0, GF3.add(0, 0)
-      assert_equal 1, GF3.add(0, 1)
-      assert_equal 2, GF3.add(0, 2)
-      assert_equal 2, GF3.add(1, 1)
-      assert_equal 0, GF3.add(1, 2)
-      assert_equal 1, GF3.add(2, 2)
+  class TestTrit < Minitest::Test
+    def test_arithmetic
+      assert_equal Trit::ZERO, Trit::ZERO + Trit::ZERO
+      assert_equal Trit::ONE,  Trit::ZERO + Trit::ONE
+      assert_equal Trit::TWO,  Trit::ZERO + Trit::TWO
+      assert_equal Trit::TWO,  Trit::ONE + Trit::ONE
+      assert_equal Trit::ZERO, Trit::ONE + Trit::TWO
+      assert_equal Trit::ONE,  Trit::TWO + Trit::TWO
     end
 
     def test_mul
-      assert_equal 0, GF3.mul(0, 0)
-      assert_equal 0, GF3.mul(0, 1)
-      assert_equal 1, GF3.mul(1, 1)
-      assert_equal 2, GF3.mul(1, 2)
-      assert_equal 1, GF3.mul(2, 2)
+      assert_equal Trit::ZERO, Trit::ZERO * Trit::ZERO
+      assert_equal Trit::ZERO, Trit::ZERO * Trit::ONE
+      assert_equal Trit::ONE,  Trit::ONE * Trit::ONE
+      assert_equal Trit::TWO,  Trit::ONE * Trit::TWO
+      assert_equal Trit::ONE,  Trit::TWO * Trit::TWO
     end
 
     def test_neg
-      assert_equal 0, GF3.neg(0)
-      assert_equal 2, GF3.neg(1)
-      assert_equal 1, GF3.neg(2)
+      assert_equal Trit::ZERO, -Trit::ZERO
+      assert_equal Trit::TWO,  -Trit::ONE
+      assert_equal Trit::ONE,  -Trit::TWO
     end
 
     def test_inv
-      assert_equal 1, GF3.inv(1)
-      assert_equal 2, GF3.inv(2)
-      assert_raises(RuntimeError) { GF3.inv(0) }
+      assert_equal Trit::ONE, Trit::ONE.inverse
+      assert_equal Trit::TWO, Trit::TWO.inverse
+      assert_raises(RuntimeError) { Trit::ZERO.inverse }
+    end
+
+    def test_comparable
+      assert Trit::ZERO < Trit::ONE
+      assert Trit::ONE < Trit::TWO
+      assert_equal [Trit::ZERO, Trit::ONE, Trit::TWO], Trit::ALL.sort
     end
 
     def test_balanced
-      assert GF3.balanced?([0, 0, 0])
-      assert GF3.balanced?([1, 1, 1])
-      assert GF3.balanced?([0, 1, 2])
-      refute GF3.balanced?([1, 1, 0])
-      refute GF3.balanced?([1])
+      assert Trit.balanced?([Trit::ZERO, Trit::ZERO, Trit::ZERO])
+      assert Trit.balanced?([Trit::ONE, Trit::ONE, Trit::ONE])
+      assert Trit.balanced?([Trit::ZERO, Trit::ONE, Trit::TWO])
+      refute Trit.balanced?([Trit::ONE, Trit::ONE, Trit::ZERO])
+      refute Trit.balanced?([Trit::ONE])
     end
 
     def test_find_balancer
-      assert_equal 0, GF3.find_balancer(0, 0, 0)
-      assert_equal 2, GF3.find_balancer(1, 0, 0)
-      assert_equal 0, GF3.find_balancer(1, 1, 1)
+      assert_equal Trit::ZERO, Trit.find_balancer(Trit::ZERO, Trit::ZERO, Trit::ZERO)
+      assert_equal Trit::TWO,  Trit.find_balancer(Trit::ONE, Trit::ZERO, Trit::ZERO)
+      assert_equal Trit::ZERO, Trit.find_balancer(Trit::ONE, Trit::ONE, Trit::ONE)
     end
 
     def test_to_balanced
-      assert_equal  0, GF3.to_balanced(0)
-      assert_equal  1, GF3.to_balanced(1)
-      assert_equal(-1, GF3.to_balanced(2))
+      assert_equal  0, Trit::ZERO.balanced_value
+      assert_equal  1, Trit::ONE.balanced_value
+      assert_equal(-1, Trit::TWO.balanced_value)
+    end
+
+    def test_role
+      assert_equal "coordinator", Trit::ZERO.role
+      assert_equal "generator",   Trit::ONE.role
+      assert_equal "verifier",    Trit::TWO.role
     end
   end
 
@@ -594,7 +700,7 @@ if __FILE__ == $0 || defined?(Minitest)
       refute_empty world.sources, "expected at least 1 extracted source"
       refute_empty world.derivations, "expected derivations from sources to claim"
 
-      world.claims.each_value do |c|
+      world.each do |c|
         assert c.confidence > 0, "expected positive confidence, got #{c.confidence}"
       end
     end
@@ -606,10 +712,9 @@ if __FILE__ == $0 || defined?(Minitest)
 
       h1, cocycles = world.sheaf_consistency
       assert h1 > 0, "unsupported claim should produce H^1 > 0"
-
       assert cocycles.any? { |c| c.kind == "unsupported" }, "expected 'unsupported' cocycle"
 
-      world.claims.each_value do |c|
+      world.each do |c|
         assert c.confidence <= 0.2, "unsupported claim should have low confidence, got #{c.confidence}"
       end
     end
@@ -661,7 +766,7 @@ if __FILE__ == $0 || defined?(Minitest)
       %w[empirical responsible harmonic pluralistic].each do |fw|
         world = CatClad.analyze_claim(text, framework: fw)
 
-        world.claims.each_value do |c|
+        world.each do |c|
           assert_equal fw, c.framework, "expected framework #{fw}, got #{c.framework}"
         end
       end
@@ -684,7 +789,6 @@ if __FILE__ == $0 || defined?(Minitest)
       )
 
       h1, _ = world.sheaf_consistency
-      # With sources present, sheaf should be relatively clean
       assert h1 >= 0
     end
 
@@ -698,6 +802,55 @@ if __FILE__ == $0 || defined?(Minitest)
       assert parsed.key?("witnesses")
       assert parsed.key?("derivations")
       assert parsed.key?("cocycles")
+    end
+
+    def test_data_define_immutability
+      claim = Claim.new(id: "x", text: "t", trit: Trit::ONE, hash: "h",
+                        confidence: 0.5, framework: "empirical", created_at: Time.now)
+      assert claim.frozen?
+
+      updated = claim.with_confidence(0.9)
+      assert_equal 0.5, claim.confidence
+      assert_equal 0.9, updated.confidence
+    end
+
+    def test_enumerable_on_world
+      world = CatClad.analyze_claim(
+        "According to Dr. Smith, research from Harvard shows that exercise reduces stress by 40%",
+        framework: "empirical"
+      )
+
+      texts = world.map(&:text)
+      assert_equal 1, texts.length
+      assert texts.first.include?("Dr. Smith")
+    end
+
+    def test_builder_dsl
+      world = ClaimWorld.build do |w|
+        w.claim("Builder test claim", framework: "harmonic")
+      end
+
+      assert_equal 1, world.claims.length
+      world.each do |c|
+        assert_equal "harmonic", c.framework
+      end
+    end
+
+    def test_lazy_source_extraction
+      text = "According to Dr. Smith, research from Harvard shows results"
+      lazy_enum = CatClad.extract_sources_lazy(text)
+      assert_kind_of Enumerator::Lazy, lazy_enum
+
+      first = lazy_enum.first
+      assert_kind_of Source, first
+    end
+
+    def test_world_is_frozen
+      world = CatClad.analyze_claim("test", framework: "pluralistic")
+      assert world.frozen?
+      assert world.claims.frozen?
+      assert world.sources.frozen?
+      assert world.derivations.frozen?
     end
   end
 end

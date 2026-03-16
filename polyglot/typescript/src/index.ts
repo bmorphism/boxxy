@@ -27,21 +27,25 @@ import {
   analyzeClaim,
   validateSources,
   detectManipulation,
+  Frameworks,
   type Framework,
 } from "./catclad.js";
 
-const VALID_FRAMEWORKS: Framework[] = [
-  "empirical",
-  "responsible",
-  "harmonic",
-  "pluralistic",
-];
+// ============================================================================
+// Framework validation -- const-derived guard
+// ============================================================================
+
+const VALID_FRAMEWORKS = Object.freeze(
+  Object.values(Frameworks),
+) as ReadonlyArray<Framework>;
 
 function isFramework(s: string): s is Framework {
-  return VALID_FRAMEWORKS.includes(s as Framework);
+  return (VALID_FRAMEWORKS as ReadonlyArray<string>).includes(s);
 }
 
-// --- Server setup ---
+// ============================================================================
+// Server setup
+// ============================================================================
 
 const server = new Server(
   {
@@ -52,10 +56,12 @@ const server = new Server(
     capabilities: {
       tools: {},
     },
-  }
+  },
 );
 
-// --- Tool definitions ---
+// ============================================================================
+// Tool definitions
+// ============================================================================
 
 server.setRequestHandler(ListToolsRequestSchema, async () => ({
   tools: [
@@ -129,7 +135,9 @@ server.setRequestHandler(ListToolsRequestSchema, async () => ({
   ],
 }));
 
-// --- Tool handlers ---
+// ============================================================================
+// Tool handlers
+// ============================================================================
 
 server.setRequestHandler(CallToolRequestSchema, async (request) => {
   const { name, arguments: args } = request.params;
@@ -149,7 +157,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const framework =
         typeof args?.framework === "string" && isFramework(args.framework)
           ? args.framework
-          : "pluralistic";
+          : ("pluralistic" as const satisfies Framework);
 
       const world = analyzeClaim(text, framework);
       const { h1, cocycles } = world.sheafConsistency();
@@ -170,7 +178,7 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
           isConsistent: h1 === 0,
           isBalanced: balanced,
         },
-      };
+      } satisfies Record<string, unknown>;
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
@@ -191,13 +199,20 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
       const framework =
         typeof args?.framework === "string" && isFramework(args.framework)
           ? args.framework
-          : "pluralistic";
+          : ("pluralistic" as const satisfies Framework);
 
       const world = validateSources(text, framework);
 
       const sourcesArray = Array.from(world.sources.values());
       const witnessesArray = Array.from(world.witnesses.values());
       const { balanced, counts } = world.gf3Balance();
+
+      // Group sources by kind using Object.groupBy (ES2024)
+      const byKindGrouped = Object.groupBy(sourcesArray, (s) => s.kind);
+      const byKind: Record<string, number> = {};
+      for (const [kind, group] of Object.entries(byKindGrouped)) {
+        if (group) byKind[kind] = group.length;
+      }
 
       const result = {
         sources: sourcesArray,
@@ -206,20 +221,14 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
         gf3: { balanced, counts },
         summary: {
           totalSources: sourcesArray.length,
-          byKind: sourcesArray.reduce(
-            (acc, s) => {
-              acc[s.kind] = (acc[s.kind] || 0) + 1;
-              return acc;
-            },
-            {} as Record<string, number>
-          ),
+          byKind,
           averageStrength:
             world.derivations.length > 0
               ? world.derivations.reduce((sum, d) => sum + d.strength, 0) /
                 world.derivations.length
               : 0,
         },
-      };
+      } satisfies Record<string, unknown>;
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
@@ -262,10 +271,10 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
               acc[p.kind] = (acc[p.kind] || 0) + 1;
               return acc;
             },
-            {} as Record<string, number>
+            {} as Record<string, number>,
           ),
         },
-      };
+      } satisfies Record<string, unknown>;
 
       return {
         content: [{ type: "text", text: JSON.stringify(result, null, 2) }],
@@ -280,15 +289,17 @@ server.setRequestHandler(CallToolRequestSchema, async (request) => {
   }
 });
 
-// --- Main ---
+// ============================================================================
+// Main
+// ============================================================================
 
-async function main() {
+async function main(): Promise<void> {
   const transport = new StdioServerTransport();
   await server.connect(transport);
   console.error("anti-bullshit-catclad MCP server running on stdio");
 }
 
-main().catch((error) => {
+main().catch((error: unknown) => {
   console.error("Fatal error:", error);
   process.exit(1);
 });

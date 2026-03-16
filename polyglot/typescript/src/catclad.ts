@@ -39,10 +39,35 @@
 
 import { createHash } from "crypto";
 
-// --- GF(3) ---
+// ============================================================================
+// Post-modern foundations: branded types, const assertions, template literals
+// ============================================================================
 
-/** GF(3) element: 0, 1, or 2 under arithmetic mod 3. */
-export type Trit = 0 | 1 | 2;
+/** Phantom brand carrier -- optional field preserves assignability from literals. */
+declare const __brand: unique symbol;
+type Brand<B extends string> = { readonly [__brand]?: B };
+
+/** GF(3) element: 0, 1, or 2 under arithmetic mod 3 (branded). */
+export type Trit = (0 | 1 | 2) & Brand<"GF3">;
+
+/** Template literal type for SHA-256 content hashes. */
+export type ContentHash = `sha256:${string}`;
+
+/** Generic algebraic Result type -- success or failure, never thrown. */
+export type Result<T, E> = Readonly<
+  | { readonly ok: true; readonly value: T }
+  | { readonly ok: false; readonly error: E }
+>;
+
+const Ok = <T>(value: T): Result<T, never> =>
+  Object.freeze({ ok: true, value }) as Result<T, never>;
+
+const Err = <E>(error: E): Result<never, E> =>
+  Object.freeze({ ok: false, error }) as Result<never, E>;
+
+// ============================================================================
+// GF(3) -- the Galois field on {0, 1, 2}
+// ============================================================================
 
 export const GF3 = {
   Zero: 0 as Trit,
@@ -61,15 +86,15 @@ export const GF3 = {
     return ((a * b) % 3) as Trit;
   },
 
-  /** Sum of a sequence mod 3. */
-  seqSum(s: Trit[]): number {
+  /** Sum of a sequence (plain number, not reduced). */
+  seqSum(s: ReadonlyArray<Trit>): number {
     let sum = 0;
     for (const e of s) sum += e;
     return sum;
   },
 
   /** Conservation law: sum of elements is 0 (mod 3). */
-  isBalanced(s: Trit[]): boolean {
+  isBalanced(s: ReadonlyArray<Trit>): boolean {
     return ((GF3.seqSum(s) % 3) + 3) % 3 === 0;
   },
 
@@ -80,25 +105,153 @@ export const GF3 = {
   },
 } as const;
 
-// --- ACSet Schema Types ---
+// ============================================================================
+// ACSet Schema Types -- discriminated unions & const-assertion enums
+// ============================================================================
 
-export type SourceKind = "academic" | "authority" | "url" | "anecdotal";
+/** Object types in the epistemic category. */
+export const ObType = {
+  Claim: "Claim",
+  Source: "Source",
+  Witness: "Witness",
+  Derivation: "Derivation",
+} as const satisfies Readonly<Record<string, string>>;
+export type ObType = (typeof ObType)[keyof typeof ObType];
+
+/** Morphism types in the epistemic category. */
+export const MorType = {
+  DerivesFrom: "derives_from",
+  Produces: "produces",
+  Attests: "attests",
+  Cites: "cites",
+} as const satisfies Readonly<Record<string, string>>;
+export type MorType = (typeof MorType)[keyof typeof MorType];
+
+/** Epistemological frameworks -- const assertion with satisfies. */
+export const Frameworks = {
+  Empirical: "empirical",
+  Responsible: "responsible",
+  Harmonic: "harmonic",
+  Pluralistic: "pluralistic",
+} as const satisfies Readonly<Record<string, string>>;
+export type Framework = (typeof Frameworks)[keyof typeof Frameworks];
+
+/** Source kind -- discriminated union with exhaustive matching. */
+export const SourceKinds = {
+  Academic: "academic",
+  Authority: "authority",
+  Url: "url",
+  Anecdotal: "anecdotal",
+} as const satisfies Readonly<Record<string, string>>;
+export type SourceKind = (typeof SourceKinds)[keyof typeof SourceKinds];
+
 export type WitnessRole = "author" | "peer-reviewer" | "editor" | "self";
+
+export const DerivationKinds = {
+  Direct: "direct",
+  Deductive: "deductive",
+  AppealToAuthority: "appeal-to-authority",
+  Analogical: "analogical",
+} as const satisfies Readonly<Record<string, string>>;
 export type DerivationKind =
-  | "direct"
-  | "deductive"
-  | "appeal-to-authority"
-  | "analogical";
+  (typeof DerivationKinds)[keyof typeof DerivationKinds];
+
+/** Cocycle kinds form a discriminated union for exhaustive switching. */
 export type CocycleKind =
   | "contradiction"
   | "unsupported"
   | "circular"
   | "trit-violation";
-export type Framework =
-  | "empirical"
-  | "responsible"
-  | "harmonic"
-  | "pluralistic";
+
+// ============================================================================
+// CatColab DblTheory: EpistemicTheory
+// ============================================================================
+
+/** A branded morphism identifier for type-safe path composition. */
+declare const __morBrand: unique symbol;
+export type MorphismId = string & { readonly [__morBrand]?: "MorphismId" };
+
+/** A single segment of a categorical path. */
+export interface PathSegment {
+  readonly morphism: MorType;
+  readonly source: ObType;
+  readonly target: ObType;
+}
+
+/** A path in the epistemic category -- readonly tuple of segments. */
+export type Path = readonly [...PathSegment[]];
+
+/** Error types arising from invalid path composition. */
+export type CompositionError =
+  | { readonly kind: "domain_mismatch"; readonly expected: ObType; readonly got: ObType }
+  | { readonly kind: "empty_path" };
+
+/** Strength of a composite morphism chain. */
+export interface CompositeStrength {
+  readonly path: Path;
+  readonly strength: number;
+}
+
+/** Compose a path from segments, validating domain/codomain adjacency. */
+export function composePath(
+  segments: ReadonlyArray<PathSegment>,
+  strengths: ReadonlyArray<number>,
+): Result<CompositeStrength, CompositionError> {
+  if (segments.length === 0) {
+    return Err({ kind: "empty_path" as const });
+  }
+
+  for (let i = 1; i < segments.length; i++) {
+    const prev = segments[i - 1]!;
+    const curr = segments[i]!;
+    if (prev.target !== curr.source) {
+      return Err({
+        kind: "domain_mismatch" as const,
+        expected: prev.target,
+        got: curr.source,
+      });
+    }
+  }
+
+  const compositeStrength = strengths.reduce<number>((acc, s) => acc * s, 1.0);
+  return Ok({
+    path: segments as Path,
+    strength: compositeStrength,
+  });
+}
+
+/**
+ * The epistemic double theory -- frozen, readonly specification of the
+ * categorical schema for claim worlds.
+ */
+export const EpistemicTheory = Object.freeze({
+  objects: Object.freeze([
+    ObType.Claim,
+    ObType.Source,
+    ObType.Witness,
+    ObType.Derivation,
+  ] as const),
+
+  morphisms: Object.freeze([
+    Object.freeze({ name: MorType.DerivesFrom, source: ObType.Derivation, target: ObType.Source }),
+    Object.freeze({ name: MorType.Produces, source: ObType.Derivation, target: ObType.Claim }),
+    Object.freeze({ name: MorType.Attests, source: ObType.Witness, target: ObType.Source }),
+    Object.freeze({ name: MorType.Cites, source: ObType.Claim, target: ObType.Source }),
+  ] as const),
+
+  attributes: Object.freeze([
+    Object.freeze({ name: "claim_trit", on: ObType.Claim, type: "Trit" }),
+    Object.freeze({ name: "source_trit", on: ObType.Source, type: "Trit" }),
+    Object.freeze({ name: "witness_trit", on: ObType.Witness, type: "Trit" }),
+    Object.freeze({ name: "claim_hash", on: ObType.Claim, type: "ContentHash" }),
+    Object.freeze({ name: "source_hash", on: ObType.Source, type: "ContentHash" }),
+    Object.freeze({ name: "claim_confidence", on: ObType.Claim, type: "Confidence" }),
+  ] as const),
+} as const);
+
+// ============================================================================
+// Domain interfaces
+// ============================================================================
 
 export interface Claim {
   id: string;
@@ -146,22 +299,41 @@ export interface ManipulationPattern {
   severity: number;
 }
 
-// --- ClaimWorld: the ACSet instance ---
+// ============================================================================
+// ClaimWorld: the ACSet instance with Symbol.iterator & #private internals
+// ============================================================================
+
+/** Iterable element yielded by ClaimWorld[Symbol.iterator]. */
+export type ClaimWorldEntry =
+  | { readonly type: "claim"; readonly value: Claim }
+  | { readonly type: "source"; readonly value: Source }
+  | { readonly type: "witness"; readonly value: Witness };
 
 export class ClaimWorld {
+  // True-private backing field for the theory reference
+  readonly #theory = EpistemicTheory;
+
   claims: Map<string, Claim> = new Map();
   sources: Map<string, Source> = new Map();
   witnesses: Map<string, Witness> = new Map();
   derivations: Derivation[] = [];
   cocycles: Cocycle[] = [];
 
+  /** The epistemic theory this world instantiates. */
+  get theory(): typeof EpistemicTheory {
+    return this.#theory;
+  }
+
   /** Sheaf consistency: H^1 dimension. 0 = consistent, >0 = contradictions. */
-  sheafConsistency(): { h1: number; cocycles: Cocycle[] } {
+  sheafConsistency(): { h1: number; cocycles: ReadonlyArray<Cocycle> } {
     return { h1: this.cocycles.length, cocycles: this.cocycles };
   }
 
   /** GF(3) conservation law: sum of all trits must be 0 (mod 3). */
-  gf3Balance(): { balanced: boolean; counts: Record<string, number> } {
+  gf3Balance(): {
+    balanced: boolean;
+    counts: Readonly<Record<string, number>>;
+  } {
     const counts: Record<string, number> = {
       coordinator: 0,
       generator: 0,
@@ -169,18 +341,13 @@ export class ClaimWorld {
     };
     const trits: Trit[] = [];
 
-    for (const c of this.claims.values()) {
-      trits.push(c.trit);
-    }
-    for (const s of this.sources.values()) {
-      trits.push(s.trit);
-    }
-    for (const w of this.witnesses.values()) {
-      trits.push(w.trit);
-    }
+    for (const c of this.claims.values()) trits.push(c.trit);
+    for (const s of this.sources.values()) trits.push(s.trit);
+    for (const w of this.witnesses.values()) trits.push(w.trit);
 
     for (const t of trits) {
-      switch (t) {
+      // Exhaustive switch over GF(3) elements
+      switch (t as Trit) {
         case GF3.Zero:
           counts.coordinator++;
           break;
@@ -196,6 +363,30 @@ export class ClaimWorld {
     return { balanced: GF3.isBalanced(trits), counts };
   }
 
+  /** Iterate all objects (claims, sources, witnesses) in the category. */
+  *[Symbol.iterator](): Generator<ClaimWorldEntry, void, undefined> {
+    for (const value of this.claims.values()) {
+      yield { type: "claim", value } satisfies ClaimWorldEntry;
+    }
+    for (const value of this.sources.values()) {
+      yield { type: "source", value } satisfies ClaimWorldEntry;
+    }
+    for (const value of this.witnesses.values()) {
+      yield { type: "witness", value } satisfies ClaimWorldEntry;
+    }
+  }
+
+  /** Deep-clone this world via structuredClone. */
+  clone(): ClaimWorld {
+    const copy = new ClaimWorld();
+    copy.claims = structuredClone(this.claims);
+    copy.sources = structuredClone(this.sources);
+    copy.witnesses = structuredClone(this.witnesses);
+    copy.derivations = structuredClone(this.derivations);
+    copy.cocycles = structuredClone(this.cocycles);
+    return copy;
+  }
+
   /** Serialize to a plain JSON object. */
   toJSON(): object {
     return {
@@ -208,7 +399,9 @@ export class ClaimWorld {
   }
 }
 
-// --- Content hashing ---
+// ============================================================================
+// Content hashing
+// ============================================================================
 
 export function contentHash(text: string): string {
   return createHash("sha256")
@@ -216,14 +409,21 @@ export function contentHash(text: string): string {
     .digest("hex");
 }
 
-// --- Source extraction ---
-
-interface SourcePattern {
-  re: RegExp;
-  kind: SourceKind;
+/** Branded content hash with `sha256:` prefix (internal use). */
+function brandedHash(text: string): ContentHash {
+  return `sha256:${contentHash(text)}` as ContentHash;
 }
 
-const sourcePatterns: SourcePattern[] = [
+// ============================================================================
+// Source extraction -- readonly patterns with const assertion
+// ============================================================================
+
+interface SourcePattern {
+  readonly re: RegExp;
+  readonly kind: SourceKind;
+}
+
+const sourcePatterns = [
   {
     re: /(?:according to|cited by|reported by)\s+([^,.]+)/gi,
     kind: "authority",
@@ -234,9 +434,9 @@ const sourcePatterns: SourcePattern[] = [
   },
   { re: /(?:published in|journal of)\s+([^,.]+)/gi, kind: "academic" },
   { re: /(https?:\/\/\S+)/gi, kind: "url" },
-];
+] as const satisfies ReadonlyArray<SourcePattern>;
 
-function extractSources(text: string): Source[] {
+function extractSources(text: string): ReadonlyArray<Source> {
   const sources: Source[] = [];
   const seen = new Set<string>();
 
@@ -246,7 +446,7 @@ function extractSources(text: string): Source[] {
     let match: RegExpExecArray | null;
     while ((match = pattern.re.exec(text)) !== null) {
       if (match.length < 2) continue;
-      const citation = match[1].trim();
+      const citation = match[1]!.trim();
       const id = contentHash(citation).slice(0, 12);
       if (seen.has(id)) continue;
       seen.add(id);
@@ -264,7 +464,9 @@ function extractSources(text: string): Source[] {
   return sources;
 }
 
-// --- Witness extraction ---
+// ============================================================================
+// Witness extraction -- exhaustive SourceKind switching
+// ============================================================================
 
 function witnessRole(kind: SourceKind): WitnessRole {
   switch (kind) {
@@ -274,9 +476,13 @@ function witnessRole(kind: SourceKind): WitnessRole {
       return "author";
     case "url":
       return "editor";
-    default:
+    case "anecdotal":
       return "self";
   }
+  // Exhaustiveness: the above switch covers all SourceKind variants.
+  // TypeScript will error if a variant is added to SourceKind without a case.
+  const _exhaustive: never = kind;
+  return _exhaustive;
 }
 
 function witnessWeight(kind: SourceKind): number {
@@ -287,12 +493,14 @@ function witnessWeight(kind: SourceKind): number {
       return 0.6;
     case "url":
       return 0.4;
-    default:
+    case "anecdotal":
       return 0.2;
   }
+  const _exhaustive: never = kind;
+  return _exhaustive;
 }
 
-function extractWitnesses(src: Source): Witness[] {
+function extractWitnesses(src: Source): ReadonlyArray<Witness> {
   return [
     {
       id: `w-${src.id}`,
@@ -301,10 +509,12 @@ function extractWitnesses(src: Source): Witness[] {
       role: witnessRole(src.kind),
       weight: witnessWeight(src.kind),
     },
-  ];
+  ] as const;
 }
 
-// --- Derivation classification ---
+// ============================================================================
+// Derivation classification -- exhaustive SourceKind dispatch
+// ============================================================================
 
 function classifyDerivation(src: Source): DerivationKind {
   switch (src.kind) {
@@ -314,9 +524,11 @@ function classifyDerivation(src: Source): DerivationKind {
       return "appeal-to-authority";
     case "url":
       return "direct";
-    default:
+    case "anecdotal":
       return "analogical";
   }
+  const _exhaustive: never = src.kind;
+  return _exhaustive;
 }
 
 function sourceStrength(src: Source): number {
@@ -327,17 +539,21 @@ function sourceStrength(src: Source): number {
       return 0.5;
     case "url":
       return 0.3;
-    default:
+    case "anecdotal":
       return 0.1;
   }
+  const _exhaustive: never = src.kind;
+  return _exhaustive;
 }
 
-// --- Confidence computation ---
+// ============================================================================
+// Confidence computation -- framework-aware weighting
+// ============================================================================
 
 function computeConfidence(
   world: ClaimWorld,
   claim: Claim,
-  framework: string
+  framework: string,
 ): number {
   if (world.sources.size === 0) {
     return 0.1; // unsupported claim
@@ -355,7 +571,7 @@ function computeConfidence(
   if (count === 0) return 0.1;
   let avgStrength = totalStrength / count;
 
-  // Weight by framework
+  // Weight by framework (exhaustive over known frameworks)
   switch (framework) {
     case "empirical": {
       let academicCount = 0;
@@ -394,20 +610,22 @@ function computeConfidence(
   return confidence;
 }
 
-// --- Cocycle detection ---
+// ============================================================================
+// Cocycle detection -- sheaf obstruction finder
+// ============================================================================
 
-function detectCocycles(world: ClaimWorld): Cocycle[] {
+function detectCocycles(world: ClaimWorld): ReadonlyArray<Cocycle> {
   const cocycles: Cocycle[] = [];
 
   // Check for unsupported claims (no derivation chain)
   for (const claim of world.claims.values()) {
     const hasDerivation = world.derivations.some(
-      (d) => d.claimId === claim.id
+      (d) => d.claimId === claim.id,
     );
     if (!hasDerivation) {
       cocycles.push({
         claimA: claim.id,
-        kind: "unsupported",
+        kind: "unsupported" satisfies CocycleKind,
         severity: 0.9,
       });
     }
@@ -430,7 +648,7 @@ function detectCocycles(world: ClaimWorld): Cocycle[] {
   if (!balanced) {
     cocycles.push({
       claimA: "",
-      kind: "trit-violation",
+      kind: "trit-violation" satisfies CocycleKind,
       severity: 0.3,
     });
   }
@@ -438,7 +656,9 @@ function detectCocycles(world: ClaimWorld): Cocycle[] {
   return cocycles;
 }
 
-// --- Public API ---
+// ============================================================================
+// Public API
+// ============================================================================
 
 /**
  * Analyze a claim: parse text into a cat-clad structure and check consistency.
@@ -449,7 +669,7 @@ function detectCocycles(world: ClaimWorld): Cocycle[] {
  */
 export function analyzeClaim(
   text: string,
-  framework: Framework = "pluralistic"
+  framework: Framework = "pluralistic",
 ): ClaimWorld {
   const world = new ClaimWorld();
 
@@ -489,20 +709,22 @@ export function analyzeClaim(
   claim.confidence = computeConfidence(world, claim, framework);
 
   // Detect cocycles (contradictions, unsupported claims, circular reasoning)
-  world.cocycles = detectCocycles(world);
+  world.cocycles = [...detectCocycles(world)];
 
   return world;
 }
 
-// --- Manipulation detection ---
+// ============================================================================
+// Manipulation detection
+// ============================================================================
 
 interface ManipulationCheck {
-  kind: string;
-  pattern: RegExp;
-  weight: number;
+  readonly kind: string;
+  readonly pattern: RegExp;
+  readonly weight: number;
 }
 
-const manipulationChecks: ManipulationCheck[] = [
+const manipulationChecks = [
   {
     kind: "emotional_fear",
     pattern: /(?:fear|terrif|alarm|panic|dread|catastroph)/gi,
@@ -562,13 +784,15 @@ const manipulationChecks: ManipulationCheck[] = [
       /(?:stupid|idiot|moron|fool|ignorant|naive) .* (?:think|believe|say)/gi,
     weight: 0.8,
   },
-];
+] as const satisfies ReadonlyArray<ManipulationCheck>;
 
 /**
  * Detect manipulation patterns in text.
  * Returns an array of matched patterns with kind, evidence, and severity.
  */
-export function detectManipulation(text: string): ManipulationPattern[] {
+export function detectManipulation(
+  text: string,
+): ReadonlyArray<ManipulationPattern> {
   const patterns: ManipulationPattern[] = [];
 
   for (const check of manipulationChecks) {
@@ -592,7 +816,7 @@ export function detectManipulation(text: string): ManipulationPattern[] {
  */
 export function validateSources(
   text: string,
-  framework: Framework = "pluralistic"
+  framework: Framework = "pluralistic",
 ): ClaimWorld {
   // This is essentially analyzeClaim but we can return the same structure;
   // the caller focuses on the sources, witnesses, and derivations.
