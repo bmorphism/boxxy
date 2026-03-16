@@ -13,6 +13,7 @@ import (
 	"github.com/bmorphism/boxxy/internal/color"
 	"github.com/bmorphism/boxxy/internal/lisp"
 	"github.com/bmorphism/boxxy/internal/streams"
+	"github.com/bmorphism/boxxy/internal/tape"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
 
@@ -34,6 +35,15 @@ func Start() {
 
 	// Register AGM belief revision namespace
 	RegisterAGM(env)
+
+	// Register tape/* namespace (TUI QuickTime causal recording)
+	tape.RegisterNamespace(env)
+
+	// Register tape DGM evolution + ACSet world namespace
+	tape.RegisterEvolveNamespace(env)
+
+	// Register self-evolving daemon + persistence + sheaf namespace
+	tape.RegisterDaemonNamespace(env)
 
 	// REPL-specific commands
 	env.Set("help", &lisp.Fn{Name: "help", Func: func(args []lisp.Value) lisp.Value {
@@ -236,6 +246,62 @@ func printColorHelp(theme *color.Theme) {
 				{"(repl :bb)", "Launch Babashka nREPL"},
 				{"(repl :nu)", "Launch Nushell"},
 				{"(repl :emacs)", "Launch Emacs -nw"},
+			},
+		},
+		{
+			title: "Tape Recording (TUI QuickTime)",
+			cmds: []struct{ cmd, desc string }{
+				{"(tape/new-recorder node label)", "Create local 1-FPS recorder"},
+				{"(tape/new-recorder node label host)", "Record remote via SSH"},
+				{"(tape/start! rec)", "Start recording"},
+				{"(tape/stop! rec)", "Stop, returns tape"},
+				{"(tape/save! tape path)", "Save tape as JSONL"},
+				{"(tape/load path)", "Load tape from JSONL"},
+				{"(tape/play! tape)", "Replay tape at 1x"},
+				{"(tape/play! tape 2)", "Replay at 2x speed"},
+				{"(tape/merge t1 t2)", "Merge tapes by causal order"},
+				{"(tape/serve! addr rec)", "Share tape over network"},
+				{"(tape/connect! addr rec)", "Connect to tape server"},
+				{"(tape/info rec-or-tape)", "Show tape/recorder info"},
+			},
+		},
+		{
+			title: "DGM Self-Evolution",
+			cmds: []struct{ cmd, desc string }{
+				{"(tape/new-archive 20)", "Create DGM archive"},
+				{"(tape/evolve! archive rec 10)", "Evolve 10 generations"},
+				{"(tape/archive-status archive)", "GF(3) trit distribution"},
+				{"(tape/archive-best archive)", "Best capture strategy"},
+				{"(tape/save-archive! archive path)", "Persist archive to disk"},
+				{"(tape/load-archive path)", "Load persisted archive"},
+				{"(tape/new-daemon rec)", "Self-evolving daemon"},
+				{"(tape/daemon-start! d)", "Start continuous evolution"},
+				{"(tape/daemon-stop! d)", "Stop daemon, save archive"},
+				{"(tape/daemon-status d)", "Daemon progress stats"},
+			},
+		},
+		{
+			title: "Autopoietic Recorder",
+			cmds: []struct{ cmd, desc string }{
+				{"(tape/autopoietic-recorder node label)", "Self-evolving recorder"},
+				{"(tape/autopoietic-start! ar)", "Start recording + evolving"},
+				{"(tape/autopoietic-stop! ar)", "Stop, returns tape"},
+				{"(tape/autopoietic-status ar)", "Full status w/ DGM stats"},
+				{"(tape/pty-recorder node label)", "Record real terminal"},
+				{"(tape/ps-recorder node label)", "Record process table"},
+				{"(tape/color-stream tape)", "Gay MCP color stream"},
+				{"(tape/gossip-status)", "Network gossip convergence"},
+			},
+		},
+		{
+			title: "ACSet World + Sheaf Consistency",
+			cmds: []struct{ cmd, desc string }{
+				{"(tape/new-world t1 t2)", "Build ACSet world from tapes"},
+				{"(tape/world-gf3 world)", "GF(3) conservation check"},
+				{"(tape/world-bisim? w1 w2)", "Bisimulation verification"},
+				{"(tape/sheaf-check world)", "Čech cohomology H¹ check"},
+				{"(tape/world-uri world)", "Plurigrid ASI tape:// URI"},
+				{"(tape/world-schema)", "ACSet categorical schema"},
 			},
 		},
 		{

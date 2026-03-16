@@ -1,0 +1,101 @@
+;; tape-recording.joke — Self-evolving tape recording example
+;;
+;; Demonstrates the full autopoietic cycle:
+;;   record → evaluate → evolve → hot-swap → record (improved)
+;;
+;; Run with: boxxy tape-recording.joke
+;;           tapeqt repl < tape-recording.joke
+
+;; --- Basic recording ---
+
+;; Create a local recorder at 1 FPS with causal timestamps
+(def rec (tape/new-recorder "my-node" "session-1"))
+
+;; Start capturing
+(tape/start! rec)
+
+;; ... recording happens at 1 FPS in background ...
+;; (sleep 5)  ;; in real use, do work here
+
+;; Stop and get the tape
+(def my-tape (tape/stop! rec))
+
+;; Inspect
+(tape/info my-tape)
+
+;; Save as JSONL for replay/merge later
+(tape/save! my-tape "session-1.jsonl")
+
+
+;; --- Darwin Gödel Machine self-evolution ---
+
+;; Create a DGM archive (population of capture strategies)
+(def archive (tape/new-archive 20))
+
+;; Create a recorder for evolution trials
+(def trial-rec (tape/new-recorder "evolve-node" "trial"))
+
+;; Evolve 10 generations: sample → mutate → evaluate → insert
+(tape/evolve! archive trial-rec 10)
+
+;; Check the best evolved strategy
+(tape/archive-best archive)
+;; => {:id "agent-..." :fitness 0.95 :interval 800 :diff-threshold 0.05}
+
+;; Persist the archive for cross-session memory
+(tape/save-archive! archive "my-archive.jsonl")
+
+;; GF(3) trit distribution across the population
+(tape/archive-status archive)
+;; => {:agents 8 :coordinators 3 :generators 3 :verifiers 2 :balanced true}
+
+
+;; --- Self-evolving daemon (continuous DGM) ---
+
+;; Create the autopoietic recorder: records + evolves simultaneously
+(def ar (tape/autopoietic-recorder "my-node" "autopoietic"))
+
+;; Start the autopoietic cycle
+(tape/autopoietic-start! ar)
+
+;; ... the daemon evolves capture strategies in background ...
+;; ... when a better strategy is found, it hot-swaps the recorder ...
+
+;; Check progress
+(tape/autopoietic-status ar)
+;; => {:node "my-node" :frames 42 :generations 5 :hot-swaps 2 :best-fitness 0.87}
+
+;; Stop everything (saves archive automatically)
+(def final-tape (tape/autopoietic-stop! ar))
+(tape/save! final-tape "autopoietic-session.jsonl")
+
+
+;; --- Distributed recording + causal merge ---
+
+;; Load tapes from multiple machines
+(def tape-a (tape/load "machine-a.jsonl"))
+(def tape-b (tape/load "machine-b.jsonl"))
+
+;; Merge by causal order (Lamport timestamps)
+(def merged (tape/merge tape-a tape-b))
+(tape/info merged)
+
+;; Build categorical world (ACSet)
+(def world (tape/new-world tape-a tape-b))
+
+;; Verify GF(3) conservation across the world
+(tape/world-gf3 world)
+;; => {:balanced true :coordinators 14 :generators 14 :verifiers 14}
+
+;; Check sheaf consistency (Čech cohomology H¹)
+(tape/sheaf-check world)
+;; => {:consistent true :h1-dim 0 :sections 2 :coverage 1.0}
+
+;; Bisimulation: are two worlds observationally equivalent?
+(def world2 (tape/new-world tape-a tape-b))
+(tape/world-bisim? world world2)
+;; => true
+
+;; Get the tape:// URI for plurigrid ASI namespace
+(tape/world-uri world)
+;; => "tape://machine-a/world"
