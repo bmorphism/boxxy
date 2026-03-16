@@ -13,6 +13,7 @@ mod catclad;
 
 use catclad::{analyze_claim, detect_manipulation, gf3_balance, sheaf_consistency, ClaimWorld};
 use serde_json::{json, Value};
+use std::collections::BTreeMap;
 use std::io::{self, BufRead, Write};
 
 // ---------------------------------------------------------------------------
@@ -209,7 +210,7 @@ fn format_analysis_result(
     h1: usize,
     cocycles: &[catclad::Cocycle],
     balanced: bool,
-    trit_counts: &std::collections::HashMap<String, usize>,
+    trit_counts: &BTreeMap<String, usize>,
 ) -> Value {
     let claims: Vec<Value> = world
         .claims

@@ -55,13 +55,13 @@ value class ContentHash(val hex: String) {
 }
 
 @JvmInline
-value class Confidence(val value: Double) {
-    init { require(value in 0.0..1.0) { "Confidence must be in [0,1], got $value" } }
+value class Confidence private constructor(val value: Double) {
     override fun toString(): String = "%.2f".format(value)
 
     companion object {
         val ZERO = Confidence(0.0)
         val LOW = Confidence(0.1)
+        /** Factory coerces to [0,1] — the only way to construct a Confidence. */
         operator fun invoke(raw: Double): Confidence = Confidence(raw.coerceIn(0.0, 1.0))
     }
 }
@@ -746,7 +746,7 @@ fun main() {
     }
     println("    Sources: ${world.sources.size}")
     world.sources.values.forEach { s ->
-        println("      - [$s.kind] \"${s.citation}\" trit=${s.trit}")
+        println("      - [${s.kind}] \"${s.citation}\" trit=${s.trit}")
     }
     println("    Derivations: ${world.derivations.size}")
     println("    Witnesses: ${world.witnesses.size}")
