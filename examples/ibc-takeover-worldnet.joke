@@ -1,0 +1,356 @@
+#!/usr/bin/env boxxy
+;; ibc-takeover-worldnet.joke — IBC Denom SHA-256 Takeover Lab
+;;
+;; Composes multiple boxxy tiles into a world net that reproduces the
+;; FULL IBC denom attack surface including validator set architectures.
+;;
+;; VALIDATOR SET ARCHITECTURES UNDER TEST:
+;;
+;;   1. REPLICATED SECURITY (ICS v1 / Cosmos Hub → consumer chains)
+;;      Hub validators MUST run consumer chains. Full Hub stake secures consumer.
+;;      Denom impact: Hub light client trusts consumer state transitions.
+;;      SHA-256 denom computed on consumer, verified by Hub light client.
+;;      Attack: forge denom on consumer, Hub LC accepts because hash matches.
+;;      Noble was ICS consumer → maintenance mode = validator decay.
+;;
+;;   2. OPT-IN SECURITY (ICS v2 / Partial Set Security)
+;;      Subset of Hub validators opt in. Lower security than full replicated.
+;;      Denom impact: smaller validator set → cheaper corruption.
+;;      SHA-256 denom forgery needs fewer validators to collude.
+;;      Post-PSS, a consumer chain with 10/180 Hub validators is weaker.
+;;
+;;   3. MESH SECURITY (Osmosis-Stride, multi-directional)
+;;      Validators cross-stake across chains. Economic security shared bidirectionally.
+;;      Denom impact: denom verified by MULTIPLE light clients simultaneously.
+;;      SHA-256 weakness: ALL light clients trust the same Merkle-Damgard hash.
+;;      A length extension attack passes validation on EVERY mesh participant.
+;;      SHA-3 fix: each verifier independently confirms sponge-constructed hash.
+;;
+;;   4. SOVEREIGN CHAIN (Osmosis, Sei, Injective — own validator set)
+;;      Independent validator set, own economic security (staked token).
+;;      Denom impact: security proportional to staked value of native token.
+;;      SHA-256 risk scales with TVL: $16M Osmosis vs $65B total Cosmos.
+;;      Zombie denoms from Noble: sovereign chain can't force Noble to patch.
+;;
+;;   5. BABYLON SHARED SECURITY (BTC-secured finality)
+;;      Bitcoin stakers provide economic security via Babylon protocol.
+;;      Denom impact: BTC-backed finality gadget adds layer on top of CometBFT.
+;;      SHA-256 hash still used for denom computation, Babylon only secures finality.
+;;      Attack vector preserved: Babylon doesn't validate IBC denom hashes.
+;;      BTC economic security is orthogonal to denom hash construction.
+;;
+;;   6. ATTESTOR LIGHT CLIENTS (IBC v2 / Cosmos Stack 2026)
+;;      m-of-n off-chain attestors verify state transitions for non-Cosmos chains.
+;;      Denom impact: attestors bridge SHA-256 denoms to Solana/EVM/L2s.
+;;      IFT (Interchain Fungible Token) uses mint-burn model, eliminates path denoms.
+;;      BUT: IFT not yet deployed. Transition period: SHA-256 denoms cross into EVM.
+;;      Polymer/Eureka export zombie SHA-256 denoms to $50B+ Ethereum L2 TVL.
+;;
+;;   7. PROOF OF AUTHORITY (Cosmos SDK v0.54 x/poa, enterprise chains)
+;;      Token-free validator selection. Fixed permissioned set.
+;;      Denom impact: PoA chains are typically private/permissioned.
+;;      SHA-256 denoms from PoA chains enter public IBC → same vulnerability.
+;;      Enterprise chains may bridge to public Cosmos for liquidity.
+;;
+;; THE CRITICAL INSIGHT:
+;;   Every validator set architecture above trusts SHA-256 denom hashes
+;;   at the IBC transfer module level. Validator set security protects
+;;   CONSENSUS (block validity), not DENOM COMPUTATION (hash construction).
+;;   Even Babylon's BTC-secured finality doesn't touch the denom hash.
+;;   SHA-3 migration must happen in ibc-go transfer module, not consensus.
+;;
+;; COSMOS STACK 2026 ROADMAP ALIGNMENT:
+;;   - CometBFT v0.39: BLS signing, libp2p — consensus improvements, no hash fix
+;;   - SDK v0.54: BlockSTM, IAVLx — execution/storage improvements, no hash fix
+;;   - ibc-go v11: IFT, GMP — NEW token model eliminates path denoms long-term
+;;   - IFT (mint-burn) DOES solve the denom hash problem by removing it entirely
+;;   - BUT: IFT is post-2026 for full rollout. SHA-256 denoms persist meanwhile.
+;;
+;; WORLD NET COMPOSITION:
+;;   TileA: Noble Cosmos (ICS consumer → maintenance mode)
+;;   TileB: Osmosis (sovereign, DEX exit)
+;;   TileC: DAO DAO governance chain (wasmd, CosmWasm)
+;;   TileD: Attacker chain (SHA-256 length extension + zombie denom probes)
+;;   TileE: Zig verifier sidecar (dual-hash validation, zero allocation)
+;;
+;; GF(3) conservation per tile:
+;;   TileA Noble:     validator(-1) + runtime(0) + relayer(+1)     = 0
+;;   TileB Osmosis:   validator(-1) + runtime(0) + relayer(+1)     = 0
+;;   TileC DAO DAO:   governance(-1) + runtime(0) + proposer(+1)   = 0
+;;   TileD Attacker:  exploit(-1)   + runtime(0)  + generator(+1)  = 0
+;;   TileE Verifier:  sha3_check(-1) + runtime(0) + reporter(+1)   = 0
+;;
+;; World net composition:
+;;   Noble(-1) ⊗ Osmosis(0) ⊗ DAO_DAO(+1) = 0 mod 3  (macro triad)
+;;   Attacker is the perturbation; Verifier is the immune response.
+;;
+;; Usage:
+;;   boxxy examples/ibc-takeover-worldnet.joke
+
+;; ── Configuration ──────────────────────────────────────────────────────
+
+;; Per-tile resource allocation (2 CPU / 2 GB each, 5 tiles = 10 CPU / 10 GB)
+(def tile-cpus   2)
+(def tile-memory 2)
+
+;; Shared kernel/initrd (Alpine Linux arm64, minimal)
+(def kernel-path  (or (env "BOXXY_KERNEL")  "vmlinuz"))
+(def initrd-path  (or (env "BOXXY_INITRD")  "initrd"))
+
+;; Disk images per tile
+(def noble-disk    (or (env "NOBLE_DISK")    "noble-chain.img"))
+(def osmosis-disk  (or (env "OSMOSIS_DISK")  "osmosis-chain.img"))
+(def daodao-disk   (or (env "DAODAO_DISK")   "daodao-chain.img"))
+(def attacker-disk (or (env "ATTACKER_DISK") "attacker-chain.img"))
+
+;; Zig verifier listens on this port inside each tile
+(def zig-verifier-port 9256)
+
+;; ── Validator Set Architecture Map ─────────────────────────────────────
+
+(def valset-architectures
+  [{:name "Replicated Security (ICS v1)"
+    :chains ["noble" "stride" "neutron"]
+    :security-source "Cosmos Hub validator set (full)"
+    :denom-hash "SHA-256 (trusted by Hub light client)"
+    :attack-cost "High (corrupt >1/3 Hub stake = ~$600M)"
+    :maintenance-mode? true
+    :sha256-fix? false
+    :notes "Noble moving to maintenance mode. Hub LC still trusts SHA-256 denoms."}
+
+   {:name "Opt-In Security (ICS v2 / PSS)"
+    :chains ["consumer-chains-post-pss"]
+    :security-source "Subset of Hub validators (opt-in)"
+    :denom-hash "SHA-256 (same ibc-go module)"
+    :attack-cost "Lower (corrupt >1/3 of SUBSET, not full Hub)"
+    :maintenance-mode? false
+    :sha256-fix? false
+    :notes "Smaller validator set = cheaper denom forgery via collusion."}
+
+   {:name "Mesh Security"
+    :chains ["osmosis" "stride"]
+    :security-source "Cross-staked validators (bidirectional)"
+    :denom-hash "SHA-256 (all mesh LCs trust same hash)"
+    :attack-cost "Medium (must corrupt across multiple chains)"
+    :maintenance-mode? false
+    :sha256-fix? false
+    :notes "Length extension passes ALL mesh validators simultaneously."}
+
+   {:name "Sovereign Chain"
+    :chains ["osmosis" "sei" "injective" "kujira"]
+    :security-source "Own validator set (staked native token)"
+    :denom-hash "SHA-256 (ibc-go transfer module)"
+    :attack-cost "Varies ($16M Osmosis to $2B+ Injective)"
+    :maintenance-mode? false
+    :sha256-fix? false
+    :notes "Can't force Noble to patch. Zombie denoms arrive via open channels."}
+
+   {:name "Babylon Shared Security"
+    :chains ["babylon-secured-chains"]
+    :security-source "Bitcoin stakers (BTC-backed finality gadget)"
+    :denom-hash "SHA-256 (Babylon secures finality, NOT denom hashes)"
+    :attack-cost "BTC economic security (very high for finality)"
+    :maintenance-mode? false
+    :sha256-fix? false
+    :notes "BTC secures CONSENSUS. Denom hash is application layer, untouched."}
+
+   {:name "Attestor Light Clients (IBC v2)"
+    :chains ["solana-ibc" "evm-l2-ibc"]
+    :security-source "m-of-n off-chain attestors"
+    :denom-hash "SHA-256 denoms bridged to non-Cosmos chains"
+    :attack-cost "Corrupt m attestors + forge denom = cross-ecosystem attack"
+    :maintenance-mode? false
+    :sha256-fix? "Partial (IFT mint-burn eliminates path denoms long-term)"
+    :notes "IFT replaces ICS-20 voucher model. Until deployed: SHA-256 persists."}
+
+   {:name "Proof of Authority (SDK v0.54)"
+    :chains ["enterprise-private-chains"]
+    :security-source "Fixed permissioned validator set (no token)"
+    :denom-hash "SHA-256 (same ibc-go for public bridge)"
+    :attack-cost "Requires corrupting permissioned operators"
+    :maintenance-mode? false
+    :sha256-fix? false
+    :notes "Enterprise chains bridge to public Cosmos. SHA-256 denoms cross boundary."}])
+
+;; ── Banner ─────────────────────────────────────────────────────────────
+
+(println "╔════════════════════════════════════════════════════════════════════╗")
+(println "║  IBC DENOM SHA-256 TAKEOVER LAB — World Net Composition          ║")
+(println "║                                                                  ║")
+(println "║  5 tiles: Noble + Osmosis + DAO DAO + Attacker + Zig Verifier    ║")
+(println "║  7 validator set architectures assessed                          ║")
+(println "║  ALL trust SHA-256 at the denom hash layer                       ║")
+(println "║                                                                  ║")
+(println "║  Cosmos Stack 2026: IFT (mint-burn) solves this LONG TERM        ║")
+(println "║  Until then: Zig dual-hash verifier is the only runtime defense  ║")
+(println "╚════════════════════════════════════════════════════════════════════╝")
+(println)
+
+;; ── Validator Set Architecture Assessment ──────────────────────────────
+
+(println "VALIDATOR SET ARCHITECTURE ASSESSMENT")
+(println "═════════════════════════════════════════════════════════════════════")
+(println)
+(doseq [v valset-architectures]
+  (println "  " (:name v))
+  (println "    Chains:          " (:chains v))
+  (println "    Security source: " (:security-source v))
+  (println "    Denom hash:      " (:denom-hash v))
+  (println "    Attack cost:     " (:attack-cost v))
+  (println "    SHA-256 fix?     " (:sha256-fix? v))
+  (println "    Notes:           " (:notes v))
+  (println))
+
+(println "CRITICAL FINDING:")
+(println "  Every architecture above trusts SHA-256 at the IBC transfer module level.")
+(println "  Validator set security protects CONSENSUS, not DENOM COMPUTATION.")
+(println "  Even Babylon BTC-backed finality does not touch the denom hash.")
+(println "  The fix must be in ibc-go transfer module (SHA-3/IFT), not consensus.")
+(println)
+(println "COSMOS 2026 TIMELINE:")
+(println "  Now:     SHA-256 denoms everywhere. Noble entering maintenance mode.")
+(println "  Q1-Q2:   CometBFT v0.39 + SDK v0.54 + ibc-go v11 (no hash change)")
+(println "  Q2-Q3:   IFT (mint-burn) development, Solana/EVM attestor LCs")
+(println "  2027+:   IFT replaces ICS-20 voucher model. Path denoms eliminated.")
+(println "  GAP:     12-18 months of SHA-256 denoms crossing into EVM/Solana")
+(println)
+
+;; ── Helper: Create one tile ────────────────────────────────────────────
+
+(defn create-tile [chain-id moniker disk-path trit-label]
+  (let [cmdline (str "console=hvc0 root=/dev/vda rw"
+                     " systemd.setenv=CHAIN_ID=" chain-id
+                     " systemd.setenv=MONIKER=" moniker
+                     " systemd.setenv=ZIG_VERIFIER_PORT=" zig-verifier-port)]
+    (println "[" trit-label "] Creating tile:" chain-id)
+    (let [boot      (vz/new-linux-boot-loader kernel-path initrd-path cmdline)
+          platform  (vz/new-generic-platform)
+          vm-config (vz/new-vm-config tile-cpus tile-memory boot platform)
+          disk-att  (vz/new-disk-attachment disk-path false)
+          disk-dev  (vz/new-virtio-block-device disk-att)
+          nat       (vz/new-nat-network)
+          net       (vz/new-virtio-network nat)]
+      (vz/add-storage-devices vm-config [disk-dev])
+      (vz/add-network-devices vm-config [net])
+      {:chain-id chain-id :vm-config vm-config})))
+
+;; ── Create World Net Tiles ─────────────────────────────────────────────
+
+(println "COMPOSING WORLD NET")
+(println "═════════════════════════════════════════════════════════════════════")
+(println)
+
+;; TileA: Noble Cosmos (ICS consumer, maintenance mode)
+;; Validator set: Replicated Security from Hub, decaying post-maintenance
+(def tile-noble
+  (create-tile "noble-1" "noble-validator-0" noble-disk "-1"))
+
+;; TileB: Osmosis (sovereign chain, DEX exit for all IBC denoms)
+;; Validator set: Sovereign + Mesh Security cross-staking
+(def tile-osmosis
+  (create-tile "osmosis-1" "osmosis-validator-0" osmosis-disk " 0"))
+
+;; TileC: DAO DAO governance chain (wasmd + CosmWasm contracts)
+;; Validator set: Sovereign wasmd chain with DAO DAO governance overlay
+;; DA0-DA0 contracts provide coordinated response to zombie denoms
+(def tile-daodao
+  (create-tile "daodao-1" "daodao-validator-0" daodao-disk "+1"))
+
+;; TileD: Attacker chain (SHA-256 length extension + denom probes)
+;; Not a real validator set — adversarial node running custom ibc-go fork
+(def tile-attacker
+  (create-tile "attacker-1" "attacker-node-0" attacker-disk " X"))
+
+(println)
+
+;; ── IBC Channel Topology ──────────────────────────────────────────────
+
+(println "IBC CHANNEL TOPOLOGY")
+(println "═════════════════════════════════════════════════════════════════════")
+(println)
+(println "  noble-1 ←→ osmosis-1     channel-750 / channel-750  (USDC flow)")
+(println "  noble-1 ←→ daodao-1      channel-NEW / channel-NEW  (governance)")
+(println "  osmosis-1 ←→ daodao-1    channel-NEW / channel-NEW  (DEX access)")
+(println "  attacker-1 ←→ osmosis-1  channel-ATK / channel-ATK  (attack vector)")
+(println "  attacker-1 ←→ noble-1    channel-ATK / channel-ATK  (zombie probes)")
+(println)
+(println "  Zig verifier: sidecar on each tile, port" zig-verifier-port)
+(println "  Every IBC recv_packet runs dual-hash: SHA-256 (legacy) + SHA-3 (shadow)")
+(println "  Divergence between hashes → length extension detected → alert DAO DAO")
+(println)
+
+;; ── Attack Scenarios ──────────────────────────────────────────────────
+
+(println "ATTACK SCENARIOS IN THIS LAB")
+(println "═════════════════════════════════════════════════════════════════════")
+(println)
+(println "  1. LENGTH EXTENSION on Noble→Osmosis USDC denom")
+(println "     Attacker computes SHA-256(noble_path || padding || extension)")
+(println "     without knowing original message. Forged denom accepted by Osmosis LC.")
+(println "     Zig verifier detects: SHA-3 shadow hash does NOT match.")
+(println)
+(println "  2. ZOMBIE DENOM REANIMATION")
+(println "     Noble enters maintenance mode. Validator set decays.")
+(println "     Attacker sends IBC transfer from Noble with stale denom.")
+(println "     Osmosis sovereign validators accept (they trust Noble LC).")
+(println "     Zig verifier detects: channel in NOBLE_CHANNELS zombie list.")
+(println)
+(println "  3. MULTI-HOP CASCADE (7 hops)")
+(println "     attacker→noble→osmosis→daodao→osmosis→noble→osmosis→daodao")
+(println "     Each hop: new SHA-256 hash wrapping previous.")
+(println "     Zig verifier: recursive trace parsing, check each sub-trace.")
+(println)
+(println "  4. DAO DAO COORDINATED RESPONSE")
+(println "     Zig verifier detects attack → sends alert to DAO DAO contract.")
+(println "     DAO DAO proposal: freeze channel to attacker chain.")
+(println "     Governance vote: 2/3 of DAO members approve in N blocks.")
+(println "     Channel frozen via ICS-29 middleware hook.")
+(println)
+(println "  5. CROSS-ECOSYSTEM EXPORT (Polymer/Eureka to Ethereum L2)")
+(println "     Attacker forges denom on Cosmos, exports via attestor LC to EVM.")
+(println "     $50B+ Ethereum L2 TVL exposed. Attestor m-of-n validates SHA-256.")
+(println "     Zig verifier on Cosmos side: catch before it crosses the bridge.")
+(println)
+
+;; ── Validate and Launch ────────────────────────────────────────────────
+
+(println "LAUNCHING WORLD NET")
+(println "═════════════════════════════════════════════════════════════════════")
+(println)
+
+(def tiles [tile-noble tile-osmosis tile-daodao tile-attacker])
+
+(doseq [tile tiles]
+  (let [valid (vz/validate-config (:vm-config tile))]
+    (if (= valid true)
+      (do
+        (println "[✓]" (:chain-id tile) "validated")
+        (def vm (vz/new-vm (:vm-config tile)))
+        (vz/start-vm! vm)
+        (println "   " (:chain-id tile) "running. State:" (vz/vm-state vm)))
+      (println "[✗]" (:chain-id tile) "INVALID:" valid))))
+
+(println)
+(println "═════════════════════════════════════════════════════════════════════")
+(println "WORLD NET RUNNING")
+(println)
+(println "  4 tiles booted. IBC channels require hermes relayer setup.")
+(println "  Zig verifier starts automatically on each tile (port" zig-verifier-port ")")
+(println)
+(println "  Post-boot commands:")
+(println "    hermes create channel noble-1 osmosis-1 --port transfer")
+(println "    hermes create channel noble-1 daodao-1 --port transfer")
+(println "    hermes create channel osmosis-1 daodao-1 --port transfer")
+(println "    hermes create channel attacker-1 osmosis-1 --port transfer")
+(println)
+(println "  Deploy DAO DAO on daodao-1:")
+(println "    wasmd tx wasm store dao_dao_core.wasm --from validator")
+(println "    wasmd tx wasm store dao_proposal_single.wasm --from validator")
+(println "    wasmd tx wasm store cw4_voting.wasm --from validator")
+(println)
+(println "  Run Zig verifier integration test:")
+(println "    curl localhost:" zig-verifier-port "/verify?trace=transfer/channel-750/uusdc")
+(println "    → returns { sha256: ..., sha3_256: ..., zombie: 'maintenance_mode' }")
+(println)
+(println "  Press Ctrl+C to stop all tiles.")
+(println "═════════════════════════════════════════════════════════════════════")

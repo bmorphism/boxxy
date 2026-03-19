@@ -1,0 +1,200 @@
+;; Indefinite Causal Order Protocol over VirtIO Socket
+;;
+;; Implements the quantum switch between host ↔ guest VMs.
+;; Each VM is a "party" in the process matrix formalism.
+;; The causal order between operations depends on the control trit.
+;;
+;; boxxy Lisp-1 dialect: def, fn, let, if, do, quote
+;; No defn — use (def name (fn [...] ...))
+;;
+;; Colors from gay MCP seed=42:
+;;   depth-0 #7B68EE (ICO root)     spin 0  ERGODIC
+;;   depth-1 #1533EA (channel)      spin +1
+;;   depth-2 #D822A5 (switch)       spin -1
+;;   depth-3 #A4DE31 (verify)       spin +1
+;;
+;; GF(3) trit: 0 (ERGODIC — coordination)
+
+;; ── GF(3) Arithmetic ────────────────────────────────────────────
+
+(def gf3-add (fn [a b]
+  (let [s (+ a b)]
+    (if (> s 1)
+      (- s 3)
+      (if (< s -1)
+        (+ s 3)
+        s)))))
+
+(def gf3-mul (fn [a b]
+  (let [p (* a b)]
+    (if (> p 1)
+      (- p 3)
+      (if (< p -1)
+        (+ p 3)
+        p)))))
+
+(def gf3-neg (fn [a] (- 0 a)))
+
+;; ── Channel Representation ──────────────────────────────────────
+;; A channel is a flat vector of 12 integers:
+;; [m00 m01 m02  m10 m11 m12  m20 m21 m22  b0 b1 b2]
+
+(def channel-identity (fn [] [1 0 0  0 1 0  0 0 1  0 0 0]))
+(def channel-cnot     (fn [] [1 0 0  1 1 0  0 0 1  0 0 0]))
+(def channel-permute  (fn [] [0 1 0  0 0 1  1 0 0  0 0 0]))
+(def channel-zero     (fn [] [0 0 0  0 0 0  0 0 0  0 0 0]))
+
+(def ch-get (fn [ch i j] (nth ch (+ (* i 3) j))))
+(def ch-off (fn [ch i] (nth ch (+ 9 i))))
+
+;; Matrix-vector product: y = M·x + b over GF(3)
+(def channel-apply (fn [ch x]
+  (let [dot-row (fn [i]
+                  (gf3-add
+                    (gf3-add
+                      (gf3-add (gf3-mul (ch-get ch i 0) (nth x 0))
+                               (gf3-mul (ch-get ch i 1) (nth x 1)))
+                      (gf3-mul (ch-get ch i 2) (nth x 2)))
+                    (ch-off ch i)))]
+    [(dot-row 0) (dot-row 1) (dot-row 2)])))
+
+;; Matrix multiply: C = A × B over GF(3)
+(def channel-compose (fn [a b]
+  (let [m (fn [i j]
+            (gf3-add
+              (gf3-add (gf3-mul (ch-get a i 0) (ch-get b 0 j))
+                       (gf3-mul (ch-get a i 1) (ch-get b 1 j)))
+              (gf3-mul (ch-get a i 2) (ch-get b 2 j))))
+        off (fn [i]
+              (gf3-add
+                (gf3-add
+                  (gf3-add (gf3-mul (ch-get a i 0) (ch-off b 0))
+                           (gf3-mul (ch-get a i 1) (ch-off b 1)))
+                  (gf3-mul (ch-get a i 2) (ch-off b 2)))
+                (ch-off a i)))]
+    [(m 0 0) (m 0 1) (m 0 2)
+     (m 1 0) (m 1 1) (m 1 2)
+     (m 2 0) (m 2 1) (m 2 2)
+     (off 0) (off 1) (off 2)])))
+
+;; Element-wise GF(3) addition
+(def channel-add (fn [a b]
+  [(gf3-add (nth a 0) (nth b 0))   (gf3-add (nth a 1) (nth b 1))   (gf3-add (nth a 2) (nth b 2))
+   (gf3-add (nth a 3) (nth b 3))   (gf3-add (nth a 4) (nth b 4))   (gf3-add (nth a 5) (nth b 5))
+   (gf3-add (nth a 6) (nth b 6))   (gf3-add (nth a 7) (nth b 7))   (gf3-add (nth a 8) (nth b 8))
+   (gf3-add (nth a 9) (nth b 9))   (gf3-add (nth a 10) (nth b 10)) (gf3-add (nth a 11) (nth b 11))]))
+
+;; ── Quantum Switch ──────────────────────────────────────────────
+
+(def quantum-switch (fn [c1 c2 control]
+  (if (= control 0)
+    (channel-compose c1 c2)
+    (if (= control 1)
+      (channel-compose c2 c1)
+      (channel-add (channel-compose c1 c2)
+                   (channel-compose c2 c1))))))
+
+;; ── Determinant (Sarrus) ────────────────────────────────────────
+
+(def channel-det (fn [ch]
+  (let [m (fn [i j] (ch-get ch i j))
+        pos1 (gf3-mul (gf3-mul (m 0 0) (m 1 1)) (m 2 2))
+        pos2 (gf3-mul (gf3-mul (m 0 1) (m 1 2)) (m 2 0))
+        pos3 (gf3-mul (gf3-mul (m 0 2) (m 1 0)) (m 2 1))
+        neg1 (gf3-mul (gf3-mul (m 0 2) (m 1 1)) (m 2 0))
+        neg2 (gf3-mul (gf3-mul (m 0 1) (m 1 0)) (m 2 2))
+        neg3 (gf3-mul (gf3-mul (m 0 0) (m 1 2)) (m 2 1))]
+    (gf3-add
+      (gf3-add (gf3-add pos1 pos2) pos3)
+      (gf3-add (gf3-add (gf3-neg neg1) (gf3-neg neg2)) (gf3-neg neg3))))))
+
+;; ── Phase Cell ──────────────────────────────────────────────────
+
+(def phase-parity (fn [freq phase amp]
+  (gf3-add (gf3-add freq phase) amp)))
+
+;; ── Affordance ──────────────────────────────────────────────────
+;; boxxy builtins: = < > (no >=), so define it
+
+(def gte (fn [a b] (not (< a b))))
+
+(def evaluate-affordance (fn [freq phase amp min-f min-p min-a]
+  (if (and (gte freq min-f) (and (gte phase min-p) (gte amp min-a)))
+    1
+    (let [matches (+ (if (gte freq min-f) 1 0)
+                     (+ (if (gte phase min-p) 1 0)
+                        (if (gte amp min-a) 1 0)))]
+      (if (gte matches 2) 0 -1)))))
+
+;; ── Local Demo ──────────────────────────────────────────────────
+
+(do
+  (println "")
+  (println "═══════════════════════════════════════════════════")
+  (println "  Indefinite Causal Order — Boxxy Lisp Demo")
+  (println "═══════════════════════════════════════════════════")
+
+  (let [c1 (channel-cnot)
+        c2 (channel-permute)]
+    (println "")
+    (println "Channels:")
+    (println "  C1 = CNOT(freq→phase)  det =" (channel-det c1))
+    (println "  C2 = Cyclic permutation det =" (channel-det c2))
+
+    (let [s0 (quantum-switch c1 c2 0)
+          s1 (quantum-switch c1 c2 1)
+          sm (quantum-switch c1 c2 -1)]
+      (println "")
+      (println "Quantum Switch:")
+      (println "  S(0)  = C1∘C2  det =" (channel-det s0))
+      (println "  S(+1) = C2∘C1  det =" (channel-det s1))
+      (println "  S(-1) = C1⊕C2  det =" (channel-det sm))
+      (println "  S(0) = S(+1)?" (= s0 s1))
+
+      ;; Test a specific phase cell
+      (println "")
+      (println "Phase cell test [+1, 0, -1]:")
+      (let [x [1 0 -1]
+            y0 (channel-apply s0 x)
+            y1 (channel-apply s1 x)
+            ym (channel-apply sm x)]
+        (println "  S(0)  applied:" y0 " parity:" (phase-parity (nth y0 0) (nth y0 1) (nth y0 2)))
+        (println "  S(+1) applied:" y1 " parity:" (phase-parity (nth y1 0) (nth y1 1) (nth y1 2)))
+        (println "  S(-1) applied:" ym " parity:" (phase-parity (nth ym 0) (nth ym 1) (nth ym 2))))
+
+      ;; Determinant structure
+      (println "")
+      (println "Determinant Structure:")
+      (let [d0 (channel-det s0)
+            d1 (channel-det s1)
+            dm (channel-det sm)]
+        (println "  det(S0)=" d0 "  det(S+1)=" d1 "  det(S-1)=" dm)
+        (println "  ICO flips det: det(S-1)=" dm "≠ det(S0)=" d0))
+
+      ;; GF(3) conservation of CONTROL trits (the protocol invariant)
+      (println "")
+      (println "GF(3) Control Conservation:")
+      (let [trits [0 1 -1]
+            sum (gf3-add (gf3-add 0 1) -1)]
+        (println "  Control trits: [0, +1, -1]")
+        (println "  Σ control mod 3 =" sum)
+        (println "  Conserved:" (= sum 0)))
+
+      ;; Affordances at center
+      (println "")
+      (println "Affordances at (0,0,0):")
+      (println "  Communicate:" (evaluate-affordance 0 0 0 -1 -1 0))
+      (println "  Sense:      " (evaluate-affordance 0 0 0 -1 0 -1))
+      (println "  Actuate:    " (evaluate-affordance 0 0 0 0 0 0))
+
+      ;; Affordances at worst case
+      (println "")
+      (println "Affordances at (-1,-1,-1):")
+      (println "  Communicate:" (evaluate-affordance -1 -1 -1 -1 -1 0))
+      (println "  Sense:      " (evaluate-affordance -1 -1 -1 -1 0 -1))
+      (println "  Actuate:    " (evaluate-affordance -1 -1 -1 0 0 0))
+
+      (println "")
+      (println "═══════════════════════════════════════════════════")
+      (println "  ICO Demo complete. Trit: 0 (ERGODIC)")
+      (println "═══════════════════════════════════════════════════"))))

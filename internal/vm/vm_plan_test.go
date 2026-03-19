@@ -139,3 +139,43 @@ func TestNetworkPlanInvariants(t *testing.T) {
 		t.Fatalf("network plan invariant failed: %v", err)
 	}
 }
+
+func TestPinholeModeUsesNAT(t *testing.T) {
+	// PinholeMode=true should still create NAT networking (pf filters externally)
+	cfg := Config{PinholeMode: true, DisableNetwork: false}
+	devices, err := networkDevicesFromConfig(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(devices) != 1 {
+		t.Fatalf("expected 1 network device with PinholeMode, got %d", len(devices))
+	}
+}
+
+func TestPinholeModeHardenedOverrides(t *testing.T) {
+	// DisableNetwork=true should override PinholeMode
+	cfg := Config{PinholeMode: true, DisableNetwork: true}
+	devices, err := networkDevicesFromConfig(cfg)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if len(devices) != 0 {
+		t.Fatalf("expected 0 network devices when DisableNetwork=true, got %d", len(devices))
+	}
+}
+
+func TestConfigPinholePortsStored(t *testing.T) {
+	cfg := Config{
+		BootMode:     "macos",
+		Memory:       4,
+		CPUs:         2,
+		PinholeMode:  true,
+		PinholePorts: []int{8080, 9090, 4222},
+	}
+	if len(cfg.PinholePorts) != 3 {
+		t.Fatalf("expected 3 pinhole ports, got %d", len(cfg.PinholePorts))
+	}
+	if cfg.PinholePorts[0] != 8080 {
+		t.Errorf("PinholePorts[0] = %d, want 8080", cfg.PinholePorts[0])
+	}
+}

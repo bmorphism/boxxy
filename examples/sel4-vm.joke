@@ -1,0 +1,273 @@
+;; seL4 Virtual Machine Boot Script for boxxy
+;;
+;; Dual-boot approach: EFI boot (like haiku-vm.joke) OR direct kernel boot (like linux-vm.joke)
+;; Rosetta 2 note: Only works for x86_64 binaries inside ARM64 Linux VMs (not applicable to seL4)
+;;
+;; Run: boxxy examples/sel4-vm.joke
+;; Or:  boxxy -e '(sel4-repl-demo)'
+
+(ns sel4-vm
+  (:require [vz :as vz]))
+
+;; ═══════════════════════════════════════════════════════════════
+;; CONFIGURATION - Choose boot method
+;; ═══════════════════════════════════════════════════════════════
+
+;; Boot method: :efi or :direct-kernel
+(def boot-method :efi)
+
+;; Paths (adjust based on seL4 build output)
+(def disk-path "/Users/bob/projects/xmonad-sel4/seL4/build/sel4-arm64.img")
+(def kernel-path "/Users/bob/projects/xmonad-sel4/seL4/build/root-task.elf")
+(def nvram-path "/tmp/sel4-nvram.bin")
+
+;; VM specs
+(def vm-cpus 4)
+(def vm-memory-gb 4)
+
+;; Kernel command line (for direct boot)
+(def kernel-cmdline "console=hvc0")
+
+;; ═══════════════════════════════════════════════════════════════
+;; BOOT METHOD 1: EFI Boot (like haiku-vm.joke)
+;; Traditional UEFI boot sequence - compatible with most disk images
+;; ═══════════════════════════════════════════════════════════════
+
+(defn create-sel4-vm-efi []
+  "Create seL4 VM with EFI boot (haiku-vm.joke pattern)"
+
+  (println "╔════════════════════════════════════════════╗")
+  (println "║  seL4 / EFI Boot (like haiku-vm.joke)     ║")
+  (println "╚════════════════════════════════════════════╝\n")
+
+  ;; Create EFI variable store (like haiku-vm)
+  (println "Creating EFI variable store...")
+  (def store (vz/new-efi-variable-store nvram-path true))
+  (def boot (vz/new-efi-boot-loader store))
+
+  ;; Create platform
+  (println "Setting up generic ARM64 platform...")
+  (def platform (vz/new-generic-platform))
+
+  ;; Create VM configuration
+  (println (str "Configuring VM: " vm-cpus " CPUs, " vm-memory-gb " GB RAM"))
+  (def config (vz/new-vm-config vm-cpus vm-memory-gb boot platform))
+
+  ;; Attach seL4 disk image as virtio block device
+  (println "Attaching disk image...")
+  (def disk-attach (vz/new-disk-attachment disk-path false))
+  (def disk (vz/new-virtio-block-device disk-attach))
+  (vz/add-storage-devices config [disk])
+
+  ;; Add networking (NAT)
+  (println "Configuring NAT networking...")
+  (def nat-net (vz/new-nat-network))
+  (def net-device (vz/new-virtio-network-device nat-net))
+  (vz/add-network-devices config [net-device])
+
+  (println)
+  config)
+
+;; ═══════════════════════════════════════════════════════════════
+;; BOOT METHOD 2: Direct Kernel Boot (like linux-vm.joke)
+;; Simpler, faster - loads kernel directly without UEFI bootloader
+;; ═══════════════════════════════════════════════════════════════
+
+(defn create-sel4-vm-direct []
+  "Create seL4 VM with direct kernel boot (linux-vm.joke pattern)"
+
+  (println "╔════════════════════════════════════════════╗")
+  (println "║  seL4 / Direct Kernel (like linux-vm.joke)║")
+  (println "╚════════════════════════════════════════════╝\n")
+
+  ;; Create direct kernel boot loader (like linux-vm)
+  (println "Creating direct kernel boot loader...")
+  (def boot (vz/new-linux-boot-loader kernel-path nil kernel-cmdline))
+
+  ;; Create platform
+  (println "Setting up generic ARM64 platform...")
+  (def platform (vz/new-generic-platform))
+
+  ;; Create VM configuration
+  (println (str "Configuring VM: " vm-cpus " CPUs, " vm-memory-gb " GB RAM"))
+  (def config (vz/new-vm-config vm-cpus vm-memory-gb boot platform))
+
+  ;; Attach disk if EFI needed secondary storage
+  (if (.exists (java.io.File. disk-path))
+    (do
+      (println "Attaching secondary disk...")
+      (def disk-attach (vz/new-disk-attachment disk-path false))
+      (def disk (vz/new-virtio-block-device disk-attach))
+      (vz/add-storage-devices config [disk])))
+
+  ;; Add networking (NAT)
+  (println "Configuring NAT networking...")
+  (def nat-net (vz/new-nat-network))
+  (def net-device (vz/new-virtio-network-device nat-net))
+  (vz/add-network-devices config [net-device])
+
+  (println)
+  config)
+
+;; ═══════════════════════════════════════════════════════════════
+;; BOOT ORCHESTRATION - Dispatch based on boot-method
+;; ═══════════════════════════════════════════════════════════════
+
+(defn create-sel4-vm
+  "Create VM with selected boot method"
+  []
+  (case boot-method
+    :efi (create-sel4-vm-efi)
+    :direct-kernel (create-sel4-vm-direct)
+    (do
+      (println "✗ Unknown boot method:" boot-method)
+      (println "   Use :efi or :direct-kernel")
+      nil)))
+
+(defn boot-sel4-vm []
+  "Boot seL4 VM and monitor until shutdown"
+
+  (println "╔════════════════════════════════════════════╗")
+  (println "║  seL4 on macOS via boxxy                  ║")
+  (println "╚════════════════════════════════════════════╝\n")
+
+  (println "Boot method: " boot-method)
+  (println "Timestamp:   " (java.time.Instant/now))
+  (println)
+
+  ;; Create VM configuration
+  (def cfg (create-sel4-vm))
+
+  ;; Validate configuration
+  (println "Validating VM configuration...")
+  (if (vz/validate-config cfg)
+    (do
+      (println "✓ Configuration valid\n")
+
+      ;; Create and start VM
+      (println "Creating VM instance...")
+      (def vm (vz/new-vm cfg))
+
+      (println "Starting seL4 VM...")
+      (vz/start-vm! vm)
+      (println "✓ VM started\n")
+
+      ;; Monitor state
+      (println "Monitoring VM (Ctrl+C to stop)...")
+      (loop [iterations 0]
+        (let [state (vz/vm-state vm)]
+          (println (str "[" iterations "] VM state: " state))
+
+          (if (= state "running")
+            (do
+              (Thread/sleep 2000)
+              (recur (+ iterations 1)))
+            (do
+              (println)
+              (println "VM stopped: " state)))))
+
+      ;; Cleanup
+      (println "\nShutting down VM...")
+      (vz/stop-vm! vm)
+      (println "✓ VM stopped"))
+
+    (do
+      (println "✗ Configuration validation FAILED")
+      (println "   Check paths exist and are readable")
+      (println "   Check VM resources available"))))
+
+;; ═══════════════════════════════════════════════════════════════
+;; BOOT METHOD COMPARISON - EFI vs Direct Kernel
+;; ═══════════════════════════════════════════════════════════════
+
+(defn compare-boot-methods []
+  "Display comparison of EFI vs direct kernel boot"
+
+  (println "\n╔════════════════════════════════════════════════════════════════╗")
+  (println "║  Boot Method Comparison (EFI vs Direct Kernel)              ║")
+  (println "╚════════════════════════════════════════════════════════════════╝\n")
+
+  (println "┌─────────────────────┬──────────────────┬──────────────────┐")
+  (println "│ Aspect              │ EFI Boot         │ Direct Kernel    │")
+  (println "├─────────────────────┼──────────────────┼──────────────────┤")
+  (println "│ Pattern             │ haiku-vm.joke    │ linux-vm.joke    │")
+  (println "│ Boot loader         │ UEFI firmware    │ Direct kernel    │")
+  (println "│ NVRAM support       │ ✓ Full           │ ✗ None           │")
+  (println "│ Boot sequence       │ UEFI → kernel    │ kernel directly  │")
+  (println "│ Performance         │ Slower (UEFI)    │ Faster           │")
+  (println "│ Complexity          │ Higher           │ Lower            │")
+  (println "│ Flexibility         │ High             │ Limited          │")
+  (println "│ seL4 compatible     │ ✓ Yes            │ ✓ Yes (if built) │")
+  (println "│ Disk image needed   │ ✓ Yes            │ ✗ Just kernel    │")
+  (println "└─────────────────────┴──────────────────┴──────────────────┘\n")
+
+  (println "Rosetta 2 (x86_64 on ARM64):")
+  (println "  • ONLY works for x86_64 binaries inside ARM64 Linux VMs")
+  (println "  • seL4 is a microkernel, not Linux - NOT applicable")
+  (println "  • boxxy's ARM64 native approach is correct for seL4\n")
+
+  (println "Recommendation:")
+  (println "  • Start with :direct-kernel (faster, simpler)")
+  (println "  • Use :efi if you have a full disk image")
+  (println "  • Both approaches are native ARM64 (no translation overhead)\n"))
+
+;; ═══════════════════════════════════════════════════════════════
+;; INTERACTIVE REPL SUPPORT
+;; ═══════════════════════════════════════════════════════════════
+
+(defn sel4-repl-demo []
+  "Interactive demonstration in boxxy REPL"
+
+  (println "\n╔════════════════════════════════════════════╗")
+  (println "║  seL4 Interactive REPL Demo               ║")
+  (println "╚════════════════════════════════════════════╝\n")
+
+  ;; Show options
+  (println "Boot methods:")
+  (println "  :efi           - UEFI boot (haiku-vm.joke pattern)")
+  (println "  :direct-kernel - Direct kernel (linux-vm.joke pattern)\n")
+
+  ;; Step 1: Show boot methods
+  (compare-boot-methods)
+
+  ;; Step 2: Create VM without starting
+  (println "Creating VM configuration...")
+  (def cfg (create-sel4-vm))
+  (println "✓ Config created\n")
+
+  ;; Step 3: Validate
+  (println "Validating configuration...")
+  (println (str "Valid: " (vz/validate-config cfg)))
+  (println)
+
+  ;; Step 4: Create instance (don't auto-start)
+  (println "Creating VM instance (ready to start)...")
+  (def vm (vz/new-vm cfg))
+  (println "✓ VM instance created\n")
+
+  (println "Next steps in REPL:")
+  (println "  (vz/start-vm! vm)          ; Start the VM")
+  (println "  (vz/vm-state vm)           ; Check VM state")
+  (println "  (vz/pause-vm! vm)          ; Pause VM")
+  (println "  (vz/resume-vm! vm)         ; Resume VM")
+  (println "  (vz/stop-vm! vm)           ; Stop VM")
+  (println "  (compare-boot-methods)     ; Show comparison")
+  (println "")
+
+  ;; Return vm for further interaction
+  vm)
+
+;; ═══════════════════════════════════════════════════════════════
+;; SCRIPT EXPORTED INTERFACE
+;; ═══════════════════════════════════════════════════════════════
+
+(println "\n╔════════════════════════════════════════════╗")
+(println "║  seL4 boxxy boot script loaded             ║")
+(println "╚════════════════════════════════════════════╝\n")
+
+(println "Boot method: " boot-method " (edit at top to change)")
+(println "\nAvailable commands:")
+(println "  (boot-sel4-vm)             ; Auto-boot and run")
+(println "  (sel4-repl-demo)           ; Interactive REPL demo")
+(println "  (compare-boot-methods)     ; Show EFI vs Direct comparison")
+(println "")

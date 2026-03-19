@@ -1,0 +1,33 @@
+# zerobrew-joker-config.yaml — Configuration for boxxy zerobrew pinhole mode.
+#
+# GF(3) Balance:
+#   Trit 0: pinhole.go (pf anchor) — Coordinator
+#   Trit 1: scripts/zb + .joke      — Generator
+#   Trit 2: tshark.go               — Verifier
+#   Sum: 0+1+2 = 3 mod 3 = 0
+
+pinhole:
+  enabled: true
+  bridge: bridge100
+  allowed_ports: [53, 80, 443]
+  nats_port: 4222
+  pcap_dir: ~/.boxxy/pcaps
+  pf_anchor: com.boxxy.zerobrew
+
+vm:
+  boot_mode: macos
+  cpus: 4
+  memory_gb: 4
+  disk_gb: 20
+  disk_path: ~/.boxxy/zerobrew.img
+  nvram_path: ~/.boxxy/zerobrew-nvram
+
+guest:
+  ssh_user: guest
+  ssh_port: 22
+  zerobrew_path: /usr/local/bin/zb
+
+capture:
+  enabled: true
+  pcap_dir: ~/.boxxy/pcaps
+  compliance_ports: [53, 80, 443]

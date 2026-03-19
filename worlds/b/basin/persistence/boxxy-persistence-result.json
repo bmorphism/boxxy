@@ -1,0 +1,3393 @@
+{
+  "betti_numbers": [
+    2,
+    0,
+    0
+  ],
+  "euler_characteristic": 2,
+  "n_points": 637,
+  "max_dimension": 2,
+  "backend": "ripser",
+  "computation_time_ms": 57703.028510994045,
+  "pairs": [
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.10000000149011612,
+      "dimension": 0,
+      "persistence": 0.10000000149011612
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.20000000298023224,
+      "dimension": 0,
+      "persistence": 0.20000000298023224
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.30000001192092896,
+      "dimension": 0,
+      "persistence": 0.30000001192092896
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.4000000059604645,
+      "dimension": 0,
+      "persistence": 0.4000000059604645
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.5,
+      "dimension": 0,
+      "persistence": 0.5
+    },
+    {
+      "birth": 0.0,
+      "death": 0.6000000238418579,
+      "dimension": 0,
+      "persistence": 0.6000000238418579
+    },
+    {
+      "birth": 0.0,
+      "death": 0.6000000238418579,
+      "dimension": 0,
+      "persistence": 0.6000000238418579
+    },
+    {
+      "birth": 0.0,
+      "death": 0.6000000238418579,
+      "dimension": 0,
+      "persistence": 0.6000000238418579
+    },
+    {
+      "birth": 0.0,
+      "death": 0.6000000238418579,
+      "dimension": 0,
+      "persistence": 0.6000000238418579
+    },
+    {
+      "birth": 0.0,
+      "death": 0.6000000238418579,
+      "dimension": 0,
+      "persistence": 0.6000000238418579
+    },
+    {
+      "birth": 0.0,
+      "death": 0.699999988079071,
+      "dimension": 0,
+      "persistence": 0.699999988079071
+    },
+    {
+      "birth": 0.0,
+      "death": 0.699999988079071,
+      "dimension": 0,
+      "persistence": 0.699999988079071
+    },
+    {
+      "birth": 0.0,
+      "death": 0.699999988079071,
+      "dimension": 0,
+      "persistence": 0.699999988079071
+    },
+    {
+      "birth": 0.0,
+      "death": 0.699999988079071,
+      "dimension": 0,
+      "persistence": 0.699999988079071
+    },
+    {
+      "birth": 0.0,
+      "death": 0.800000011920929,
+      "dimension": 0,
+      "persistence": 0.800000011920929
+    },
+    {
+      "birth": 0.0,
+      "death": 0.800000011920929,
+      "dimension": 0,
+      "persistence": 0.800000011920929
+    },
+    {
+      "birth": 0.0,
+      "death": 0.800000011920929,
+      "dimension": 0,
+      "persistence": 0.800000011920929
+    },
+    {
+      "birth": 0.0,
+      "death": 0.800000011920929,
+      "dimension": 0,
+      "persistence": 0.800000011920929
+    },
+    {
+      "birth": 0.0,
+      "death": 0.800000011920929,
+      "dimension": 0,
+      "persistence": 0.800000011920929
+    },
+    {
+      "birth": 0.0,
+      "death": 0.800000011920929,
+      "dimension": 0,
+      "persistence": 0.800000011920929
+    },
+    {
+      "birth": 0.0,
+      "death": 0.8999999761581421,
+      "dimension": 0,
+      "persistence": 0.8999999761581421
+    },
+    {
+      "birth": 0.0,
+      "death": 0.8999999761581421,
+      "dimension": 0,
+      "persistence": 0.8999999761581421
+    },
+    {
+      "birth": 0.0,
+      "death": 0.8999999761581421,
+      "dimension": 0,
+      "persistence": 0.8999999761581421
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.0,
+      "dimension": 0,
+      "persistence": 1.0
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.100000023841858,
+      "dimension": 0,
+      "persistence": 1.100000023841858
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2000000476837158,
+      "dimension": 0,
+      "persistence": 1.2000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2000000476837158,
+      "dimension": 0,
+      "persistence": 1.2000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2000000476837158,
+      "dimension": 0,
+      "persistence": 1.2000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2000000476837158,
+      "dimension": 0,
+      "persistence": 1.2000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2000000476837158,
+      "dimension": 0,
+      "persistence": 1.2000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2000000476837158,
+      "dimension": 0,
+      "persistence": 1.2000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2000000476837158,
+      "dimension": 0,
+      "persistence": 1.2000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2999999523162842,
+      "dimension": 0,
+      "persistence": 1.2999999523162842
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2999999523162842,
+      "dimension": 0,
+      "persistence": 1.2999999523162842
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2999999523162842,
+      "dimension": 0,
+      "persistence": 1.2999999523162842
+    },
+    {
+      "birth": 0.0,
+      "death": 1.2999999523162842,
+      "dimension": 0,
+      "persistence": 1.2999999523162842
+    },
+    {
+      "birth": 0.0,
+      "death": 1.399999976158142,
+      "dimension": 0,
+      "persistence": 1.399999976158142
+    },
+    {
+      "birth": 0.0,
+      "death": 1.399999976158142,
+      "dimension": 0,
+      "persistence": 1.399999976158142
+    },
+    {
+      "birth": 0.0,
+      "death": 1.399999976158142,
+      "dimension": 0,
+      "persistence": 1.399999976158142
+    },
+    {
+      "birth": 0.0,
+      "death": 1.5,
+      "dimension": 0,
+      "persistence": 1.5
+    },
+    {
+      "birth": 0.0,
+      "death": 1.5,
+      "dimension": 0,
+      "persistence": 1.5
+    },
+    {
+      "birth": 0.0,
+      "death": 1.5,
+      "dimension": 0,
+      "persistence": 1.5
+    },
+    {
+      "birth": 0.0,
+      "death": 1.5,
+      "dimension": 0,
+      "persistence": 1.5
+    },
+    {
+      "birth": 0.0,
+      "death": 1.5,
+      "dimension": 0,
+      "persistence": 1.5
+    },
+    {
+      "birth": 0.0,
+      "death": 1.7000000476837158,
+      "dimension": 0,
+      "persistence": 1.7000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.7000000476837158,
+      "dimension": 0,
+      "persistence": 1.7000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.7000000476837158,
+      "dimension": 0,
+      "persistence": 1.7000000476837158
+    },
+    {
+      "birth": 0.0,
+      "death": 1.7999999523162842,
+      "dimension": 0,
+      "persistence": 1.7999999523162842
+    },
+    {
+      "birth": 0.0,
+      "death": 1.7999999523162842,
+      "dimension": 0,
+      "persistence": 1.7999999523162842
+    },
+    {
+      "birth": 0.0,
+      "death": 1.7999999523162842,
+      "dimension": 0,
+      "persistence": 1.7999999523162842
+    },
+    {
+      "birth": 0.0,
+      "death": 1.899999976158142,
+      "dimension": 0,
+      "persistence": 1.899999976158142
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0,
+      "dimension": 0,
+      "persistence": 2.0
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0,
+      "dimension": 0,
+      "persistence": 2.0
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0,
+      "dimension": 0,
+      "persistence": 2.0
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0,
+      "dimension": 0,
+      "persistence": 2.0
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0,
+      "dimension": 0,
+      "persistence": 2.0
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0,
+      "dimension": 0,
+      "persistence": 2.0
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0,
+      "dimension": 0,
+      "persistence": 2.0
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0999999046325684,
+      "dimension": 0,
+      "persistence": 2.0999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 2.0999999046325684,
+      "dimension": 0,
+      "persistence": 2.0999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 2.200000047683716,
+      "dimension": 0,
+      "persistence": 2.200000047683716
+    },
+    {
+      "birth": 0.0,
+      "death": 2.299999952316284,
+      "dimension": 0,
+      "persistence": 2.299999952316284
+    },
+    {
+      "birth": 0.0,
+      "death": 2.299999952316284,
+      "dimension": 0,
+      "persistence": 2.299999952316284
+    },
+    {
+      "birth": 0.0,
+      "death": 2.4000000953674316,
+      "dimension": 0,
+      "persistence": 2.4000000953674316
+    },
+    {
+      "birth": 0.0,
+      "death": 2.5,
+      "dimension": 0,
+      "persistence": 2.5
+    },
+    {
+      "birth": 0.0,
+      "death": 2.5,
+      "dimension": 0,
+      "persistence": 2.5
+    },
+    {
+      "birth": 0.0,
+      "death": 2.5,
+      "dimension": 0,
+      "persistence": 2.5
+    },
+    {
+      "birth": 0.0,
+      "death": 2.5,
+      "dimension": 0,
+      "persistence": 2.5
+    },
+    {
+      "birth": 0.0,
+      "death": 2.5999999046325684,
+      "dimension": 0,
+      "persistence": 2.5999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 2.5999999046325684,
+      "dimension": 0,
+      "persistence": 2.5999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 2.5999999046325684,
+      "dimension": 0,
+      "persistence": 2.5999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 2.799999952316284,
+      "dimension": 0,
+      "persistence": 2.799999952316284
+    },
+    {
+      "birth": 0.0,
+      "death": 3.0,
+      "dimension": 0,
+      "persistence": 3.0
+    },
+    {
+      "birth": 0.0,
+      "death": 3.0999999046325684,
+      "dimension": 0,
+      "persistence": 3.0999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 3.0999999046325684,
+      "dimension": 0,
+      "persistence": 3.0999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 3.0999999046325684,
+      "dimension": 0,
+      "persistence": 3.0999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 3.200000047683716,
+      "dimension": 0,
+      "persistence": 3.200000047683716
+    },
+    {
+      "birth": 0.0,
+      "death": 3.4000000953674316,
+      "dimension": 0,
+      "persistence": 3.4000000953674316
+    },
+    {
+      "birth": 0.0,
+      "death": 3.5,
+      "dimension": 0,
+      "persistence": 3.5
+    },
+    {
+      "birth": 0.0,
+      "death": 3.5,
+      "dimension": 0,
+      "persistence": 3.5
+    },
+    {
+      "birth": 0.0,
+      "death": 3.5999999046325684,
+      "dimension": 0,
+      "persistence": 3.5999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 3.5999999046325684,
+      "dimension": 0,
+      "persistence": 3.5999999046325684
+    },
+    {
+      "birth": 0.0,
+      "death": 3.700000047683716,
+      "dimension": 0,
+      "persistence": 3.700000047683716
+    },
+    {
+      "birth": 0.0,
+      "death": 3.700000047683716,
+      "dimension": 0,
+      "persistence": 3.700000047683716
+    },
+    {
+      "birth": 0.0,
+      "death": 3.799999952316284,
+      "dimension": 0,
+      "persistence": 3.799999952316284
+    },
+    {
+      "birth": 0.0,
+      "death": 3.799999952316284,
+      "dimension": 0,
+      "persistence": 3.799999952316284
+    },
+    {
+      "birth": 0.0,
+      "death": 4.0,
+      "dimension": 0,
+      "persistence": 4.0
+    },
+    {
+      "birth": 0.0,
+      "death": 4.099999904632568,
+      "dimension": 0,
+      "persistence": 4.099999904632568
+    },
+    {
+      "birth": 0.0,
+      "death": 4.199999809265137,
+      "dimension": 0,
+      "persistence": 4.199999809265137
+    },
+    {
+      "birth": 0.0,
+      "death": 4.5,
+      "dimension": 0,
+      "persistence": 4.5
+    },
+    {
+      "birth": 0.0,
+      "death": 4.900000095367432,
+      "dimension": 0,
+      "persistence": 4.900000095367432
+    },
+    {
+      "birth": 0.0,
+      "death": 5.300000190734863,
+      "dimension": 0,
+      "persistence": 5.300000190734863
+    },
+    {
+      "birth": 0.0,
+      "death": 5.599999904632568,
+      "dimension": 0,
+      "persistence": 5.599999904632568
+    },
+    {
+      "birth": 0.0,
+      "death": 6.400000095367432,
+      "dimension": 0,
+      "persistence": 6.400000095367432
+    },
+    {
+      "birth": 0.0,
+      "death": 6.599999904632568,
+      "dimension": 0,
+      "persistence": 6.599999904632568
+    },
+    {
+      "birth": 0.0,
+      "death": 8.100000381469727,
+      "dimension": 0,
+      "persistence": 8.100000381469727
+    },
+    {
+      "birth": 0.0,
+      "death": 8.800000190734863,
+      "dimension": 0,
+      "persistence": 8.800000190734863
+    },
+    {
+      "birth": 0.0,
+      "death": 9.100000381469727,
+      "dimension": 0,
+      "persistence": 9.100000381469727
+    },
+    {
+      "birth": 0.0,
+      "death": 11.399999618530273,
+      "dimension": 0,
+      "persistence": 11.399999618530273
+    },
+    {
+      "birth": 0.0,
+      "death": 11.5,
+      "dimension": 0,
+      "persistence": 11.5
+    },
+    {
+      "birth": 0.0,
+      "death": 11.800000190734863,
+      "dimension": 0,
+      "persistence": 11.800000190734863
+    },
+    {
+      "birth": 0.0,
+      "death": 13.0,
+      "dimension": 0,
+      "persistence": 13.0
+    },
+    {
+      "birth": 0.0,
+      "death": "inf",
+      "dimension": 0,
+      "persistence": "inf"
+    },
+    {
+      "birth": 0.0,
+      "death": "inf",
+      "dimension": 0,
+      "persistence": "inf"
+    },
+    {
+      "birth": 14.899999618530273,
+      "death": 16.399999618530273,
+      "dimension": 1,
+      "persistence": 1.5
+    },
+    {
+      "birth": 11.600000381469727,
+      "death": 13.199999809265137,
+      "dimension": 1,
+      "persistence": 1.5999994277954102
+    },
+    {
+      "birth": 10.399999618530273,
+      "death": 10.5,
+      "dimension": 1,
+      "persistence": 0.10000038146972656
+    },
+    {
+      "birth": 9.699999809265137,
+      "death": 11.100000381469727,
+      "dimension": 1,
+      "persistence": 1.4000005722045898
+    },
+    {
+      "birth": 8.300000190734863,
+      "death": 9.699999809265137,
+      "dimension": 1,
+      "persistence": 1.3999996185302734
+    },
+    {
+      "birth": 7.300000190734863,
+      "death": 7.599999904632568,
+      "dimension": 1,
+      "persistence": 0.2999997138977051
+    },
+    {
+      "birth": 6.900000095367432,
+      "death": 7.099999904632568,
+      "dimension": 1,
+      "persistence": 0.19999980926513672
+    },
+    {
+      "birth": 6.099999904632568,
+      "death": 6.300000190734863,
+      "dimension": 1,
+      "persistence": 0.20000028610229492
+    },
+    {
+      "birth": 5.699999809265137,
+      "death": 6.0,
+      "dimension": 1,
+      "persistence": 0.3000001907348633
+    },
+    {
+      "birth": 5.599999904632568,
+      "death": 5.900000095367432,
+      "dimension": 1,
+      "persistence": 0.3000001907348633
+    },
+    {
+      "birth": 5.599999904632568,
+      "death": 6.400000095367432,
+      "dimension": 1,
+      "persistence": 0.8000001907348633
+    },
+    {
+      "birth": 5.400000095367432,
+      "death": 5.800000190734863,
+      "dimension": 1,
+      "persistence": 0.40000009536743164
+    },
+    {
+      "birth": 5.400000095367432,
+      "death": 6.5,
+      "dimension": 1,
+      "persistence": 1.0999999046325684
+    },
+    {
+      "birth": 4.599999904632568,
+      "death": 5.699999809265137,
+      "dimension": 1,
+      "persistence": 1.0999999046325684
+    },
+    {
+      "birth": 4.400000095367432,
+      "death": 4.900000095367432,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 4.400000095367432,
+      "death": 4.800000190734863,
+      "dimension": 1,
+      "persistence": 0.40000009536743164
+    },
+    {
+      "birth": 4.400000095367432,
+      "death": 5.800000190734863,
+      "dimension": 1,
+      "persistence": 1.4000000953674316
+    },
+    {
+      "birth": 4.300000190734863,
+      "death": 5.300000190734863,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 4.199999809265137,
+      "death": 5.5,
+      "dimension": 1,
+      "persistence": 1.3000001907348633
+    },
+    {
+      "birth": 3.5999999046325684,
+      "death": 4.599999904632568,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 3.5,
+      "death": 5.0,
+      "dimension": 1,
+      "persistence": 1.5
+    },
+    {
+      "birth": 3.5,
+      "death": 3.5999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 3.4000000953674316,
+      "death": 4.5,
+      "dimension": 1,
+      "persistence": 1.0999999046325684
+    },
+    {
+      "birth": 3.200000047683716,
+      "death": 4.199999809265137,
+      "dimension": 1,
+      "persistence": 0.9999997615814209
+    },
+    {
+      "birth": 3.200000047683716,
+      "death": 4.300000190734863,
+      "dimension": 1,
+      "persistence": 1.1000001430511475
+    },
+    {
+      "birth": 3.0999999046325684,
+      "death": 3.200000047683716,
+      "dimension": 1,
+      "persistence": 0.10000014305114746
+    },
+    {
+      "birth": 3.0999999046325684,
+      "death": 4.0,
+      "dimension": 1,
+      "persistence": 0.9000000953674316
+    },
+    {
+      "birth": 3.0,
+      "death": 5.199999809265137,
+      "dimension": 1,
+      "persistence": 2.1999998092651367
+    },
+    {
+      "birth": 3.0,
+      "death": 3.4000000953674316,
+      "dimension": 1,
+      "persistence": 0.40000009536743164
+    },
+    {
+      "birth": 3.0,
+      "death": 3.5,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 2.9000000953674316,
+      "death": 3.200000047683716,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 2.700000047683716,
+      "death": 3.200000047683716,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 2.5999999046325684,
+      "death": 3.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 2.4000000953674316,
+      "death": 2.5,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.299999952316284,
+      "death": 3.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.7999999523162842
+    },
+    {
+      "birth": 2.299999952316284,
+      "death": 2.5999999046325684,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 2.299999952316284,
+      "death": 2.5,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.299999952316284,
+      "death": 2.5999999046325684,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 3.200000047683716,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 3.299999952316284,
+      "dimension": 1,
+      "persistence": 1.0999999046325684
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 3.200000047683716,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 2.700000047683716,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 2.799999952316284,
+      "dimension": 1,
+      "persistence": 0.5999999046325684
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 3.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.8999998569488525
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 0.7999999523162842
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 2.700000047683716,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 2.299999952316284,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 2.4000000953674316,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 3.200000047683716,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.200000047683716,
+      "death": 2.5999999046325684,
+      "dimension": 1,
+      "persistence": 0.39999985694885254
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 3.5999999046325684,
+      "dimension": 1,
+      "persistence": 1.5
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 3.4000000953674316,
+      "dimension": 1,
+      "persistence": 1.3000001907348633
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 3.4000000953674316,
+      "dimension": 1,
+      "persistence": 1.3000001907348633
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.5999999046325684,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.700000047683716,
+      "dimension": 1,
+      "persistence": 0.6000001430511475
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.4000000953674316,
+      "dimension": 1,
+      "persistence": 0.3000001907348633
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.5,
+      "dimension": 1,
+      "persistence": 0.40000009536743164
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 3.5999999046325684,
+      "dimension": 1,
+      "persistence": 1.5
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.299999952316284,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.10000014305114746
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.799999952316284,
+      "dimension": 1,
+      "persistence": 0.7000000476837158
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.10000014305114746
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.9000000953674316,
+      "dimension": 1,
+      "persistence": 0.8000001907348633
+    },
+    {
+      "birth": 2.0999999046325684,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.10000014305114746
+    },
+    {
+      "birth": 2.0,
+      "death": 2.5999999046325684,
+      "dimension": 1,
+      "persistence": 0.5999999046325684
+    },
+    {
+      "birth": 2.0,
+      "death": 3.5,
+      "dimension": 1,
+      "persistence": 1.5
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0999999046325684,
+      "dimension": 1,
+      "persistence": 1.0999999046325684
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.299999952316284,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0999999046325684,
+      "dimension": 1,
+      "persistence": 1.0999999046325684
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.299999952316284,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 2.0,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 3.0,
+      "dimension": 1,
+      "persistence": 1.0
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.299999952316284,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 2.0,
+      "death": 2.5,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 2.0,
+      "death": 2.299999952316284,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 2.0,
+      "death": 2.0999999046325684,
+      "dimension": 1,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 1.899999976158142,
+      "death": 2.4000000953674316,
+      "dimension": 1,
+      "persistence": 0.5000001192092896
+    },
+    {
+      "birth": 1.7999999523162842,
+      "death": 2.200000047683716,
+      "dimension": 1,
+      "persistence": 0.40000009536743164
+    },
+    {
+      "birth": 1.7999999523162842,
+      "death": 2.0,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.600000023841858,
+      "death": 1.7000000476837158,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.2999999523162842,
+      "death": 1.7999999523162842,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 1.2999999523162842,
+      "death": 1.899999976158142,
+      "dimension": 1,
+      "persistence": 0.6000000238418579
+    },
+    {
+      "birth": 1.2999999523162842,
+      "death": 1.7000000476837158,
+      "dimension": 1,
+      "persistence": 0.40000009536743164
+    },
+    {
+      "birth": 1.2000000476837158,
+      "death": 1.399999976158142,
+      "dimension": 1,
+      "persistence": 0.19999992847442627
+    },
+    {
+      "birth": 1.2000000476837158,
+      "death": 1.7000000476837158,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 1.2000000476837158,
+      "death": 1.7999999523162842,
+      "dimension": 1,
+      "persistence": 0.5999999046325684
+    },
+    {
+      "birth": 1.2000000476837158,
+      "death": 1.600000023841858,
+      "dimension": 1,
+      "persistence": 0.3999999761581421
+    },
+    {
+      "birth": 1.2000000476837158,
+      "death": 1.399999976158142,
+      "dimension": 1,
+      "persistence": 0.19999992847442627
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.5,
+      "dimension": 1,
+      "persistence": 0.3999999761581421
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.5,
+      "dimension": 1,
+      "persistence": 0.3999999761581421
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.399999976158142,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.399999976158142,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.19999992847442627
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.399999976158142,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.19999992847442627
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.19999992847442627
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.19999992847442627
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.600000023841858,
+      "dimension": 1,
+      "persistence": 0.5
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.100000023841858,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2999999523162842,
+      "dimension": 1,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.2000000476837158,
+      "dimension": 1,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 1.0,
+      "death": 1.100000023841858,
+      "dimension": 1,
+      "persistence": 0.10000002384185791
+    },
+    {
+      "birth": 6.599999904632568,
+      "death": 6.900000095367432,
+      "dimension": 2,
+      "persistence": 0.3000001907348633
+    },
+    {
+      "birth": 4.099999904632568,
+      "death": 4.199999809265137,
+      "dimension": 2,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 4.0,
+      "death": 4.199999809265137,
+      "dimension": 2,
+      "persistence": 0.19999980926513672
+    },
+    {
+      "birth": 4.0,
+      "death": 4.300000190734863,
+      "dimension": 2,
+      "persistence": 0.3000001907348633
+    },
+    {
+      "birth": 3.5999999046325684,
+      "death": 3.700000047683716,
+      "dimension": 2,
+      "persistence": 0.10000014305114746
+    },
+    {
+      "birth": 3.5,
+      "death": 3.5999999046325684,
+      "dimension": 2,
+      "persistence": 0.09999990463256836
+    },
+    {
+      "birth": 3.5,
+      "death": 3.799999952316284,
+      "dimension": 2,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 3.299999952316284,
+      "death": 3.5999999046325684,
+      "dimension": 2,
+      "persistence": 0.2999999523162842
+    },
+    {
+      "birth": 3.299999952316284,
+      "death": 3.9000000953674316,
+      "dimension": 2,
+      "persistence": 0.6000001430511475
+    },
+    {
+      "birth": 3.0999999046325684,
+      "death": 3.299999952316284,
+      "dimension": 2,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 3.0999999046325684,
+      "death": 3.299999952316284,
+      "dimension": 2,
+      "persistence": 0.20000004768371582
+    },
+    {
+      "birth": 3.0,
+      "death": 3.4000000953674316,
+      "dimension": 2,
+      "persistence": 0.40000009536743164
+    }
+  ],
+  "gf3_trit": 1
+}

@@ -1,0 +1,202 @@
+#!/bin/bash
+# zb — Zero-effort zerobrew passthrough via boxxy macOS VM.
+#
+# One command does everything:
+#   zb install vim   → ensures VM running, starts proxy, runs zerobrew on guest
+#
+# GF(3) Trit: 1 (Generator) — produces VMs, packages, logs
+
+set -euo pipefail
+
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+BOXXY_DIR="$(dirname "$SCRIPT_DIR")"
+BOXXY_HOME="${HOME}/.boxxy"
+PID_FILE="${BOXXY_HOME}/vm.pid"
+LOG_DIR="${BOXXY_HOME}/logs"
+BRIDGE="bridge100"
+PROXY_PORT=3128
+SSH_USER="bob"
+VM_NAME="zerobrew"
+
+# Find boxxy binary
+BOXXY=""
+if command -v boxxy &>/dev/null; then
+    BOXXY="boxxy"
+elif [ -x "${BOXXY_DIR}/boxxy" ]; then
+    BOXXY="${BOXXY_DIR}/boxxy"
+else
+    echo "error: boxxy not found in PATH or ${BOXXY_DIR}" >&2
+    exit 1
+fi
+
+usage() {
+    cat <<'EOF'
+zb — zero-effort zerobrew via boxxy macOS VM
+
+usage: zb [options] <zerobrew-command> [args...]
+
+options:
+  --user NAME    SSH user (default: bob)
+  --name NAME    VM name (default: zerobrew)
+  --no-proxy     Skip proxy, run directly
+
+examples:
+  zb install vim
+  zb search python
+  zb list
+
+First run downloads macOS (~15 GB) and installs it (~30 min).
+Subsequent runs boot in ~10s. The VM stays running between calls.
+EOF
+    exit 0
+}
+
+# Parse options
+NO_PROXY=false
+while [ $# -gt 0 ]; do
+    case "$1" in
+        --user)    SSH_USER="$2"; shift 2 ;;
+        --name)    VM_NAME="$2"; shift 2 ;;
+        --no-proxy) NO_PROXY=true; shift ;;
+        --help|-h) usage ;;
+        *) break ;;
+    esac
+done
+
+if [ $# -eq 0 ]; then
+    usage
+fi
+
+mkdir -p "${BOXXY_HOME}" "${LOG_DIR}"
+
+SESSION_ID="zb-$(date +%s)-$$"
+
+# --- Ensure VM is running ---
+
+vm_running() {
+    if [ -f "$PID_FILE" ]; then
+        local pid
+        pid=$(cat "$PID_FILE" 2>/dev/null || true)
+        if [ -n "$pid" ] && kill -0 "$pid" 2>/dev/null; then
+            return 0
+        fi
+        rm -f "$PID_FILE"
+    fi
+    return 1
+}
+
+if ! vm_running; then
+    echo "Starting macOS VM..."
+    # boxxy macos up handles create+install+boot automatically
+    $BOXXY macos boot --name "$VM_NAME" &
+    BOOT_PID=$!
+
+    # Wait for PID file (means VM is running)
+    for i in $(seq 1 60); do
+        if [ -f "$PID_FILE" ]; then
+            break
+        fi
+        # Check if boot process died
+        if ! kill -0 "$BOOT_PID" 2>/dev/null; then
+            echo "error: VM boot process exited unexpectedly" >&2
+            echo "hint: run 'boxxy macos up --name $VM_NAME' to create and install first" >&2
+            exit 1
+        fi
+        sleep 1
+    done
+
+    if [ ! -f "$PID_FILE" ]; then
+        echo "error: VM failed to start (no PID file after 60s)" >&2
+        echo "hint: run 'boxxy macos up --name $VM_NAME' interactively first" >&2
+        kill "$BOOT_PID" 2>/dev/null || true
+        exit 1
+    fi
+    echo "VM running (PID: $(cat "$PID_FILE"))"
+fi
+
+# --- Detect guest IP ---
+
+echo "Detecting guest IP..."
+GUEST_IP=""
+for i in $(seq 1 20); do
+    GUEST_IP=$(arp -a -i "$BRIDGE" 2>/dev/null | grep -oE '192\.168\.64\.[0-9]+' | head -1 || true)
+    if [ -n "$GUEST_IP" ]; then
+        break
+    fi
+    sleep 1
+done
+
+if [ -z "$GUEST_IP" ]; then
+    echo "error: could not detect guest IP on ${BRIDGE}" >&2
+    exit 1
+fi
+echo "Guest: ${GUEST_IP}"
+
+# --- Wait for SSH ---
+
+SSH_OPTS="-o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -o ConnectTimeout=3 -o LogLevel=ERROR"
+for i in $(seq 1 30); do
+    if ssh $SSH_OPTS "${SSH_USER}@${GUEST_IP}" true 2>/dev/null; then
+        break
+    fi
+    if [ "$i" -eq 1 ]; then
+        echo "Waiting for SSH..."
+    fi
+    sleep 2
+done
+
+if ! ssh $SSH_OPTS "${SSH_USER}@${GUEST_IP}" true 2>/dev/null; then
+    echo "error: SSH not reachable on ${GUEST_IP}" >&2
+    echo ""
+    echo "First-time guest setup needed:"
+    echo "  1. Open System Settings > General > Sharing > Remote Login"
+    echo "  2. Add your SSH key:"
+    echo "     ssh-copy-id ${SSH_USER}@${GUEST_IP}"
+    exit 1
+fi
+
+# --- Start proxy and run command ---
+
+HOST_IP=""
+PROXY_PID=""
+
+if [ "$NO_PROXY" = false ]; then
+    HOST_IP=$(ifconfig "$BRIDGE" 2>/dev/null | grep -oE 'inet 192\.168\.64\.[0-9]+' | awk '{print $2}' || true)
+fi
+
+cleanup() {
+    local exit_code=$?
+    if [ -n "$PROXY_PID" ] && kill -0 "$PROXY_PID" 2>/dev/null; then
+        kill -INT "$PROXY_PID" 2>/dev/null
+        wait "$PROXY_PID" 2>/dev/null || true
+    fi
+    exit $exit_code
+}
+trap cleanup EXIT INT TERM
+
+PROXY_ENV=""
+if [ -n "$HOST_IP" ]; then
+    # Start proxy in background
+    $BOXXY pinhole proxy --listen "${HOST_IP}:${PROXY_PORT}" --session "${SESSION_ID}" >/dev/null 2>&1 &
+    PROXY_PID=$!
+
+    for i in $(seq 1 10); do
+        if nc -z "$HOST_IP" "$PROXY_PORT" 2>/dev/null; then
+            break
+        fi
+        sleep 0.5
+    done
+
+    if nc -z "$HOST_IP" "$PROXY_PORT" 2>/dev/null; then
+        PROXY_URL="http://${HOST_IP}:${PROXY_PORT}"
+        PROXY_ENV="export http_proxy=${PROXY_URL} https_proxy=${PROXY_URL} HTTP_PROXY=${PROXY_URL} HTTPS_PROXY=${PROXY_URL} no_proxy=localhost,127.0.0.1 NO_PROXY=localhost,127.0.0.1;"
+    else
+        echo "warning: proxy failed to start, running without filtering" >&2
+        kill "$PROXY_PID" 2>/dev/null || true
+        PROXY_PID=""
+    fi
+fi
+
+# Run the command
+ssh $SSH_OPTS "${SSH_USER}@${GUEST_IP}" "${PROXY_ENV} zb $*"
+exit $?

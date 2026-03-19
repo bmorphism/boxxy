@@ -1,0 +1,31 @@
+;; zerobrew-pinhole.joke — Boot a macOS guest for pinhole use.
+;;
+;; Uses the native macOS boot path (MacOSBootLoader + MacPlatformConfiguration).
+;; The pinhole proxy is applied externally by the `zb` wrapper script.
+;;
+;; NOTE: Prefer `boxxy macos up` which handles the full lifecycle automatically.
+;;       This script is for advanced/custom usage only.
+;;
+;; GF(3) Trit: 1 (Generator) — produces VMs for zerobrew execution
+;;
+;; Usage:
+;;   boxxy examples/zerobrew-pinhole.joke
+;;   # or via the zb wrapper which handles the full lifecycle
+
+(def vm-name "zerobrew")
+(def cpus 4)
+(def mem-gb 4)
+
+;; Load existing macOS VM (must be created first via `boxxy macos up`)
+(def vm (vz/load-macos-vm vm-name cpus mem-gb))
+
+;; Write PID file for zb wrapper detection
+(def pid-path (str (System/getenv "HOME") "/.boxxy/vm.pid"))
+(spit pid-path (str (ProcessHandle/current) (.pid)))
+
+(println (str "Starting zerobrew VM (" cpus "CPU/" mem-gb "GB, macOS native boot)..."))
+(vz/start-vm! (.VM vm))
+(vz/wait-for-shutdown (.VM vm))
+
+;; Clean up PID file
+(.delete (java.io.File. pid-path))

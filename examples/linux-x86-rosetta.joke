@@ -1,0 +1,105 @@
+#!/usr/bin/env boxxy
+;; linux-x86-rosetta.joke — Boot ARM64 Linux VM with Rosetta x86_64 + NTP
+;;
+;; Maximally enabled x86_64 support via Rosetta binfmt_misc registration
+;; and systemd-timesyncd NTP synchronization.
+;;
+;; Usage:
+;;   boxxy examples/linux-x86-rosetta.joke
+;;
+;; Requires:
+;;   - Apple Silicon Mac
+;;   - Rosetta for Linux installed: softwareupdate --install-rosetta --agree-to-license
+;;   - ARM64 Linux kernel + initrd
+;;   - Disk image with systemd-based distro
+
+;; ── Configuration ──────────────────────────────────────────────────────
+
+(def kernel-path  (or (env "BOXXY_KERNEL")  "vmlinuz"))
+(def initrd-path  (or (env "BOXXY_INITRD")  "initrd"))
+(def disk-path    (or (env "BOXXY_DISK")    "linux-root.img"))
+(def ntp-servers  (or (env "BOXXY_NTP_SERVERS") "time.google.com pool.ntp.org"))
+(def rosetta-tag  "rosetta")
+(def cpus         (or (env "BOXXY_CPUS") 4))
+(def memory-gb    (or (env "BOXXY_MEMORY") 4))
+
+;; Kernel command line: enable hvc0 console, pass NTP servers to guest
+(def cmdline (str "console=hvc0 root=/dev/vda1 rw"
+                  " systemd.setenv=BOXXY_NTP_SERVERS='" ntp-servers "'"
+                  " systemd.setenv=BOXXY_ROSETTA_TAG=" rosetta-tag))
+
+;; ── Banner ─────────────────────────────────────────────────────────────
+
+(println "╔════════════════════════════════════════════════════════╗")
+(println "║  boxxy Linux VM — x86_64 via Rosetta + NTP sync      ║")
+(println "║                                                      ║")
+(println "║  GF(3): mount(+1) binfmt(0) timesync(-1) = 0 mod 3  ║")
+(println "╚════════════════════════════════════════════════════════╝")
+(println)
+
+;; ── Boot Loader (direct kernel, no UEFI) ───────────────────────────────
+
+(println "[+1] Configuring Linux Boot Loader...")
+(def boot (vz/new-linux-boot-loader kernel-path initrd-path cmdline))
+
+;; ── Platform ───────────────────────────────────────────────────────────
+
+(def platform (vz/new-generic-platform))
+
+;; ── VM Config ──────────────────────────────────────────────────────────
+
+(println "[ 0] Initializing VM: " cpus " CPUs, " memory-gb "GB RAM")
+(def vm-config (vz/new-vm-config cpus memory-gb boot platform))
+
+;; ── Storage ────────────────────────────────────────────────────────────
+
+(println "[ 0] Attaching root disk: " disk-path)
+(def disk-att (vz/new-disk-attachment disk-path false))
+(def disk-dev (vz/new-virtio-block-device disk-att))
+(vz/add-storage-devices vm-config [disk-dev])
+
+;; ── Network (NAT) ──────────────────────────────────────────────────────
+;; Required for NTP synchronization
+
+(println "[ 0] Enabling NAT network (required for NTP)")
+(def net (vz/new-virtio-network (vz/new-nat-network)))
+(vz/add-network-devices vm-config [net])
+
+;; ── Rosetta VirtioFS Share ─────────────────────────────────────────────
+;; The Rosetta binary is exposed via a VirtioFS share from the host.
+;; Guest mounts it and registers as binfmt_misc interpreter.
+;; addRosettaDirectoryShare in rosetta_arm64.go handles the host side.
+
+(println "[+1] Rosetta VirtioFS share: tag='" rosetta-tag "'")
+
+;; ── Validate and Launch ────────────────────────────────────────────────
+
+(println)
+(println "[-1] Validating configuration...")
+(def valid (vz/validate-config vm-config))
+
+(if (= valid true)
+  (do
+    (println "[✓] Configuration valid")
+    (println)
+    (println "Booting VM...")
+    (println "  Kernel:   " kernel-path)
+    (println "  Initrd:   " initrd-path)
+    (println "  Disk:     " disk-path)
+    (println "  Rosetta:  " rosetta-tag " -> /mnt/rosetta")
+    (println "  NTP:      " ntp-servers)
+    (println)
+    (println "After boot, run inside guest:")
+    (println "  sudo mount -t virtiofs rosetta /mnt/rosetta")
+    (println "  sudo /path/to/provision-linux-guest.sh")
+    (println)
+    (println "Or verify manually:")
+    (println "  timedatectl timesync-status")
+    (println "  cat /proc/sys/fs/binfmt_misc/rosetta")
+    (println)
+
+    (def vm (vz/new-vm vm-config))
+    (vz/start-vm! vm)
+    (println "VM State: " (vz/vm-state vm))
+    (println "Press Ctrl+C to stop."))
+  (println "[✗] Configuration invalid!"))

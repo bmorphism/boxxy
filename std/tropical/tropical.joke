@@ -1,0 +1,129 @@
+;; tropical - Max-plus semiring DP operations for boxxy
+;;
+;; Tropicalization functor:
+;;   product (×)  →  sum (+)
+;;   sum (+)      →  max(a,b)
+;;   zero         →  -∞
+;;   one          →  0
+;;
+;; Operations map directly to the stellogen tropical-covertree spec:
+;;   trop-bellman  →  DP recurrence
+;;   pants-merge   →  cobordant 2-to-1 merge (max + edge cost)
+;;   pants-copy    →  1-to-2 distribute
+;;   derange       →  σ(i) ≠ i (no self-validation)
+;;   dp-val        →  tropical local optimum
+;;   check-obstruct → H^1 conflict witness
+;;   plugin-sheaf  →  sheaf section attach/restrict
+
+(ns tropical
+  "Max-plus semiring DP with Frobenius merge and derangement constraints.
+
+  Core workflow:
+  1. Create tropical values with (tropical/val n) or tropical/neginf
+  2. Combine with (tropical/add a b) and (tropical/mul a b)
+  3. Build DP trees with (tropical/bellman leaf-vals costs)
+  4. Merge via pants cobordism (tropical/pants-merge a b cost)
+  5. Check obstructions with (tropical/check-obstruct ...)
+  6. Attach sheaf sections with (tropical/plugin-sheaf ...)")
+
+;; =============================================================================
+;; Tropical Arithmetic
+;; =============================================================================
+
+(defn ^{:doc "Create a tropical value. Wraps a number in the max-plus semiring."}
+  val [n]
+  (tropical/val n))
+
+(defn ^{:doc "Tropical additive identity: -∞. For all x: max(x, -∞) = x."}
+  neginf []
+  (tropical/neginf))
+
+(defn ^{:doc "Tropical addition: max(a, b) in the max-plus semiring.
+  (tropical/add (tropical/val 3) (tropical/val 5)) => (tropical/val 5)
+  (tropical/add (tropical/neginf) (tropical/val 7)) => (tropical/val 7)"}
+  add [a b]
+  (tropical/add a b))
+
+(defn ^{:doc "Tropical multiplication: a + b in the max-plus semiring.
+  (tropical/mul (tropical/val 3) (tropical/val 5)) => (tropical/val 8)
+  (tropical/mul (tropical/neginf) (tropical/val 7)) => (tropical/neginf)"}
+  mul [a b]
+  (tropical/mul a b))
+
+;; =============================================================================
+;; Tropicalization Functor
+;; =============================================================================
+
+(defn ^{:doc "Apply the tropicalization functor to a classical operation.
+  Maps: product → sum, sum → max, zero → -∞, one → 0.
+  op is one of :product, :sum, :zero, :one."}
+  tropicalize [op a b]
+  (tropical/tropicalize op a b))
+
+;; =============================================================================
+;; DP Recurrence (Bellman)
+;; =============================================================================
+
+(defn ^{:doc "Create a DP leaf node.
+  Returns {:addr addr :val (tropical/val cost)}."}
+  dp-leaf [addr cost]
+  (tropical/dp-leaf addr cost))
+
+(defn ^{:doc "Tropical Bellman merge: dp[parent] = max(dp[a]+cost, dp[b]+cost).
+  Frobenius merge in the max-plus semiring.
+  a, b are dp-vals, cost is the edge cost."}
+  bellman [a b cost]
+  (tropical/bellman a b cost))
+
+;; =============================================================================
+;; Cobordant Pants: 2→1 merge, 1→2 copy
+;; =============================================================================
+
+(defn ^{:doc "Pants merge: two legs merge into one waist.
+  a and b are {:id sym :trit {-1,0,+1}} pairs.
+  cost is the merge cost. a ≠ b required (Frobenius).
+  Returns {:merged [a b] :trit-sum (gf3-add trit-a trit-b) :cost cost}."}
+  pants-merge [a b cost]
+  (tropical/pants-merge a b cost))
+
+(defn ^{:doc "Pants copy: one waist splits into two identical legs.
+  w is {:id sym :trit t}. Returns two copies."}
+  pants-copy [w]
+  (tropical/pants-copy w))
+
+;; =============================================================================
+;; Derangement: σ(i) ≠ i
+;; =============================================================================
+
+(defn ^{:doc "Check derangement constraint: no element maps to itself.
+  skills is a vector of skill names.
+  validators is a vector of validator names.
+  Returns a valid assignment where skill[i] ≠ validator[i] for all i,
+  or nil if impossible."}
+  derange [skills validators]
+  (tropical/derange skills validators))
+
+;; =============================================================================
+;; H^1 Obstruction Check
+;; =============================================================================
+
+(defn ^{:doc "Check if two dp-vals can merge without H^1 obstruction.
+  a, b are dp-vals. constraints is a map of {addr constraint}.
+  Returns {:ok true} if clean merge, or {:obstruction {:witness [a b] :conflict [c1 c2]}}
+  if constraints conflict."}
+  check-obstruct [a b constraints]
+  (tropical/check-obstruct a b constraints))
+
+;; =============================================================================
+;; Plugin Sheaf
+;; =============================================================================
+
+(defn ^{:doc "Attach a plugin section to a node.
+  Returns {:node node :plugin plugin :data data}."}
+  plugin-attach [node plugin data]
+  (tropical/plugin-attach node plugin data))
+
+(defn ^{:doc "Restrict a parent section to a child node.
+  Returns the inherited section at the child."}
+  plugin-restrict [section child]
+  (tropical/plugin-restrict section child))

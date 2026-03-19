@@ -1,0 +1,583 @@
+;; seL4 CAmkES VMM provider in normal form (EDN)
+;;
+;; Identical shape to soft-machine ComputeProvider interface,
+;; metacircular: the evaluator that boots VMs is itself described
+;; as data the evaluator can read.
+;;
+;; Targets seL4 CAmkES VMM on x86_64 (PC99 platform).
+;; Unlike vz/ (macOS Virtualization.framework), sel4/ provides:
+;;   - Formally verified microkernel isolation
+;;   - Capability-based security at the hardware level
+;;   - CAmkES component architecture for composition
+;;   - Cross-VM connectors (dataports + events)
+;;   - No GPU passthrough (formally verified path only)
+;;
+;; Colors from gay MCP seed=42, verification-themed:
+;;   depth-0 #6B4C9A (root)           spin -1  (verifier)
+;;   depth-1 #3A7D44 (component)      spin +1
+;;   depth-2 #8B2252 (capability)     spin -1
+;;   depth-3 #2E86AB (connection)     spin +1
+;;   depth-4 #A23B72 (verification)   spin -1
+;;   depth-5 #44CF6C (config)         spin +1
+;;   depth-6 #7B3F00 (build)          spin -1
+;;
+;; GF(3) trit: -1 (VERIFIER - validates/attenuates, formally verified isolation)
+;; Balance: vz(0) + hv(+1) + sel4(-1) = 0 mod 3
+;; magnetization: -0.143 (verifier-biased)
+
+{:provider/name     "sel4-camkes"
+ :provider/type     :bare-metal
+ :provider/color    "#6B4C9A"
+ :provider/trit     -1
+
+ ;; -- capabilities ----------------------------------------------------------
+ :capabilities
+ {:memory-snapshots    false
+  :branching           false
+  :cold-boot-ms        15000
+  :warm-resume-ms      8000
+  :volumes             true
+  :suspend             false
+  :gpu                 false
+  :formally-verified   true
+  :capability-based-security true
+  :iommu               true
+  :nested-virt         false
+  :checkpoints         false
+  :cross-vm-connectors true
+  :max-vms             8
+  :regions             ["bare-metal" "qemu"]
+  :contexts            [:embedded :safety-critical :high-assurance]
+  :runtimes            [:sel4 :linux-guest :camkes]
+  :labels              [:verified :capability :isolation :deterministic]
+  :color               "#3A7D44"
+
+  ;; Verification status per architecture (from Proofcraft / seL4 Foundation)
+  :verification-matrix
+  {:x86-64
+   {:functional-correctness   true
+    :fast-path-verified       false
+    :binary-correctness       false
+    :integrity-availability   false
+    :confidentiality          false
+    :timing-analysis          false}
+
+   :aarch32
+   {:functional-correctness   true
+    :fast-path-verified       true
+    :binary-correctness       true
+    :integrity-availability   true
+    :confidentiality          true
+    :timing-analysis          true}
+
+   :aarch64
+   {:functional-correctness   true
+    :fast-path-verified       true
+    :binary-correctness       false
+    :integrity-availability   true
+    :confidentiality          false
+    :timing-analysis          false}
+
+   :riscv64
+   {:functional-correctness   true
+    :fast-path-verified       false
+    :binary-correctness       true
+    :integrity-availability   true
+    :confidentiality          true
+    :timing-analysis          false}}}
+
+ ;; -- sel4/ namespace (the formally verified core) --------------------------
+ ;; Each fn here is both:
+ ;;   1. A spec of what boxxy's sel4 evaluator provides
+ ;;   2. A callable from squint/SCI/babashka via the bridge
+ :sel4/namespace
+ {:boot-loaders
+  [{:name   :sel4/new-linux-boot-loader
+    :doc    "Create boot loader for Linux guest on CAmkES VM.
+             Loads kernel + initrd + cmdline via multiboot on x86_64."
+    :args   [:kernel-path :initrd-path :cmdline]
+    :return :external/boot-loader
+    :color  "#3A7D44"}
+   {:name   :sel4/new-buildroot-boot-loader
+    :doc    "Create boot loader from buildroot filesystem image.
+             Standard CAmkES VM approach: rootfs.cpio in RAM."
+    :args   [:rootfs-cpio-path]
+    :return :external/boot-loader
+    :color  "#3A7D44"}
+   {:name   :sel4/new-multiboot-loader
+    :doc    "Create multiboot boot loader for raw ELF payloads.
+             Used for custom root tasks and bare-metal seL4 images."
+    :args   [:elf-path :boot-modules]
+    :return :external/boot-loader
+    :color  "#3A7D44"}]
+
+  :platform
+  [{:name   :sel4/new-camkes-assembly
+    :doc    "Create a CAmkES assembly (top-level system description).
+             An assembly is the composition of all components and connections."
+    :args   [:name]
+    :return :external/camkes-assembly
+    :color  "#2E86AB"}
+   {:name   :sel4/new-component
+    :doc    "Define a CAmkES component with typed interfaces.
+             Components are the unit of isolation in CAmkES."
+    :args   [:name :control? :interfaces]
+    :return :external/camkes-component
+    :color  "#2E86AB"}
+   {:name   :sel4/new-connection
+    :doc    "Create a connection between component interfaces.
+             Connector types: seL4RPCDataport, seL4SharedData,
+             seL4Notification, seL4SharedDataWithCaps."
+    :args   [:connector-type :from-component :from-interface
+             :to-component :to-interface]
+    :return :external/camkes-connection
+    :color  "#2E86AB"}
+   {:name   :sel4/new-procedure-interface
+    :doc    "Define a procedure interface (RPC-style).
+             Methods are called synchronously across component boundaries."
+    :args   [:name :methods]
+    :return :external/camkes-interface
+    :color  "#2E86AB"}
+   {:name   :sel4/new-event-interface
+    :doc    "Define an event interface (async notification).
+             Used for interrupts and cross-VM signaling."
+    :args   [:name :direction]
+    :return :external/camkes-interface
+    :color  "#2E86AB"}
+   {:name   :sel4/new-dataport-interface
+    :doc    "Define a dataport interface (shared memory region).
+             Used for zero-copy data transfer between components."
+    :args   [:name :size-bytes :type]
+    :return :external/camkes-interface
+    :color  "#2E86AB"}
+   {:name   :sel4/add-component
+    :doc    "Add a component instance to an assembly."
+    :args   [:assembly :component :instance-name]
+    :return :nil
+    :color  "#2E86AB"}
+   {:name   :sel4/add-connection
+    :doc    "Add a connection to an assembly."
+    :args   [:assembly :connection]
+    :return :nil
+    :color  "#2E86AB"}]
+
+  :storage
+  [{:name   :sel4/new-virtio-block-device
+    :doc    "Create a virtio block device for guest VM.
+             Backed by a raw disk image on the host filesystem."
+    :args   [:image-path :read-only?]
+    :return :external/block-device
+    :color  "#7B3F00"}
+   {:name   :sel4/new-ram-disk
+    :doc    "Create a RAM-backed disk (tmpfs-style).
+             Used for buildroot rootfs loaded into guest memory."
+    :args   [:size-mb]
+    :return :external/block-device
+    :color  "#7B3F00"}
+   {:name   :sel4/new-dataport-storage
+    :doc    "Create shared memory storage via CAmkES dataport.
+             Zero-copy access between VMM and guest via hypercall."
+    :args   [:dataport-name :size-bytes]
+    :return :external/dataport-store
+    :color  "#7B3F00"}
+   {:name   :sel4/new-passthrough-device
+    :doc    "Create a PCI passthrough device for direct hardware access.
+             Requires IOMMU (VT-d on x86_64). Device is removed from
+             host and given exclusively to the guest VM."
+    :args   [:pci-bus :pci-device :pci-function :irq :memory-regions]
+    :return :external/passthrough-device
+    :color  "#7B3F00"}]
+
+  :network
+  [{:name   :sel4/new-virtio-net
+    :doc    "Create a virtio network device for guest VM.
+             Presents a virtual NIC to the guest; traffic is
+             forwarded to/from native seL4 components."
+    :args   [:mac-address]
+    :return :external/virtio-nic
+    :color  "#A23B72"}
+   {:name   :sel4/new-cross-vm-net
+    :doc    "Create cross-VM network connection.
+             Uses seL4SharedDataWithCaps connector for zero-copy
+             packet transfer between VMs via shared dataport."
+    :args   [:vm-a :vm-b :dataport-size]
+    :return :external/cross-vm-net
+    :color  "#A23B72"}
+   {:name   :sel4/new-passthrough-nic
+    :doc    "Passthrough a physical NIC to guest VM via IOMMU.
+             Guest gets direct hardware access; no VMM overhead."
+    :args   [:pci-bus :pci-device :pci-function :irq]
+    :return :external/passthrough-nic
+    :color  "#A23B72"}
+   {:name   :sel4/add-network-device
+    :doc    "Attach a network device to a VM configuration."
+    :args   [:vm-config :device]
+    :return :nil
+    :color  "#A23B72"}]
+
+  :config
+  [{:name   :sel4/new-vm-config
+    :doc    "Create VM configuration for CAmkES VMM.
+             Specifies guest resources: vCPUs, RAM, boot loader."
+    :args   [:vcpus :ram-mb :boot-loader]
+    :return :external/vm-config
+    :color  "#44CF6C"}
+   {:name   :sel4/set-guest-ram
+    :doc    "Set guest RAM base address and size.
+             On x86_64 PC99, typical base is 0x20000000."
+    :args   [:vm-config :ram-base :ram-size-mb]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/set-kernel-image
+    :doc    "Set the guest kernel image path."
+    :args   [:vm-config :kernel-path]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/set-initrd
+    :doc    "Set the guest initrd/initramfs path."
+    :args   [:vm-config :initrd-path]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/set-cmdline
+    :doc    "Set the guest kernel command line."
+    :args   [:vm-config :cmdline]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/add-storage-device
+    :doc    "Attach a storage device to a VM configuration."
+    :args   [:vm-config :device]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/add-ioport-range
+    :doc    "Grant guest access to x86 I/O port range.
+             Requires explicit capability delegation."
+    :args   [:vm-config :start-port :end-port :name]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/add-irq
+    :doc    "Map a hardware IRQ to the guest VM.
+             Configures level-trigger, active-low, and destination."
+    :args   [:vm-config :irq-name :source :level-trig? :active-low? :dest]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/enable-iommu
+    :doc    "Enable IOMMU (VT-d) for device passthrough.
+             Required for PCI passthrough devices."
+    :args   [:vm-config]
+    :return :nil
+    :color  "#44CF6C"}
+   {:name   :sel4/validate-config
+    :doc    "Validate VM configuration. Checks component wiring,
+             capability delegation, and resource constraints."
+    :args   [:vm-config]
+    :return :bool
+    :color  "#44CF6C"}]
+
+  :control
+  [{:name   :sel4/create-vm
+    :doc    "Instantiate a VM from a validated CAmkES VM configuration.
+             The VMM component is created and initialized."
+    :args   [:vm-config]
+    :return :external/vm
+    :color  "#6B4C9A"}
+   {:name   :sel4/start-vm!
+    :doc    "Start a VM. Begins executing the guest kernel.
+             The VMM enters its main event loop."
+    :args   [:vm]
+    :return :bool
+    :color  "#6B4C9A"}
+   {:name   :sel4/stop-vm!
+    :doc    "Stop a VM. Destroys the guest and reclaims resources.
+             All capabilities to the VM are revoked."
+    :args   [:vm]
+    :return :bool
+    :color  "#6B4C9A"}
+   {:name   :sel4/vm-state
+    :doc    "Query current VM state.
+             Returns: :stopped :running :faulted :initializing"
+    :args   [:vm]
+    :return :keyword
+    :color  "#6B4C9A"}
+   {:name   :sel4/inject-irq!
+    :doc    "Inject a virtual interrupt into the guest.
+             Used by VMM to deliver device interrupts."
+    :args   [:vm :irq-number]
+    :return :bool
+    :color  "#6B4C9A"}
+   {:name   :sel4/handle-vmcall
+    :doc    "Register a handler for guest VM calls (hypercalls).
+             The VMM dispatches hypercalls to registered handlers."
+    :args   [:vm :vmcall-number :handler-fn]
+    :return :nil
+    :color  "#6B4C9A"}]
+
+  :utilities
+  [{:name   :sel4/repo-init!
+    :doc    "Initialize seL4/CAmkES build environment via Google repo tool.
+             Fetches kernel, CAmkES, VM libraries, and build system."
+    :args   [:manifest-url :manifest-branch]
+    :return :bool
+    :color  "#44CF6C"}
+   {:name   :sel4/cmake-configure!
+    :doc    "Configure CAmkES build with CMake.
+             Sets platform (x86_64-pc99), app, and kernel options."
+    :args   [:build-dir :platform :app-name :extra-cmake-args]
+    :return :bool
+    :color  "#44CF6C"}
+   {:name   :sel4/ninja-build!
+    :doc    "Build the CAmkES system image using Ninja."
+    :args   [:build-dir]
+    :return :bool
+    :color  "#44CF6C"}
+   {:name   :sel4/qemu-simulate!
+    :doc    "Run the built CAmkES image in QEMU for testing.
+             Uses -machine q35 -cpu Nehalem -m for x86_64."
+    :args   [:image-path :memory-mb :extra-qemu-args]
+    :return :external/qemu-process
+    :color  "#44CF6C"}
+   {:name   :sel4/create-disk-image
+    :doc    "Create a raw disk image for guest VM storage."
+    :args   [:path :size-mb]
+    :return :bool
+    :color  "#44CF6C"}
+   {:name   :sel4/wait-for-vm
+    :doc    "Block until VM reaches a target state or times out."
+    :args   [:vm :target-state :timeout-ms]
+    :return :bool
+    :color  "#44CF6C"}]
+
+  :verification
+  [{:name   :sel4/proof-status
+    :doc    "Query formal verification status for a given architecture.
+             Returns which proofs are complete: functional-correctness,
+             binary-correctness, integrity, confidentiality, timing."
+    :args   [:architecture]
+    :return :map
+    :color  "#8B2252"}
+   {:name   :sel4/verify-config-isolation
+    :doc    "Statically check that a CAmkES configuration preserves
+             the verified isolation properties. Ensures no component
+             has capabilities it should not possess."
+    :args   [:assembly]
+    :return {:valid? :bool :violations :vector}
+    :color  "#8B2252"}
+   {:name   :sel4/check-capability-leaks
+    :doc    "Analyze capability derivation tree for potential leaks.
+             Walks the CDT and reports any capability that grants
+             more rights than its parent."
+    :args   [:cspace-root]
+    :return {:leaks :vector :total-caps :int}
+    :color  "#8B2252"}
+   {:name   :sel4/audit-ipc-channels
+    :doc    "Audit all IPC endpoints for information flow violations.
+             Checks against the verified confidentiality policy."
+    :args   [:assembly]
+    :return {:channels :vector :violations :vector}
+    :color  "#8B2252"}
+   {:name   :sel4/invariant-check
+    :doc    "Verify system invariants hold at runtime.
+             Checks: capability well-formedness, memory isolation,
+             scheduling domain separation."
+    :args   [:vm]
+    :return {:invariants-ok? :bool :failures :vector}
+    :color  "#8B2252"}
+   {:name   :sel4/verified-configurations
+    :doc    "List all verified configurations for a given architecture.
+             Returns platform names and which proofs apply."
+    :args   [:architecture]
+    :return :vector
+    :color  "#8B2252"}]
+
+  :capability-management
+  [{:name   :sel4/cnode-copy
+    :doc    "Copy a capability to a new CSpace slot.
+             seL4_CNode_Copy: creates a copy with specified access rights."
+    :args   [:dest-root :dest-index :dest-depth
+             :src-root :src-index :src-depth :rights]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/cnode-mint
+    :doc    "Mint a new capability with badge from an existing one.
+             seL4_CNode_Mint: copy + badge + rights attenuation."
+    :args   [:dest-root :dest-index :dest-depth
+             :src-root :src-index :src-depth :rights :badge]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/cnode-move
+    :doc    "Move a capability from one CSpace slot to another.
+             seL4_CNode_Move: source slot becomes empty."
+    :args   [:dest-root :dest-index :dest-depth
+             :src-root :src-index :src-depth]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/cnode-mutate
+    :doc    "Move a capability with guard modification.
+             seL4_CNode_Mutate: move + badge change."
+    :args   [:dest-root :dest-index :dest-depth
+             :src-root :src-index :src-depth :badge]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/cnode-delete
+    :doc    "Delete a capability from a CSpace slot.
+             seL4_CNode_Delete: removes the cap, slot becomes empty."
+    :args   [:root :index :depth]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/cnode-revoke
+    :doc    "Revoke all capabilities derived from the specified one.
+             seL4_CNode_Revoke: walks CDT, deletes all children.
+             This is the formal revocation mechanism."
+    :args   [:root :index :depth]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/cnode-rotate
+    :doc    "Atomically rotate three CSpace slots.
+             seL4_CNode_Rotate: pivot gets src, dest gets pivot."
+    :args   [:dest-root :dest-index :dest-depth :dest-badge
+             :pivot-root :pivot-index :pivot-depth :pivot-badge
+             :src-root :src-index :src-depth]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/cnode-save-caller
+    :doc    "Save the reply capability from the last IPC call.
+             seL4_CNode_SaveCaller: preserves reply cap for later use."
+    :args   [:root :index :depth]
+    :return :bool
+    :color  "#8B2252"}
+   {:name   :sel4/untyped-retype
+    :doc    "Create new kernel objects from untyped memory.
+             seL4_Untyped_Retype: the only way to create objects in seL4.
+             Object types: :endpoint :notification :cnode :tcb :untyped
+             :page-table :page :page-directory :io-page-table"
+    :args   [:untyped :object-type :size-bits
+             :root :node-index :node-depth :node-offset :num-objects]
+    :return :bool
+    :color  "#8B2252"}]}
+
+ ;; -- IPC protocol (seL4 message passing) -----------------------------------
+ ;; seL4 IPC is synchronous, rendezvous-based.
+ ;; Unlike vz/ vsock (stream-oriented), sel4 IPC is capability-invocation.
+ :ipc/protocol
+ {:wire-format    :capability-invocation
+  :max-msg-regs   4
+  :max-extra-caps 3
+  :badge-bits     64
+  :color          "#8B2252"
+  :trit           -1
+  :operations
+  {:send         "seL4_Send(dest, msgInfo)"
+   :recv         "seL4_Recv(src, sender)"
+   :call         "seL4_Call(dest, msgInfo)"
+   :reply        "seL4_Reply(msgInfo)"
+   :nb-send      "seL4_NBSend(dest, msgInfo)"
+   :reply-recv   "seL4_ReplyRecv(dest, msgInfo, sender)"
+   :nb-recv      "seL4_NBRecv(src, sender)"
+   :signal       "seL4_Signal(dest)"
+   :wait         "seL4_Wait(src, sender)"
+   :poll         "seL4_Poll(src, sender)"
+   :yield        "seL4_Yield()"}
+  :invariant     "All IPC preserves capability monotonicity: a receiver
+                  never gains rights exceeding the sender's authority."}
+
+ ;; -- cross-VM connectors (CAmkES-specific) ---------------------------------
+ :crossvm/connectors
+ {:seL4RPCDataport
+  {:doc   "RPC + shared memory. Client calls procedure, data in dataport."
+   :color "#2E86AB"}
+  :seL4SharedData
+  {:doc   "Pure shared memory region between components."
+   :color "#2E86AB"}
+  :seL4SharedDataWithCaps
+  {:doc   "Shared memory with runtime capability insertion.
+           Required for cross-VM dataports (VMM inserts mappings at runtime)."
+   :color "#2E86AB"}
+  :seL4Notification
+  {:doc   "Asynchronous event notification between components."
+   :color "#2E86AB"}
+  :seL4GlobalAsynchCallback
+  {:doc   "Global async callback for interrupt handling."
+   :color "#2E86AB"}}
+
+ ;; -- evaluator shape (the metacircular part) -------------------------------
+ ;; boxxy's eval/apply is a standard Lisp-1 with these forms.
+ ;; For sel4/, the evaluator additionally understands CAmkES
+ ;; component descriptions and capability references.
+ :evaluator
+ {:special-forms [:quote :def :let :fn :if :do :require :ns
+                  :component :connection :assembly]
+  :value-types   [:nil :bool :int :float :string
+                  :symbol :keyword :list :vector :hash-map
+                  :fn :external-value :capability-ref :component-ref]
+  :builtins      [:+ :- :* :/
+                  := :< :>
+                  :nil? :string? :number? :vector?
+                  :type :println :print :str
+                  :vector :count :first :rest :nth :conj
+                  :get :assoc
+                  :or :and :not
+                  :getenv
+                  ;; sel4-specific builtins
+                  :cap-valid? :cap-rights :cap-badge
+                  :component? :connected?]
+  :color         "#6B4C9A"}
+
+ ;; -- machine sizes ---------------------------------------------------------
+ ;; CAmkES VMs are typically resource-constrained (embedded / safety-critical).
+ ;; Sizes reflect realistic CAmkES VM deployments, not cloud instances.
+ :sizes
+ {:micro     {:vcpus 1  :ram-mb 128   :label "Minimal"    :tier :embedded}
+  :small     {:vcpus 1  :ram-mb 256   :label "Buildroot"  :tier :embedded}
+  :medium    {:vcpus 1  :ram-mb 512   :label "Small Linux" :tier :basic}
+  :large     {:vcpus 2  :ram-mb 1024  :label "Linux"      :tier :basic}
+  :xlarge    {:vcpus 2  :ram-mb 2048  :label "Multi-VM"   :tier :standard}
+  :2xlarge   {:vcpus 4  :ram-mb 4096  :label "Research"   :tier :standard}
+  :4xlarge   {:vcpus 4  :ram-mb 8192  :label "Server"     :tier :performance}
+  :8xlarge   {:vcpus 8  :ram-mb 16384 :label "Workstation" :tier :performance}}
+
+ ;; -- GF(3) balance ---------------------------------------------------------
+ ;; Provider trit assignments:
+ ;;   vz/    = 0  (ERGODIC - coordination, macOS Virtualization.framework)
+ ;;   hv/    = +1 (GENERATOR - creates/provisions, hypervisor)
+ ;;   sel4/  = -1 (VERIFIER - validates/attenuates, formally verified)
+ ;;
+ ;; Conservation: vz(0) + hv(+1) + sel4(-1) = 0 (mod 3)
+ ;;
+ ;; The sel4 provider is the VERIFIER in every triad:
+ ;;   - It attenuates capabilities (never amplifies)
+ ;;   - It validates isolation (never violates)
+ ;;   - It checks proofs (never assumes)
+ ;;
+ ;; Canonical triad:
+ ;;   hv (+1, Generator) creates VM resources
+ ;;   vz (0, Ergodic)    coordinates VM lifecycle
+ ;;   sel4 (-1, Verifier) validates isolation invariants
+ :gf3/balance
+ {:trit            -1
+  :role            :verifier
+  :magnetization   -0.143
+  :triad           {:generator "hv" :ergodic "vz" :verifier "sel4"}
+  :conservation    "vz(0) + hv(+1) + sel4(-1) = 0 (mod 3)"
+
+  ;; Internal operation trits (from std/sel4/balance.clj)
+  :operation-trits
+  {:verify-capability   -1
+   :audit-message       -1
+   :validate-rights     -1
+   :query-layout         0
+   :send-message         0
+   :recv-message          0
+   :create-endpoint      +1
+   :allocate-capability  +1
+   :spawn-process        +1}
+
+  ;; Skill trits
+  :skill-trits
+  {"sel4:capability-verifier" -1
+   "sel4:security-monitor"    -1
+   "sel4:audit-service"       -1
+   "sel4:ipc-router"           0
+   "sel4:message-broker"       0
+   "sel4:vmm-coordinator"      0
+   "sel4:process-creator"     +1
+   "sel4:endpoint-allocator"  +1
+   "sel4:untyped-allocator"   +1}}}

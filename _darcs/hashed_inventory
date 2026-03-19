@@ -1,0 +1,16 @@
+pristine:457fcc117ff0ea464a1423ddbdd14d9a7a796a8fae08af3ddf77bbf1be6c014e
+[Import boxxy from git
+bmorphism <bmorphism@gmail.com>**20260212062552
+ Ignore-this: 8ceacb111ed67dfaa33673d3621118fe31ebde4d788b835c0b2fd7328572b8f5f4e0d20a2eb8aa4d
+] 
+hash: 0001735261-1668613e6ea6f97d195eaa66f09626e9b07c7c79723aef3145de790007ee9388
+[Add go.mod (force past boring filter)
+bmorphism <bmorphism@gmail.com>**20260212062604
+ Ignore-this: 335a74f82a4e7c9992d7ae38b98a4021986e8a61eb8a09406ffe98ca893b5714ca080cb8bff04b64
+] 
+hash: 0000004819-54186ceacdb0938091aca67913a6dbe382c5c97a5bc154614a2cfe0113a09022
+[Add darcs documentation with patch theory / GF(3) analysis
+bmorphism <bmorphism@gmail.com>**20260212062712
+ Ignore-this: f0176a64a3e87a249c90d0a3492cbd56b8f27ab61f0e09c8b9d7843079e6b893c7708d309371b8f
+] 
+hash: 0000006143-229246963c40ba0c7b6aa83f2c4aadf38603589abb1ff60e537f916baf71d3b3

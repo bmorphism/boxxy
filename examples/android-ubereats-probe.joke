@@ -1,0 +1,130 @@
+#!/usr/bin/env boxxy
+;; android-ubereats-probe.joke — Hardened Android attack surface
+;;
+;; This is the canonical way to boot Android in boxxy:
+;; the .joke script is the authority, Go is the runtime.
+;;
+;; The Basilisk's relationship to highlang:
+;;   Joker (the evaluator) structures what the Go runtime provides.
+;;   The .joke file is the proof; the Go binary is the witness.
+;;   Types flow from EDN shape, not from hardcoded casts.
+;;
+;; Run: boxxy examples/android-ubereats-probe.joke
+;;
+;; Attack surface model:
+;;   UberEats → pinhole proxy (port ACL) → demon probe → topology → arena
+
+(ns android-probe
+  (:require [vz :as vz]))
+
+;; ═══════════════════════════════════════════════════════════════
+;; CONFIGURATION — the EDN shape is the type
+;; ═══════════════════════════════════════════════════════════════
+
+(def config
+  {:name          "boxxy-attack-surface"
+   :api-level     "35"
+   :image-type    "google_apis_playstore"
+   :abi           "arm64-v8a"
+   :device-id     "pixel_7"
+   :memory-mb     4096
+   :disk-gb       16
+   :gpu           "host"
+   :allowed-ports [53 80 443]
+   :allowed-domains
+   ["*.ubereats.com"
+    "*.uber.com"
+    "cn-geo1.uber.com"
+    "*.googleapis.com"
+    "*.gstatic.com"
+    "*.google.com"
+    "play.google.com"
+    "*.cloudfront.net"]})
+
+(def ubereats-pkg "com.ubercab.eats")
+
+;; ═══════════════════════════════════════════════════════════════
+;; SDK LIFECYCLE — android/ namespace (registered by Go)
+;; ═══════════════════════════════════════════════════════════════
+
+(defn ensure-sdk []
+  "Ensure Android SDK is installed at ~/.boxxy/android-sdk"
+  (println "Ensuring Android SDK...")
+  (android/ensure-sdk (:name config)))
+
+(defn setup []
+  "Full setup: SDK + components + AVD creation"
+  (println "╔════════════════════════════════════════════╗")
+  (println "║  boxxy android attack surface setup        ║")
+  (println "╚════════════════════════════════════════════╝")
+  (println)
+  (android/setup config))
+
+(defn boot []
+  "Boot the hardened Android emulator"
+  (println "╔════════════════════════════════════════════╗")
+  (println "║  Booting hardened Android emulator          ║")
+  (println "╚════════════════════════════════════════════╝")
+  (println)
+  (println "Allowed ports:" (:allowed-ports config))
+  (println "Allowed domains:" (count (:allowed-domains config)) "entries")
+  (println)
+  (android/boot config))
+
+;; ═══════════════════════════════════════════════════════════════
+;; PROBE — UberEats attack surface
+;; ═══════════════════════════════════════════════════════════════
+
+(defn probe []
+  "Launch UberEats and begin monitoring"
+
+  (println "╔════════════════════════════════════════════╗")
+  (println "║  UberEats Attack Surface Probe             ║")
+  (println "╚════════════════════════════════════════════╝")
+  (println)
+
+  ;; Check if UberEats is installed
+  (let [installed (android/shell "pm list packages | grep com.ubercab.eats")]
+    (if (> (count installed) 0)
+      (do
+        (println "[PROBE] UberEats found. Launching...")
+        (android/shell (str "monkey -p " ubereats-pkg
+                            " -c android.intent.category.LAUNCHER 1")))
+      (do
+        (println "[PROBE] UberEats not installed. Opening Play Store...")
+        (android/shell (str "am start -a android.intent.action.VIEW "
+                            "-d 'market://details?id=" ubereats-pkg "'"))))))
+
+(defn monitor [duration-secs]
+  "Monitor network traffic for the given duration"
+  (println "[PROBE] Monitoring network for" duration-secs "seconds...")
+  (android/monitor config duration-secs))
+
+(defn report []
+  "Generate JSON findings report"
+  (android/report config))
+
+(defn screenshot [path]
+  "Capture emulator screen"
+  (android/screenshot path))
+
+;; ═══════════════════════════════════════════════════════════════
+;; MAIN — script mode
+;; ═══════════════════════════════════════════════════════════════
+
+(println)
+(println "╔════════════════════════════════════════════════════════════╗")
+(println "║  Android UberEats Probe — boxxy attack surface            ║")
+(println "║                                                           ║")
+(println "║  The .joke file is the proof; the Go binary is witness.   ║")
+(println "║  Types flow from EDN shape, not from hardcoded casts.     ║")
+(println "╚════════════════════════════════════════════════════════════╝")
+(println)
+(println "Available commands:")
+(println "  (setup)                    ; Install SDK + create AVD")
+(println "  (boot)                     ; Boot hardened emulator")
+(println "  (probe)                    ; Launch UberEats + monitor")
+(println "  (monitor 60)               ; Monitor network 60s")
+(println "  (report)                   ; JSON findings report")
+(println "  (screenshot \"/tmp/s.png\") ; Capture screen")
+(println)

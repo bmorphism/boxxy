@@ -1,5 +1,5 @@
 session Boxxy_AGM = HOL +
-  description "AGM Belief Revision"
+  description "AGM Belief Revision with GF(3) Narratives and Byzantine Vector Clocks"
   options [document = false, quick_and_dirty = true]
   sessions
     "HOL-Library"
@@ -11,3 +11,6 @@ session Boxxy_AGM = HOL +
     OpticClass
     SemiReliable_Nashator
     Vibesnipe
+    Abelian_Extensions
+    Narratives
+    Byzantine_Vector_Clock

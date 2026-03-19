@@ -1,0 +1,200 @@
+#!/usr/bin/env joker
+;; sqlite-scanner.joke - Discover SQLite databases via magic-byte detection
+;;
+;; Wraps simonw/sqlite-scanner (Go binary, distributed via PyPI/uvx)
+;; Detection: reads first 16 bytes of every file, compares to "SQLite format 3\x00"
+;;
+;; GF(3) conservation: MINUS (detection) + ERGODIC (orchestration) + PLUS (reporting)
+;;   sqlite-scanner (-1) + jo-clojure (0) + hy-regime (+1) = 0 (mod 3)
+;;
+;; Activities:
+;;   1. scan-host     — full filesystem scan
+;;   2. scan-paths    — targeted directory scan
+;;   3. canary-audit  — verify honeypot SQLite canaries
+;;   4. catalog       — inventory with size/path metadata
+;;
+;; Usage:
+;;   joker examples/sqlite-scanner.joke                    # scan home dir
+;;   joker examples/sqlite-scanner.joke ~/Library ~/Documents  # scan specific paths
+;;   SCAN_MODE=canary joker examples/sqlite-scanner.joke   # canary verification
+
+(ns boxxy.sqlite-scanner
+  (:require [joker.os :as os]
+            [joker.string :as str]
+            [joker.json :as json]))
+
+;; ═══════════════════════════════════════════════════════════════════
+;; GF(3) Skill Classification
+;; ═══════════════════════════════════════════════════════════════════
+
+(def skill-meta
+  {:name        "sqlite-scanner"
+   :trit        2       ;; GF(3) element 2 = balanced -1 (MINUS)
+   :role        :MINUS
+   :role-name   "Verifier"
+   :upstream    "github.com/simonw/sqlite-scanner"
+   :version     "0.1.1"
+   :detection   "SQLite format 3\\x00 (16-byte magic)"})
+
+(def triad
+  {:verifier    {:name "sqlite-scanner" :trit 2 :role :MINUS}
+   :coordinator {:name "jo-clojure"     :trit 0 :role :ERGODIC}
+   :generator   {:name "hy-regime"      :trit 1 :role :PLUS}})
+
+(defn balanced? [a b c]
+  (zero? (mod (+ (:trit a) (:trit b) (:trit c)) 3)))
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Scanner Invocation
+;; ═══════════════════════════════════════════════════════════════════
+
+(defn run-scanner
+  "Invoke sqlite-scanner via uvx, return parsed JSON result.
+   joker.os/sh takes command + varargs, returns {:success :exit :out :err}."
+  [paths]
+  (let [result (apply os/sh "uvx" "sqlite-scanner" "--json" "--size" paths)]
+    (if (:success result)
+      (json/read-string (:out result))
+      (do
+        (println "ERROR: sqlite-scanner failed (exit" (:exit result) ")")
+        (println (:err result))
+        nil))))
+
+(defn run-scanner-jsonl
+  "Invoke sqlite-scanner with JSONL output, return seq of entries."
+  [paths]
+  (let [result (apply os/sh "uvx" "sqlite-scanner" "--jsonl" "--size" paths)]
+    (if (:success result)
+      (->> (str/split-lines (:out result))
+           (filter #(not (str/blank? %)))
+           (map json/read-string))
+      (do
+        (println "ERROR: sqlite-scanner failed (exit" (:exit result) ")")
+        (println (:err result))
+        nil))))
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Activity: scan-host
+;; ═══════════════════════════════════════════════════════════════════
+
+(defn activity-scan-host
+  "Full host filesystem scan. Streams results as discovered."
+  [& paths]
+  (let [scan-paths (if (seq paths) paths [(os/get-env "HOME")])]
+    (println "╔════════════════════════════════════════════════════════════╗")
+    (println "║  sqlite-scanner — Host Filesystem Scan                    ║")
+    (println "║  Detection: 16-byte magic header (no extension guessing)  ║")
+    (println "║  GF(3) role: MINUS (-1) Verifier                         ║")
+    (println "╚════════════════════════════════════════════════════════════╝")
+    (println)
+    (println "Scanning:" (str/join ", " scan-paths))
+    (println)
+    (let [result (run-scanner scan-paths)]
+      (when result
+        (let [entries (get result "entries")]
+          (println "Found" (count entries) "SQLite databases:")
+          (println)
+          (doseq [entry entries]
+            (let [path (get entry "path")
+                  size (get entry "size")
+                  kb   (quot size 1024)]
+              (println (str "  " path " (" kb " KB)"))))
+          (println)
+          (println "Total:" (count entries) "databases")
+          entries)))))
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Activity: catalog
+;; ═══════════════════════════════════════════════════════════════════
+
+(defn activity-catalog
+  "Inventory databases with classification by path patterns."
+  [paths]
+  (let [entries (run-scanner-jsonl paths)]
+    (when entries
+      (let [classify (fn [path]
+                       (cond
+                         (str/includes? path "/Library/Safari/")     :browser
+                         (str/includes? path "/Library/Messages/")   :messaging
+                         (str/includes? path "/Library/Mail/")       :email
+                         (str/includes? path "/Library/Calendars/")  :calendar
+                         (str/includes? path "/Library/Cookies/")    :cookies
+                         (str/includes? path "Chrome")               :browser
+                         (str/includes? path "Firefox")              :browser
+                         (str/includes? path ".sqlite")              :app-data
+                         :else                                       :other))
+            classified (map (fn [e]
+                              (assoc e "category" (name (classify (get e "path")))))
+                            entries)
+            by-category (group-by #(get % "category") classified)]
+        (println "╔════════════════════════════════════════════════════════════╗")
+        (println "║  sqlite-scanner — Database Catalog                        ║")
+        (println "╚════════════════════════════════════════════════════════════╝")
+        (println)
+        (doseq [[cat items] by-category]
+          (println (str "  [" cat "] " (count items) " databases"))
+          (doseq [item (take 5 items)]
+            (println (str "    " (get item "path"))))
+          (when (> (count items) 5)
+            (println (str "    ... and " (- (count items) 5) " more")))
+          (println))
+        (println "Total:" (count entries) "databases in"
+                 (count by-category) "categories")
+        by-category))))
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Activity: canary-audit
+;; ═══════════════════════════════════════════════════════════════════
+
+(defn activity-canary-audit
+  "Verify honeypot canary SQLite databases are in place.
+   Pairs with banshee-honeypot.joke for stealer detection."
+  [canary-paths scan-dir]
+  (println "╔════════════════════════════════════════════════════════════╗")
+  (println "║  sqlite-scanner — Canary Audit                            ║")
+  (println "║  Verifying honeypot SQLite databases are planted          ║")
+  (println "╚════════════════════════════════════════════════════════════╝")
+  (println)
+  (let [entries    (run-scanner-jsonl [scan-dir])
+        found-set  (into #{} (map #(get % "path") entries))
+        results    (map (fn [cp]
+                          {:path    cp
+                           :present (contains? found-set cp)})
+                        canary-paths)]
+    (doseq [r results]
+      (if (:present r)
+        (println (str "  [OK]      " (:path r)))
+        (println (str "  [MISSING] " (:path r)))))
+    (println)
+    (let [ok      (count (filter :present results))
+          missing (- (count results) ok)]
+      (println (str "Verified: " ok "/" (count results)
+                    (when (pos? missing)
+                      (str " (" missing " MISSING — honeypot compromised?)"))))
+      results)))
+
+;; ═══════════════════════════════════════════════════════════════════
+;; Dispatch
+;; ═══════════════════════════════════════════════════════════════════
+
+;; Verify GF(3) conservation before proceeding
+(assert (balanced? (:verifier triad) (:coordinator triad) (:generator triad))
+        "GF(3) triad must be balanced: -1 + 0 + 1 = 0 (mod 3)")
+
+;; *command-line-args* = positional args after script name (no script path)
+(let [mode       (or (os/get-env "SCAN_MODE") "scan")
+      cli-args   *command-line-args*]
+  (case mode
+    "scan"    (apply activity-scan-host cli-args)
+    "catalog" (activity-catalog (if (seq cli-args) cli-args [(os/get-env "HOME")]))
+    "canary"  (if (>= (count cli-args) 2)
+                (activity-canary-audit
+                  (str/split-lines (slurp (first cli-args)))
+                  (second cli-args))
+                (do
+                  (println "Canary mode requires: <canary-list-file> <scan-dir>")
+                  (os/exit 1)))
+    (do
+      (println "Unknown SCAN_MODE:" mode)
+      (println "Valid modes: scan, catalog, canary")
+      (os/exit 1))))

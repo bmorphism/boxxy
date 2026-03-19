@@ -1,0 +1,74 @@
+#!/usr/bin/env boxxy
+;; boot.joke - Boot hardened Guix System for OpenClaw
+;;
+;; Usage:
+;;   boxxy examples/guix-hardened/boot.joke
+
+;; Configuration
+(def kernel-path "vmlinuz")
+(def initrd-path "initrd")
+(def disk-path "guix-root.img")
+(def store-path "/gnu/store") ; Path on HOST
+(def cmdline "console=hvc0 root=/dev/vda1 rw --load=/gnu/store/...-boot")
+(def cpus 4)
+(def memory-gb 8)
+
+(println "╔════════════════════════════════════════════╗")
+(println "║  OpenClaw Node Alpha - Hardened Guix       ║")
+(println "║  GF(3) Mode: PLUS (+1)                     ║")
+(println "╚════════════════════════════════════════════╝")
+(println)
+
+;; 1. Boot Loader
+(println "[+] Configuring Linux Boot Loader...")
+(def boot (vz/new-linux-boot-loader kernel-path initrd-path cmdline))
+
+;; 2. Platform
+(def platform (vz/new-generic-platform))
+
+;; 3. Base Config
+(println "[+] Initializing VM Config...")
+(def vm-config (vz/new-vm-config cpus memory-gb boot platform))
+
+;; 4. Storage (Root Disk)
+(println "[+] Attaching Root Disk (VirtioBlock)...")
+(def disk-att (vz/new-disk-attachment disk-path false))
+(def disk-dev (vz/new-virtio-block-device disk-att))
+(vz/add-storage-devices vm-config [disk-dev])
+
+;; 5. VirtioFS (Read-Only Store)
+(println "[+] Mounting /gnu/store (VirtioFS)...")
+(def store-fs (vz/new-virtio-fs-device "boxxy-store" store-path))
+(vz/add-directory-shares vm-config [store-fs])
+
+;; 6. Network (Restricted/Disabled)
+;; For hardened node, we default to NO network, or a specific restricted interface
+;; (def net (vz/new-virtio-network (vz/new-nat-network)))
+;; (vz/add-network-devices vm-config [net])
+(println "[*] Network: DISABLED (Hardened Mode)")
+
+;; 7. Validate and Launch
+(println "[?] Validating Configuration...")
+(def valid (vz/validate-config vm-config))
+
+(if (= valid true)
+  (do
+    (println "[✓] Configuration Valid.")
+    (println "[!] Instantiating VM Tile...")
+    (def vm (vz/new-vm vm-config))
+    
+    (println "Starting VM...")
+    (println "  Console: hvc0")
+    (println "  Store:   " store-path " -> /gnu/store")
+    (println)
+    
+    (vz/start-vm! vm)
+    
+    (println "VM State: " (vz/vm-state vm))
+    (println "Press Ctrl+C to stop.")
+    
+    ;; Keep running (in a real repl we'd interact)
+    ;; For script, we might want to wait or just exit if boxxy runner handles wait
+    ;; The runner usually waits if it's the main script.
+    )
+  (println "[✗] Configuration Invalid!"))

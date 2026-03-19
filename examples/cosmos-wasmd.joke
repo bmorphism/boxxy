@@ -1,0 +1,157 @@
+#!/usr/bin/env boxxy
+;; cosmos-wasmd.joke — CosmWasm-enabled Cosmos chain in a boxxy tile
+;;
+;; Boots an ARM64 Linux VM running wasmd (CosmWasm + IBC + bank modules).
+;; Minimal footprint: wasmd binary is ~80MB, runs full IBC denom surface.
+;;
+;; The DAO DAO approach: modular governance contracts deploy ON TOP of this tile.
+;; DA0-DA0/dao-contracts → wasmd → boxxy tile → world net
+;;
+;; GF(3) conservation:
+;;   wasmd validator (-1)  — verifies state transitions, rejects invalid denoms
+;;   boxxy runtime   ( 0)  — ergodic coordinator, tile lifecycle management
+;;   IBC relayer     (+1)  — generates new denom traces, pushes cross-chain
+;;   SUM = 0 mod 3 ✓
+;;
+;; IBC Denom Takeover attack surface:
+;;   SHA-256: ibc/SHA256(port/channel/denom) — vulnerable to length extension
+;;   SHA-3:   would require sponge construction — immune
+;;   This tile enables BOTH hashes for comparison via Zig verifier sidecar
+;;
+;; Usage:
+;;   boxxy examples/cosmos-wasmd.joke
+;;
+;; Prerequisites:
+;;   1. ARM64 Linux kernel + initrd (Alpine/Ubuntu minimal)
+;;   2. wasmd binary cross-compiled for linux/arm64
+;;   3. Genesis file with IBC transfer module enabled
+;;   4. (Optional) DAO DAO contracts .wasm for governance layer
+
+;; ── Configuration ──────────────────────────────────────────────────────
+
+(def kernel-path  (or (env "BOXXY_KERNEL")  "vmlinuz"))
+(def initrd-path  (or (env "BOXXY_INITRD")  "initrd"))
+(def disk-path    (or (env "BOXXY_DISK")    "wasmd-chain.img"))
+(def chain-id     (or (env "BOXXY_CHAIN_ID") "wasmd-boxxy-1"))
+(def moniker      (or (env "BOXXY_MONIKER")  "boxxy-validator-0"))
+(def cpus         (or (env "BOXXY_CPUS") 2))
+(def memory-gb    (or (env "BOXXY_MEMORY") 2))
+
+;; Zig denom verifier sidecar port (listens on guest localhost)
+(def zig-verifier-port 9256)
+
+;; IBC configuration
+(def ibc-port "transfer")
+(def ibc-channels ["channel-0" "channel-1"])
+
+;; DAO DAO contract paths (deployed after chain genesis)
+(def dao-contracts
+  {:core     "dao_dao_core.wasm"
+   :proposal "dao_proposal_single.wasm"
+   :voting   "cw4_voting.wasm"
+   :staking  "cw20_stake.wasm"})
+
+;; Kernel command line: enable hvc0, pass chain config to guest
+(def cmdline (str "console=hvc0 root=/dev/vda rw"
+                  " systemd.setenv=CHAIN_ID=" chain-id
+                  " systemd.setenv=MONIKER=" moniker
+                  " systemd.setenv=ZIG_VERIFIER_PORT=" zig-verifier-port))
+
+;; ── Banner ─────────────────────────────────────────────────────────────
+
+(println "╔════════════════════════════════════════════════════════════════╗")
+(println "║  boxxy tile: CosmWasm Chain (wasmd + IBC + DAO DAO)          ║")
+(println "║                                                              ║")
+(println "║  IBC DENOM TAKEOVER — SHA-256 vs SHA-3 attack surface        ║")
+(println "║  Zig verifier sidecar: dual-hash validation at wire speed    ║")
+(println "║                                                              ║")
+(println "║  GF(3): validator(-1) + runtime(0) + relayer(+1) = 0 mod 3  ║")
+(println "╚════════════════════════════════════════════════════════════════╝")
+(println)
+
+;; ── Boot Loader ────────────────────────────────────────────────────────
+
+(println "[-1] Configuring Linux Boot Loader (validator role)...")
+(def boot (vz/new-linux-boot-loader kernel-path initrd-path cmdline))
+
+;; ── Platform ───────────────────────────────────────────────────────────
+
+(def platform (vz/new-generic-platform))
+
+;; ── VM Config ──────────────────────────────────────────────────────────
+
+(println "[ 0] Initializing tile:" cpus "CPUs," memory-gb "GB RAM")
+(def vm-config (vz/new-vm-config cpus memory-gb boot platform))
+
+;; ── Storage ────────────────────────────────────────────────────────────
+
+(println "[ 0] Attaching chain disk:" disk-path)
+(def disk-att (vz/new-disk-attachment disk-path false))
+(def disk-dev (vz/new-virtio-block-device disk-att))
+(vz/add-storage-devices vm-config [disk-dev])
+
+;; ── Network (NAT) ──────────────────────────────────────────────────────
+;; Required for: CometBFT p2p, IBC relayer, RPC endpoint, Zig verifier
+
+(println "[+1] Enabling NAT network (IBC relayer + RPC + verifier)")
+(def nat (vz/new-nat-network))
+(def net (vz/new-virtio-network nat))
+(vz/add-network-devices vm-config [net])
+
+;; ── Validate and Launch ────────────────────────────────────────────────
+
+(println)
+(println "[-1] Validating configuration...")
+(def valid (vz/validate-config vm-config))
+
+(if (= valid true)
+  (do
+    (println "[✓] Configuration valid")
+    (println)
+    (println "═════════════════════════════════════════════════════════════")
+    (println "CHAIN CONFIGURATION:")
+    (println "═════════════════════════════════════════════════════════════")
+    (println "  Chain ID:       " chain-id)
+    (println "  Moniker:        " moniker)
+    (println "  Kernel:         " kernel-path)
+    (println "  Disk:           " disk-path)
+    (println "  IBC Port:       " ibc-port)
+    (println "  IBC Channels:   " ibc-channels)
+    (println "  Zig Verifier:   localhost:" zig-verifier-port)
+    (println)
+    (println "WASMD MODULES:")
+    (println "  • bank      — native token management")
+    (println "  • ibc-transfer — IBC denom trace + SHA-256 hashing")
+    (println "  • wasm       — CosmWasm smart contract execution")
+    (println "  • staking    — CometBFT validator set")
+    (println)
+    (println "DAO DAO CONTRACTS (deploy post-genesis):")
+    (doseq [[k v] dao-contracts]
+      (println "  •" (name k) " → " v))
+    (println)
+    (println "DENOM ATTACK SURFACE:")
+    (println "  SHA-256:  ibc/SHA256(transfer/channel-0/uatom)")
+    (println "  SHA-3:    ibc/SHA3-256(transfer/channel-0/uatom)  [Zig shadow]")
+    (println "  BLAKE3:   ibc/BLAKE3(transfer/channel-0/uatom)    [Zig shadow]")
+    (println)
+    (println "After boot, provision the chain:")
+    (println "  wasmd init" moniker "--chain-id" chain-id)
+    (println "  wasmd genesis add-account validator 10000000stake")
+    (println "  wasmd genesis gentx validator 1000000stake \\")
+    (println "    --chain-id" chain-id)
+    (println "  wasmd genesis collect-gentxs")
+    (println "  wasmd start --rpc.laddr tcp://0.0.0.0:26657")
+    (println)
+    (println "Deploy DAO DAO governance:")
+    (println "  wasmd tx wasm store dao_dao_core.wasm --from validator")
+    (println "  wasmd tx wasm instantiate 1 '{...}' --label dao-core")
+    (println)
+    (println "═════════════════════════════════════════════════════════════")
+    (println "Starting tile... (Ctrl+C to stop)")
+    (println "═════════════════════════════════════════════════════════════")
+    (println)
+
+    (def vm (vz/new-vm vm-config))
+    (vz/start-vm! vm)
+    (println "VM State:" (vz/vm-state vm)))
+  (println "[✗] Configuration invalid:" valid))

@@ -1,0 +1,62 @@
+;; isabelle-codegen.joke
+;; Boxxy orchestration for Isabelle2025-2 with code generation
+;; Use: boxxy isabelle-codegen.joke
+
+(require '[boxxy.vz :as vz])
+
+(println "🏗️  Building Isabelle2025-2 VM configuration...")
+
+;; Create EFI variable store for UEFI boot
+(def nvram (vz/new-efi-variable-store "isabelle-nvram.nvram" true))
+(def boot (vz/new-efi-boot-loader nvram))
+(def platform (vz/new-generic-platform))
+
+;; Create VM: 4 CPUs, 8GB RAM (adjust based on your system)
+(def config (vz/new-vm-config 4 8 boot platform))
+
+;; Create or attach Ubuntu ISO for Isabelle installation
+;; Note: You'll need to provide your own Ubuntu ISO or Docker image
+(println "📦 Attaching storage devices...")
+
+;; Create disk for OS
+(def disk-img "isabelle-disk.img")
+(when (not (.exists (java.io.File. disk-img)))
+  (println (str "Creating " disk-img "..."))
+  (vz/create-disk-image disk-img 50))
+
+(def disk-att (vz/new-disk-attachment disk-img false))
+(def disk-dev (vz/new-virtio-block-device disk-att))
+
+;; Setup network (NAT)
+(def network (vz/new-nat-network))
+(def net-device (vz/new-virtio-network-device network))
+
+;; Add devices to config
+(vz/add-storage-devices config [disk-dev])
+(vz/add-network-devices config [net-device])
+
+;; Validate configuration
+(println "✅ Validating configuration...")
+(when (vz/validate-config config)
+  (println "Configuration is valid")
+
+  ;; Create and start VM
+  (def vm (vz/new-vm config))
+  (println "🚀 Starting Isabelle VM...")
+  (vz/start-vm! vm)
+
+  (println "VM State:" (vz/vm-state vm))
+  (println "")
+  (println "📖 Isabelle VM is running!")
+  (println "")
+  (println "Next steps:")
+  (println "1. SSH or console into the VM")
+  (println "2. Install Isabelle2025-2 (from the Dockerfile)")
+  (println "3. Build your theories:")
+  (println "   isabelle build -D theories/")
+  (println "4. Generate code from proofs:")
+  (println "   isabelle codegen -t Haskell AGM_Base")
+  (println "5. Available codegen targets: SML, OCaml, Haskell, Scala")
+  (println "")
+  (println "Use (vz/stop-vm! vm) to stop when done")
+  (println "Use (vz/pause-vm! vm)/(vz/resume-vm! vm) to pause/resume")))

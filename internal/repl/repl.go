@@ -13,6 +13,7 @@ import (
 	"github.com/bmorphism/boxxy/internal/color"
 	"github.com/bmorphism/boxxy/internal/lisp"
 	"github.com/bmorphism/boxxy/internal/streams"
+	"github.com/bmorphism/boxxy/internal/tropical"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
 
@@ -31,6 +32,9 @@ func Start() {
 
 	// Register streams namespace (macOS event consumption)
 	streams.RegisterNamespace(env)
+
+	// Register tropical semiring namespace (max-plus DP)
+	tropical.RegisterNamespace(env)
 
 	// Register AGM belief revision namespace
 	RegisterAGM(env)

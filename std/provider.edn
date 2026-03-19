@@ -90,6 +90,32 @@
     :return :external/nic
     :color  "#E2799D"}]
 
+  :vsock
+  [{:name   :vz/vsock-listen
+    :args   [:vm :port]
+    :return :external/vsock-listener
+    :color  "#7B68EE"}
+   {:name   :vz/vsock-accept
+    :args   [:listener]
+    :return :external/vsock-connection
+    :color  "#7B68EE"}
+   {:name   :vz/vsock-connect
+    :args   [:vm :port]
+    :return :external/vsock-connection
+    :color  "#7B68EE"}
+   {:name   :vz/vsock-read
+    :args   [:connection]
+    :return :string
+    :color  "#7B68EE"}
+   {:name   :vz/vsock-write
+    :args   [:connection :data]
+    :return :int
+    :color  "#7B68EE"}
+   {:name   :vz/vsock-close
+    :args   [:connection-or-listener]
+    :return :bool
+    :color  "#7B68EE"}]
+
   :config
   [{:name   :vz/new-vm-config
     :args   [:cpus :memory-gb :boot-loader :platform]
@@ -143,6 +169,19 @@
     :args   [:vm]
     :return :nil
     :color  "#8CE2F0"}]}
+
+ ;; ── ICO protocol (indefinite causal order over vsock) ─────────
+ ;; Implements quantum switch between host ↔ guest VMs.
+ ;; See std/ico.joke for the full protocol.
+ :ico/protocol
+ {:port          3333
+  :wire-format   :space-separated-ints
+  :channel-size  12
+  :control-trits [-1 0 1]
+  :color         "#7B68EE"
+  :trit          0
+  :verified      {:julia true :zig true :lisp true}
+  :invariant     "det(S(-1)) = -det(S(0)) for non-commuting channels"}
 
  ;; ── evaluator shape (the metacircular part) ───────────────────
  ;; boxxy's eval/apply is a standard Lisp-1 with these forms.

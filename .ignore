@@ -1,0 +1,38 @@
+# Pijul ignore file (analogous to .gitignore)
+
+# Git internals
+.git
+
+# Build artifacts and binaries
+boxxy
+alpine-gui
+haiku-gui
+serve
+scan
+*.duckdb
+*.duckdb.wal
+
+# Flox runtime
+.flox/run/
+.flox/cache/
+.flox/lib/
+.flox/log/
+
+# OS files
+.DS_Store
+*.swp
+*.swo
+*~
+
+# Go build cache
+vendor/
+
+# Temporary files
+tmp/
+
+# Large binaries in bin/
+bin/
+
+# Nix
+result
+result-*

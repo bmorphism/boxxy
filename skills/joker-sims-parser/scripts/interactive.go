@@ -15,8 +15,7 @@ func StartInteractiveShell() {
 ║              Sims DBPF Parser for Boxxy Skill System             ║
 ╚═══════════════════════════════════════════════════════════════════╝
 
-Type 'help' for commands, 'quit' to exit.
-`)
+Type 'help' for commands, 'quit' to exit.`)
 
 	reader := bufio.NewReader(os.Stdin)
 
@@ -102,6 +101,5 @@ Available commands:
 Examples:
   joker> parse ~/Documents/TheSims3/Saves/UserSaveGame.sims3pack
   joker> list game.package
-  joker> info ~/Saves/
-`)
+  joker> info ~/Saves/`)
 }

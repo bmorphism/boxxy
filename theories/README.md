@@ -12,6 +12,7 @@ Isabelle/HOL formalization of AGM belief revision extended with:
 |------|-------------|
 | `AGM_Base.thy` | Basic AGM postulates, trit datatypes |
 | `AGM_Extensions.thy` | Partial entrenchment, selection functions, indeterministic revision |
+| `Abelian_Extensions.thy` | GF(3)→GF(9)→GF(27) tower, Frobenius, characters, Pontryagin |
 | `Boxxy_AGM_Bridge.thy` | Bridges AFP formalization with L&R and Hedges extensions |
 | `OpticClass.thy` | Lenses and parametric lenses from open-games-hs |
 | `SemiReliable_Nashator.thy` | Nash product with ε-slack (bounded rationality) |
@@ -108,6 +109,9 @@ Conservation law: `∑ trits ≡ 0 (mod 3)`
 - [x] Selection functions and determinization
 - [x] Nash product and semi-reliable variant
 - [x] Optic class (lenses, parametric lenses)
+- [x] Abelian extensions: GF(9) nonet, GF(27) tribble, Frobenius automorphisms
+- [x] Characters of GF(3), tower balance preservation theorems
+- [x] Frobenius selection functions (prefers GF(3) fixed points)
 - [ ] Full AFP integration (requires AFP installation)
 - [ ] Collapse theorem proof (total → functional)
 - [ ] Complete semi-reliable approximation bounds

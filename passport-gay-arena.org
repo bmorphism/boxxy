@@ -1,0 +1,769 @@
+#+TITLE: passport.gay — Diegetic Open Games Arena
+#+SUBTITLE: Pure Graphical Monoidal Corolla Forest / Resource-Sharing Machine
+#+AUTHOR: bmorphism
+#+DATE: 2026-02-10
+#+PROPERTY: header-args :eval no-export
+
+* Preamble: The Signed Trit as Mantissa-Significand
+
+The interval [-1, 1] is the *treacherous indeterminism interval* of FFI choices.
+
+Every language represents signed integers differently at the FFI boundary:
+- Go: =int8= (two's complement, -1 = 0xFF)
+- Clojure/JVM: =long= (two's complement, -1 = 0xFFFFFFFFFFFFFFFF)
+- Julia: =Int8= (two's complement)
+- Move: *no signed integers at all* — only =u8=, =u64=
+- Zig: =i8= (two's complement, defined wrapping)
+- Ruby: arbitrary precision (no fixed width)
+- JavaScript: =Number= (IEEE 754 double — -1 is exact, but 0 has ±0 ambiguity)
+
+The GF(3) trit {-1, 0, +1} must cross every one of these boundaries *identically*.
+
+** The Sign-Magnitude Encoding (Mantissa/Significand Split)
+
+#+begin_src text
+  ┌──────────────────────────────────────────────────────┐
+  │  TRIT WIRE FORMAT (FFI-safe, 2 bytes)                │
+  │                                                      │
+  │  Byte 0: SIGN (the "mantissa" = polarity)            │
+  │    0x00 = ERGODIC  (zero, coordinator, boundary)     │
+  │    0x01 = PLUS     (+1, generator, warm)             │
+  │    0x02 = MINUS    (-1, validator, cold)             │
+  │                                                      │
+  │  Byte 1: SIGNIFICAND (the color self-address)        │
+  │    0x00..0xFF = hue sector (hue * 256 / 360)         │
+  │                                                      │
+  │  Never use signed integers across FFI.               │
+  │  The sign is ALWAYS byte 0, ALWAYS unsigned.         │
+  │  The significand is ALWAYS byte 1, ALWAYS unsigned.  │
+  └──────────────────────────────────────────────────────┘
+#+end_src
+
+Why 0x02 for MINUS instead of 0xFF?  Because 0xFF is *exactly* the trap:
+two's complement -1 in any width.  The treacherous indeterminism is that
+a C =int8_t= value of -1 cast to =uint8_t= gives 0xFF, which is *not*
+semantically -1 in our encoding.  We dodge the trap entirely by never
+using signed wire values.
+
+** Self-Addressing / Self-Indexing Property
+
+A color is *referentially transparent* if:
+
+#+begin_src text
+  resolve(address(color)) ≡ color
+#+end_src
+
+In did:gay, this is achieved by:
+
+#+begin_src text
+  identifier  ──SHA-256──▶  seed  ──SplitMix64──▶  hue  ──hueToHex──▶  hex
+       │                                                                  │
+       └──────────────── did:gay:<identifier> ◀────────────────────────────┘
+                         self-referential loop:
+                         the DID contains the hash
+                         the hash determines the color
+                         the color addresses back to the DID
+#+end_src
+
+This is a *fixed point*: =F(x) = x= where =F= is the color derivation.
+The DID is its own color.  The color is its own address.
+
+** Self-Similarity: Golden Angle Separation
+
+SplitMix64 generates hues separated by the golden angle (137.508°).
+Consecutive hues are maximally dispersed.  But every *other* hue
+differs by 2 × 137.508° = 275.016° ≡ -84.984° (mod 360°).
+
+The sequence is *self-similar at worst every other interaction*:
+the subsequence of even-indexed hues and odd-indexed hues each form
+their own golden-angle-separated series, shifted by 137.508°.
+
+This is the *Fibonacci lattice* on the circle: the densest packing
+of hues such that no two are perceptually close, and the pattern
+at scale 2n is a rotated copy of the pattern at scale n.
+
+* Arena Structure: Graphical Monoidal Category
+
+The Org tree IS the corolla forest.  Each heading is a corolla
+(single-node tree in operad theory).  Nesting = sequential composition (>>).
+Siblings at the same level = parallel composition (⊗).
+
+#+begin_src text
+  ┌───────────────────────────────────────────────────────────────┐
+  │  ARENA = symmetric monoidal category                          │
+  │                                                               │
+  │  Objects = DID types: did:gay, did:plc, did:ens, did:key     │
+  │  Morphisms = identity bridges (Verifiable Credentials)        │
+  │                                                               │
+  │  Sequential (>>):  resolve ∘ bridge ∘ verify                  │
+  │  Parallel   (⊗):   did:gay ⊗ did:plc ⊗ did:ens              │
+  │                                                               │
+  │  Play:   X → Y   (forward identity resolution)               │
+  │  Coplay: R ← S   (backward verification / attestation)       │
+  │                                                               │
+  │  The arena is DIEGETIC: agents inside the system verify       │
+  │  each other without external authority.                       │
+  └───────────────────────────────────────────────────────────────┘
+#+end_src
+
+** Corolla 1: Identity Sources (Parallel ⊗)
+:PROPERTIES:
+:TRIT: input
+:WIRE: X = did:gay ⊗ did:plc ⊗ did:ens ⊗ WorldID
+:END:
+
+*** did:gay (self-certifying + colored)
+:PROPERTIES:
+:SIGN: 0x01
+:SIGNIFICAND: SHA-256(identifier) → SplitMix64 → hue
+:END:
+
+Genesis hash → permanent color → GF(3) trit.
+Keys rotate, color doesn't.  The sign IS the role.
+
+*** did:plc (AT Protocol native)
+:PROPERTIES:
+:SIGN: 0x00
+:SIGNIFICAND: same hash as did:gay (backward compatible)
+:END:
+
+=did:plc:ewq3kfod7jn5eer7= ↔ =did:gay:ewq3kfod7jn5eer7=
+Same genesis, same hash.  Upgrade path: publish to gay_log.
+
+*** did:ens (Ethereum Name Service)
+:PROPERTIES:
+:SIGN: variable
+:SIGNIFICAND: ENS name → address → color derivation
+:END:
+
+#+begin_src text
+  did:ens:bmorphism.eth
+       │
+       ├──▶ resolve ENS → 0x1234...abcd (Ethereum address)
+       ├──▶ SHA-256(address) → SplitMix64 → hue → color
+       └──▶ cross-sign VC: did:gay ↔ did:ens binding
+
+  Bridge morphism:
+    bridge_ens: did:ens → did:gay
+    bridge_ens(name) = did:gay:base32(sha256(dagCBOR(genesis_from_ens(name))))
+#+end_src
+
+The ENS name is mutable (can change resolver/address).
+The did:gay derived from it is immutable (hash of genesis).
+The bridge VC records the binding at a point in time.
+
+*** Iris / World ID (biometric personhood)
+:PROPERTIES:
+:SIGN: 0x02
+:SIGNIFICAND: nullifier_hash → Semaphore commitment
+:END:
+
+Proof-of-personhood via iris scan (Worldcoin Orb).
+One human → one nullifier → one did:gay binding.
+The iris is the MINUS validator: it says "this is a real person."
+
+** Corolla 2: The Bridge (Sequential >>)
+:PROPERTIES:
+:TRIT: morphism
+:WIRE: f: X → Y  where X = sources, Y = unified DID document
+:END:
+
+*** Step 1: Resolve all DIDs in parallel
+
+#+begin_src text
+  resolve: did:gay ⊗ did:plc ⊗ did:ens ⊗ WorldID
+         → Color ⊗ OpLog ⊗ Address ⊗ Nullifier
+#+end_src
+
+*** Step 2: Cross-sign bindings (the Verifiable Credential web)
+
+#+begin_src text
+  cross_sign: Color ⊗ OpLog ⊗ Address ⊗ Nullifier
+            → VC_gay_plc ⊗ VC_gay_ens ⊗ VC_gay_worldid
+#+end_src
+
+Each VC is a morphism in the arena:
+- =VC_gay_plc=: proves same genesis hash
+- =VC_gay_ens=: proves ENS name resolves to holder's address, signed by both
+- =VC_gay_worldid=: proves iris scan binds to this DID, via Semaphore
+
+*** Step 3: Produce unified DID document with all service endpoints
+
+#+begin_src text
+  unify: VC_gay_plc ⊗ VC_gay_ens ⊗ VC_gay_worldid
+       → DidDocument { color, services: [pds, gay_log, ens, world_id] }
+#+end_src
+
+** Corolla 3: The Subobject Classifier (Confidentiality)
+:PROPERTIES:
+:TRIT: Ω₃
+:WIRE: χ: Element → Ω₃  (characteristic morphism)
+:END:
+
+The topos subobject classifier determines *who sees what*.
+
+#+begin_src text
+  ┌────────────────────────────────────────────────────────┐
+  │  Ω₃ = { PLUS(+1), ERGODIC(0), MINUS(-1) }            │
+  │                                                        │
+  │  PLUS   (+1): PUBLIC    — visible to everyone          │
+  │  ERGODIC (0): CONFIDENTIAL — visible to collective     │
+  │  MINUS  (-1): SECRET    — visible only to holder       │
+  │                                                        │
+  │  Characteristic morphism χ: Record → Ω₃               │
+  │  determines the confidentiality level of each record   │
+  │  in the AT Protocol repository.                        │
+  │                                                        │
+  │  The Lawvere-Tierney topology j: Ω₃ → Ω₃ is:         │
+  │    j(+1) = +1  (public stays public)                   │
+  │    j( 0) =  0  (confidential stays confidential)       │
+  │    j(-1) = -1  (secret stays secret)                   │
+  │  This is the identity topology = discrete sheaves.     │
+  │                                                        │
+  │  The OPEN COLLECTIVE topology collapses secret→conf:   │
+  │    j_oc(+1) = +1                                       │
+  │    j_oc( 0) =  0                                       │
+  │    j_oc(-1) =  0   ← secrets become collective         │
+  │  This is the *collective trust* modality.              │
+  └────────────────────────────────────────────────────────┘
+#+end_src
+
+*** Pullback construction for access control
+
+Given a collective =C ⊆ Agents= with characteristic morphism =χ_C: Agents → Ω₃=:
+
+#+begin_src text
+  visible(agent, record) =
+    let agent_trit  = χ_C(agent)   -- agent's membership level
+        record_trit = χ(record)    -- record's confidentiality level
+    in  agent_trit ≥ record_trit   -- PLUS sees all, ERGODIC sees conf+public, MINUS sees only public
+
+  This is a SIEVE: the set of morphisms through which a record is visible.
+  The sieve is a subfunctor of the representable presheaf y(record).
+#+end_src
+
+*** Kripke-Joyal forcing for confidentiality
+
+#+begin_src text
+  U ⊩ "record r is visible"
+  iff ∀ agent a ∈ U, χ_C(a) ≥ χ(r)
+
+  The "stage of knowledge" U is a subset of the collective.
+  Truth is relative to who's asking.
+  This IS intuitionistic logic: excluded middle fails because
+  ERGODIC is neither fully visible nor fully hidden.
+#+end_src
+
+** Corolla 4: Resource-Sharing Machine (Coplay)
+:PROPERTIES:
+:TRIT: 0
+:WIRE: coplay: Ω × X × R → U × S  (backward resource flow)
+:END:
+
+The resource-sharing machine is the COPLAY direction of the arena.
+While PLAY resolves identities forward, COPLAY distributes resources backward.
+
+#+begin_src text
+  ┌───────────────────────────────────────────────────────────────────┐
+  │  RESOURCE-SHARING = Open Game with GF(3) balanced allocation     │
+  │                                                                   │
+  │  PLUS  (+1) nodes: excess capacity → donate to collective        │
+  │  ERGODIC (0) nodes: broker/coordinator → route resources         │
+  │  MINUS (-1) nodes: need resources → receive from collective      │
+  │                                                                   │
+  │  play:   Identity → Collective_Membership                        │
+  │  coplay: Revenue × Membership × Costs → Share × Allocation      │
+  │                                                                   │
+  │  Nash equilibrium: no agent benefits from changing trit class    │
+  │  iff the resource flow satisfies GF(3) conservation:             │
+  │    Σ(resource_trits) ≡ 0 (mod 3)                                 │
+  │                                                                   │
+  │  This IS an open collective: the collective's treasury is the    │
+  │  ERGODIC node, donations flow from PLUS, withdrawals to MINUS.  │
+  └───────────────────────────────────────────────────────────────────┘
+#+end_src
+
+*** Bootstrap Protocol (on Bluesky)
+
+#+begin_src text
+  1. Creator publishes did:gay genesis with gay_log in AT Protocol repo
+  2. Creator creates Bluesky labeler service at did:gay
+  3. Labeler assigns GF(3) labels to collective members:
+     - label:gay:plus   (contributor)
+     - label:gay:ergodic (member)
+     - label:gay:minus  (validator/auditor)
+  4. Members subscribe to labeler → join collective
+  5. Labeler feed generator filters by confidentiality:
+     - Public feed: all PLUS-labeled posts
+     - Collective feed: PLUS + ERGODIC posts (members only)
+     - Audit feed: MINUS posts (validators only, accountability)
+  6. Resource sharing via AT Protocol records:
+     - gay.collective.pledge (PLUS → donate)
+     - gay.collective.request (MINUS → request)
+     - gay.collective.route (ERGODIC → allocate)
+  7. GF(3) conservation enforced by labeler:
+     Σ(pledge_trits) + Σ(request_trits) + Σ(route_trits) ≡ 0 (mod 3)
+#+end_src
+
+*** Lexicon Schema (AT Protocol)
+
+#+begin_src json
+{
+  "lexicon": 1,
+  "id": "gay.collective.pledge",
+  "defs": {
+    "main": {
+      "type": "record",
+      "key": "tid",
+      "record": {
+        "type": "object",
+        "required": ["amount", "trit", "color", "createdAt"],
+        "properties": {
+          "amount": { "type": "integer", "minimum": 0 },
+          "trit": { "type": "integer", "minimum": -1, "maximum": 1 },
+          "color": { "type": "string", "format": "did" },
+          "confidentiality": {
+            "type": "integer", "minimum": -1, "maximum": 1,
+            "description": "Ω₃ classifier: +1 public, 0 collective, -1 secret"
+          },
+          "createdAt": { "type": "string", "format": "datetime" }
+        }
+      }
+    }
+  }
+}
+#+end_src
+
+* DID Method Bridge: did:gay ↔ did:ens
+
+** Resolution Flow
+
+#+begin_src text
+  did:ens:bmorphism.eth
+       │
+       ▼
+  ┌─────────────────────────────────┐
+  │  ENS Universal Resolver         │
+  │  → addr(bmorphism.eth)          │
+  │  → 0x1234...abcd                │
+  └─────────────┬───────────────────┘
+                │
+                ▼
+  ┌─────────────────────────────────┐
+  │  Color Derivation               │
+  │  SHA-256("0x1234...abcd")       │
+  │  → SplitMix64 seed             │
+  │  → hue → OkLab → trit          │
+  └─────────────┬───────────────────┘
+                │
+                ▼
+  ┌─────────────────────────────────┐
+  │  Bridge VC                      │
+  │  issuer: did:gay:<id>           │
+  │  subject: did:ens:bmorphism.eth │
+  │  proof: EIP-712 cross-sign      │
+  │         (ENS owner key signs    │
+  │          did:gay binding)       │
+  └─────────────────────────────────┘
+#+end_src
+
+** ENS Text Records for did:gay
+
+#+begin_src text
+  bmorphism.eth TXT records:
+    did.gay     = "did:gay:ewq3kfod7jn5eer7"
+    gay.color   = "#E847C0"
+    gay.trit    = "-1"
+    gay.log     = "https://gay.fi/log/ewq3kfod7jn5eer7"
+    gay.pds     = "https://pds.host"
+#+end_src
+
+Setting these text records on the ENS name creates a bidirectional bridge:
+- ENS → did:gay: read the =did.gay= text record
+- did:gay → ENS: the =alsoKnownAs= field includes the ENS name
+
+* Vibesnipe Clone: Triadic Consensus for Passport Verification
+
+The vibesnipe pattern is cloned to passport verification:
+
+#+begin_src text
+  ┌──────────────────────────────────────────────────────────────────┐
+  │  PASSPORT VERIFICATION ARENA (vibesnipe clone)                   │
+  │                                                                  │
+  │  Agent ALICE  (trit -1, MINUS, Validator)                       │
+  │    └─ verifies: World ID nullifier is fresh                     │
+  │    └─ verifies: iris scan is not replayed                       │
+  │    └─ coplay: attestation                                        │
+  │                                                                  │
+  │  Agent ARBITER (trit 0, ERGODIC, Coordinator)                   │
+  │    └─ verifies: GF(3) balance across all bindings               │
+  │    └─ verifies: cross-signatures are valid                      │
+  │    └─ coplay: routing                                            │
+  │                                                                  │
+  │  Agent BOB (trit +1, PLUS, Generator)                           │
+  │    └─ generates: unified DID document                           │
+  │    └─ generates: AT Protocol repo records                       │
+  │    └─ coplay: publication                                        │
+  │                                                                  │
+  │  Consensus: 2/3 agents must agree for passport to be issued.    │
+  │  The arena is DIEGETIC: no external oracle, no centralized      │
+  │  authority.  The agents are the authority.                       │
+  └──────────────────────────────────────────────────────────────────┘
+#+end_src
+
+** Merkle Proof Structure
+
+#+begin_src text
+  Passport Proof = {
+    identity_root:     Merkle(did:gay, did:plc, did:ens, WorldID)
+    color_root:        Merkle(hex, hue, oklab, trit)
+    binding_root:      Merkle(VC_gay_plc, VC_gay_ens, VC_gay_worldid)
+    collective_root:   Merkle(pledges, requests, routes)
+    gf3_sum:           Σ trits ≡ 0 (mod 3)
+  }
+#+end_src
+
+* Implementation: Babashka Bootstrap
+
+#+begin_src clojure :tangle bootstrap-passport-gay.bb
+#!/usr/bin/env bb
+
+(ns passport-gay.arena
+  (:require [babashka.http-client :as http]
+            [cheshire.core :as json]
+            [clojure.string :as str]))
+
+;; --- Signed Trit (FFI-safe wire format) ---
+;; Never use signed integers across FFI boundaries.
+;; The sign is always byte 0, always unsigned.
+
+(def SIGN-ERGODIC 0x00)
+(def SIGN-PLUS    0x01)
+(def SIGN-MINUS   0x02)
+
+(defn trit->wire
+  "Encode a trit {-1, 0, +1} as FFI-safe [sign significand] pair."
+  [trit hue]
+  (let [sign (case (int trit)
+               -1 SIGN-MINUS
+                0 SIGN-ERGODIC
+                1 SIGN-PLUS)
+        significand (int (* (/ hue 360.0) 256))]
+    {:sign sign
+     :significand (bit-and significand 0xFF)
+     :bytes [(unchecked-byte sign) (unchecked-byte significand)]}))
+
+(defn wire->trit
+  "Decode FFI-safe wire bytes back to trit + hue."
+  [{:keys [sign significand]}]
+  (let [trit (case (int sign)
+               0x00  0
+               0x01  1
+               0x02 -1)
+        hue (* (/ significand 256.0) 360.0)]
+    {:trit trit :hue hue}))
+
+;; --- SplitMix64 (deterministic color from identifier) ---
+
+(def GOLDEN-GAMMA 0x9e3779b97f4a7c15)
+(def MASK64 (unchecked-dec (bit-shift-left 1 64)))
+
+(defn mask64 [n] (bit-and n MASK64))
+
+(defn splitmix64 [seed]
+  (let [z (mask64 (unchecked-add seed GOLDEN-GAMMA))
+        z (mask64 (unchecked-multiply (bit-xor z (unsigned-bit-shift-right z 30))
+                                       0xbf58476d1ce4e5b9))
+        z (mask64 (unchecked-multiply (bit-xor z (unsigned-bit-shift-right z 27))
+                                       0x94d049bb133111eb))]
+    (bit-xor z (unsigned-bit-shift-right z 31))))
+
+(defn state->hue [value]
+  (mod (* (bit-and (unsigned-bit-shift-right value 16) 0xFFFF)
+          137.508)
+       360.0))
+
+(defn hue->trit [hue]
+  (cond
+    (< hue 120) 1
+    (< hue 240) 0
+    :else -1))
+
+;; --- Ω₃ Subobject Classifier ---
+
+(def omega-3
+  {:plus    {:trit  1 :name "PUBLIC"       :access :all}
+   :ergodic {:trit  0 :name "CONFIDENTIAL" :access :collective}
+   :minus   {:trit -1 :name "SECRET"       :access :holder-only}})
+
+(defn classify-confidentiality
+  "χ: Record → Ω₃  — the characteristic morphism."
+  [record]
+  (let [conf (get record :confidentiality 1)]
+    (case (int conf)
+      1  (:plus omega-3)
+      0  (:ergodic omega-3)
+      -1 (:minus omega-3))))
+
+(defn visible?
+  "Ordered locale visibility: a + r ≥ 0.
+   This is the GF(3) inner product in Z, projected to the locale frame.
+   PLUS(+1)    sees: PUBLIC(+1)✓ CONF(0)✓ SECRET(-1)✓
+   ERGODIC(0)  sees: PUBLIC(+1)✓ CONF(0)✓ SECRET(-1)✗
+   MINUS(-1)   sees: PUBLIC(+1)✓ CONF(0)✗ SECRET(-1)✗"
+  [agent-trit record-trit]
+  (>= (+ agent-trit record-trit) 0))
+
+;; --- DID Bridge ---
+
+(defn did-gay->did-plc [did-gay]
+  (str/replace did-gay "did:gay:" "did:plc:"))
+
+(defn did-plc->did-gay [did-plc]
+  (str/replace did-plc "did:plc:" "did:gay:"))
+
+(defn resolve-ens-bridge
+  "Bridge did:ens → did:gay via ENS text records."
+  [ens-name]
+  {:did-ens (str "did:ens:" ens-name)
+   :bridge-type "ens-text-record"
+   :text-records {"did.gay" "did:gay:<resolve-from-genesis>"
+                  "gay.color" "<derived>"
+                  "gay.trit" "<derived>"}
+   :note "Set these as ENS text records to create bidirectional bridge"})
+
+;; --- Open Collective Bootstrap ---
+
+(defn bootstrap-collective!
+  "Bootstrap an open collective on Bluesky via AT Protocol."
+  [{:keys [did handle pds-host]}]
+  (let [lexicons [{:id "gay.collective.pledge"
+                   :type "record"
+                   :description "PLUS node donates resources"}
+                  {:id "gay.collective.request"
+                   :type "record"
+                   :description "MINUS node requests resources"}
+                  {:id "gay.collective.route"
+                   :type "record"
+                   :description "ERGODIC node routes allocation"}
+                  {:id "gay.collective.member"
+                   :type "record"
+                   :description "Membership with Ω₃ confidentiality"}]]
+    {:collective {:did did
+                  :handle handle
+                  :pds pds-host
+                  :lexicons lexicons
+                  :labeler-config {:labels [{:id "gay-plus"
+                                             :severity "inform"
+                                             :description "Contributor (trit +1)"}
+                                            {:id "gay-ergodic"
+                                             :severity "inform"
+                                             :description "Member (trit 0)"}
+                                            {:id "gay-minus"
+                                             :severity "inform"
+                                             :description "Validator (trit -1)"}]}
+                  :feeds [{:id "public"
+                           :filter {:confidentiality 1}
+                           :description "All public posts"}
+                          {:id "collective"
+                           :filter {:confidentiality {:$gte 0}}
+                           :description "Members-only feed"}
+                          {:id "audit"
+                           :filter {:confidentiality -1}
+                           :description "Validator audit trail"}]}
+     :gf3-invariant "Σ(member_trits) ≡ 0 (mod 3)"}))
+
+;; --- Arena (Diegetic Open Game) ---
+
+(defn play
+  "Forward pass: resolve identity sources → unified document."
+  [sources]
+  (let [{:keys [did-gay did-plc did-ens world-id]} sources]
+    {:resolution {:did-gay did-gay
+                  :did-plc (or did-plc (did-gay->did-plc did-gay))
+                  :did-ens did-ens
+                  :world-id world-id}
+     :step :play}))
+
+(defn coplay
+  "Backward pass: verification attestations flow back."
+  [resolution votes]
+  (let [trits (map :trit votes)
+        sum (reduce + trits)
+        balanced? (zero? (mod sum 3))]
+    {:attestations votes
+     :gf3-sum sum
+     :balanced? balanced?
+     :consensus? (and balanced? (>= (count (filter :approve votes)) 2))
+     :step :coplay}))
+
+(defn arena-round
+  "One round of the diegetic open game."
+  [sources]
+  (let [resolved (play sources)
+        ;; Three agents vote independently (vibesnipe pattern)
+        alice-vote   {:agent "ALICE"   :trit -1 :approve true
+                      :check :world-id-fresh}
+        arbiter-vote {:agent "ARBITER" :trit  0 :approve true
+                      :check :gf3-balanced}
+        bob-vote     {:agent "BOB"     :trit  1 :approve true
+                      :check :document-valid}
+        result (coplay resolved [alice-vote arbiter-vote bob-vote])]
+    (merge resolved result)))
+
+;; --- Main ---
+
+(defn -main [& _args]
+  (println "=== passport.gay Diegetic Open Games Arena ===")
+  (println)
+
+  ;; Demo: trit wire encoding roundtrip
+  (println "--- Signed Trit FFI Wire Format ---")
+  (doseq [trit [-1 0 1]
+          :let [hue (case (int trit) -1 270.0, 0 180.0, 1 60.0)
+                wire (trit->wire trit hue)
+                back (wire->trit wire)]]
+    (printf "  trit=%+d  hue=%.1f°  wire=[0x%02X 0x%02X]  roundtrip=%s%n"
+            trit hue (:sign wire) (:significand wire) back))
+  (println)
+
+  ;; Demo: arena round
+  (println "--- Arena Round (Vibesnipe Clone) ---")
+  (let [result (arena-round {:did-gay "did:gay:ewq3kfod7jn5eer7"
+                              :did-ens "did:ens:bmorphism.eth"
+                              :world-id {:nullifier "0xabc..."
+                                         :level "orb"}})]
+    (println "  Play:")
+    (println "    DIDs:" (:resolution result))
+    (println "  Coplay:")
+    (println "    GF(3) sum:" (:gf3-sum result))
+    (println "    Balanced:" (:balanced? result))
+    (println "    Consensus:" (:consensus? result)))
+  (println)
+
+  ;; Demo: Ω₃ confidentiality (ordered locale: a + r ≥ 0)
+  (println "--- Ω₃ Subobject Classifier (Ordered Locale) ---")
+  (let [records [{:id 1 :content "public post"    :confidentiality  1}
+                 {:id 2 :content "collective memo" :confidentiality  0}
+                 {:id 3 :content "secret audit"    :confidentiality -1}]
+        agents [{:name "Alice"   :trit -1}
+                {:name "Arbiter" :trit  0}
+                {:name "Bob"     :trit  1}]]
+    (doseq [agent agents]
+      (let [vis (filter #(visible? (:trit agent) (:confidentiality %)) records)]
+        (printf "  %s (trit=%+d) sees: %s%n"
+                (:name agent) (:trit agent)
+                (mapv :content vis)))))
+  (println)
+
+  ;; Demo: bootstrap collective
+  (println "--- Bootstrap Open Collective on Bluesky ---")
+  (let [collective (bootstrap-collective!
+                     {:did "did:gay:ewq3kfod7jn5eer7"
+                      :handle "bmorphism.bsky.social"
+                      :pds-host "https://pds.host"})]
+    (println "  Lexicons:" (mapv :id (get-in collective [:collective :lexicons])))
+    (println "  Labels:" (mapv :id (get-in collective [:collective :labeler-config :labels])))
+    (println "  Feeds:" (mapv :id (get-in collective [:collective :feeds])))
+    (println "  Invariant:" (:gf3-invariant collective)))
+  (println)
+  (println "=== Arena complete ==="))
+
+(when (= *file* (System/getProperty "babashka.file"))
+  (apply -main *command-line-args*))
+#+end_src
+
+* Diagram: Complete String Diagram
+
+#+begin_src text
+         did:gay          did:plc         did:ens         WorldID (iris)
+           │                │               │                │
+           │    ┌───────────┘               │                │
+           │    │    ┌──────────────────────┘                │
+           │    │    │    ┌──────────────────────────────────┘
+           ▼    ▼    ▼    ▼
+      ┌────────────────────────┐
+      │    PLAY (forward)       │
+      │  resolve ⊗ resolve ⊗   │
+      │  resolve ⊗ verify      │     ← Corolla 1: identity sources (⊗)
+      └────────────┬───────────┘
+                   │
+                   ▼
+      ┌────────────────────────┐
+      │    BRIDGE (compose)     │
+      │  cross-sign VCs         │     ← Corolla 2: bridge (>>)
+      │  VC_plc ⊗ VC_ens ⊗    │
+      │  VC_worldid             │
+      └────────────┬───────────┘
+                   │
+                   ▼
+      ┌────────────────────────┐
+      │    Ω₃ CLASSIFIER       │
+      │  χ: Record → Ω₃       │     ← Corolla 3: confidentiality
+      │  PUBLIC / CONF / SECRET │
+      └────────────┬───────────┘
+                   │
+                   ▼
+      ┌────────────────────────┐
+      │  VIBESNIPE CONSENSUS   │
+      │  ALICE(-1) ⊗           │     ← Vibesnipe clone: triadic consensus
+      │  ARBITER(0) ⊗          │
+      │  BOB(+1)               │
+      │  2/3 agree → issue     │
+      └────────────┬───────────┘
+                   │
+                   ▼
+      ┌────────────────────────┐
+      │  RESOURCE-SHARING      │
+      │  COPLAY (backward)     │     ← Corolla 4: open collective (⊗)
+      │  pledge ⊗ route ⊗     │
+      │  request               │
+      │  Σ trits ≡ 0 (mod 3)  │
+      └────────────┬───────────┘
+                   │
+                   ▼
+            ┌──────────────┐
+            │  AT Protocol  │
+            │  Bluesky PDS  │
+            │  Labeler +    │
+            │  Feed Gen     │
+            └──────────────┘
+#+end_src
+
+* GF(3) Conservation Proof
+
+For the complete arena:
+- Identity sources: 4 inputs (did:gay, did:plc, did:ens, WorldID)
+- Bridge: 3 VCs
+- Consensus: 3 agents (trits: -1, 0, +1 → sum = 0 ✓)
+- Resource sharing: balanced allocation (Σ pledges + Σ routes + Σ requests ≡ 0 mod 3)
+
+The GF(3) invariant is maintained at every corolla and across the entire composition.
+This is the *monoidal functor* from the Arena category to GF(3):
+  F: Arena → GF(3), F(f ⊗ g) = F(f) + F(g), F(f >> g) = F(f) + F(g)
+
+The functor is additive: parallel and sequential composition both preserve the invariant.
+This is why it works: GF(3) is an abelian group, and our functor is a group homomorphism.
+
+* The Self-Addressing Fixed Point
+
+#+begin_src text
+  The passport IS its color.
+  The color IS its address.
+  The address IS its passport.
+
+  F(x) = x  where F = SHA-256 ∘ SplitMix64 ∘ hueToHex
+
+  This is not literally a cryptographic fixed point (that would break SHA-256).
+  It is a SEMANTIC fixed point: the meaning of the DID is its color,
+  and the color uniquely identifies the DID.
+
+  Self-similar at every other interaction:
+    h(2n)   = h(0) + n × 275.016° (mod 360°)
+    h(2n+1) = h(1) + n × 275.016° (mod 360°)
+
+  Two interleaved golden spirals.  Eventually self-same:
+  as n → ∞, the union of even and odd subsequences densely fills [0°, 360°),
+  and any query "what color is near hue θ?" has the same answer
+  regardless of which subsequence you sample.
+#+end_src

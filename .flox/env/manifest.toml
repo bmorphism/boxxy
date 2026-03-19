@@ -38,6 +38,21 @@ isabelle.pkg-path = "isabelle"
 isabelle.version = "^2024"
 
 ## ═══════════════════════════════════════════════════════════════════
+## Spritely — Scheme → WASM → capability-secure distributed objects
+##
+##   hoot: Guile Scheme → WebAssembly AOT compiler
+##   goblins: OCapN distributed object capability runtime
+##   guile-fibers: lightweight concurrency (goblins dep)
+##
+##   Pipeline: Scheme source → hoot compile-wasm → wasmtime run
+##   Or: hoot → browser (Firefox 121+, Chrome 119+, Safari 26+)
+## ═══════════════════════════════════════════════════════════════════
+guile.pkg-path = "guile"
+guile-goblins.pkg-path = "guile-goblins"
+guile-fibers.pkg-path = "guile-fibers"
+guile-hoot.pkg-path = "guile-hoot"
+
+## ═══════════════════════════════════════════════════════════════════
 ## TinyGo (all platforms)
 ##
 ## Compiles Go to bare metal and exotic targets:
@@ -325,6 +340,18 @@ common = '''
   # ── TinyGo WASM ──────────────────────────────────────────────
   alias tg-wasi="tinygo build -target=wasip1"
   alias tg-wasm="tinygo build -target=wasm"
+
+  # ── Hoot: Scheme → WASM ────────────────────────────────────
+  alias hoot-compile="guild compile-wasm"
+  alias hoot-run="guild compile-wasm --run=node"
+
+  # Compile Goblins actor to WASM and run via wasmtime
+  hoot-wasm() {
+    local src=${1:?usage: hoot-wasm file.scm}
+    local base="${src%.scm}"
+    guild compile-wasm -o "${base}.wasm" "$src" && \
+    wasmtime "${base}.wasm"
+  }
 
   # ── Emulator shortcuts ───────────────────────────────────────
   alias gba-run="mgba-qt"

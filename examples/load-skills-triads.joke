@@ -15,4 +15,7 @@
 
 (def bhg (slurp "/Users/bob/.codex/skills/blackhat-go/SKILL.md"))
 
-(println "Loaded triads: audit-readiness, fix-verification, static-analysis + blackhat-go")
+;; sqlite-scanner triad: detection + orchestration + reporting
+(def sqscan (slurp "/Users/bob/i/boxxy/skills/sqlite-scanner/SKILL.md"))
+
+(println "Loaded triads: audit-readiness, fix-verification, static-analysis + blackhat-go + sqlite-scanner")

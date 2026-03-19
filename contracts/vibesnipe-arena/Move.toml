@@ -1,0 +1,22 @@
+[package]
+name = "VibesnipeArena"
+version = "0.1.0"
+authors = ["bmorphism"]
+
+[addresses]
+vibesnipe_arena = "_"
+
+[dependencies.AptosFramework]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-framework"
+
+[dependencies.AptosStdlib]
+git = "https://github.com/aptos-labs/aptos-core.git"
+rev = "mainnet"
+subdir = "aptos-move/framework/aptos-stdlib"
+
+[dev-addresses]
+vibesnipe_arena = "0xCAFE"
+
+[dev-dependencies]

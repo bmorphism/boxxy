@@ -61,6 +61,70 @@ func TestParseRunArgsModes(t *testing.T) {
 	}
 }
 
+func TestParseRunArgsPinholeFlag(t *testing.T) {
+	cfg, err := parseRunArgs([]string{"--efi", "--iso", "x.iso", "--pinhole"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !cfg.PinholeMode {
+		t.Fatal("expected PinholeMode=true with --pinhole flag")
+	}
+}
+
+func TestParseRunArgsPinholeDefaultFalse(t *testing.T) {
+	cfg, err := parseRunArgs([]string{"--efi", "--iso", "x.iso"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.PinholeMode {
+		t.Fatal("expected PinholeMode=false without --pinhole flag")
+	}
+}
+
+func TestParseRunArgsPinholeWithHardened(t *testing.T) {
+	// Both flags can be set — hardened disables networking entirely,
+	// pinhole is advisory (pf applied externally). No conflict at parse time.
+	cfg, err := parseRunArgs([]string{"--efi", "--iso", "x.iso", "--pinhole", "--hardened"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if !cfg.PinholeMode {
+		t.Fatal("expected PinholeMode=true")
+	}
+	if !cfg.DisableNetwork {
+		t.Fatal("expected DisableNetwork=true")
+	}
+}
+
+func TestParseRunArgsDefaults(t *testing.T) {
+	cfg, err := parseRunArgs([]string{"--efi", "--iso", "x.iso"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Memory != 4 {
+		t.Errorf("default memory = %d, want 4", cfg.Memory)
+	}
+	if cfg.CPUs != 2 {
+		t.Errorf("default cpus = %d, want 2", cfg.CPUs)
+	}
+	if cfg.NVRAM != "boxxy-nvram" {
+		t.Errorf("default nvram = %q, want boxxy-nvram", cfg.NVRAM)
+	}
+}
+
+func TestParseRunArgsCustomResources(t *testing.T) {
+	cfg, err := parseRunArgs([]string{"--efi", "--iso", "x.iso", "--memory", "8", "--cpus", "4"})
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+	if cfg.Memory != 8 {
+		t.Errorf("memory = %d, want 8", cfg.Memory)
+	}
+	if cfg.CPUs != 4 {
+		t.Errorf("cpus = %d, want 4", cfg.CPUs)
+	}
+}
+
 func TestParseRunArgsStress(t *testing.T) {
 	rng := rand.New(rand.NewSource(1))
 	modes := [][]string{{"--efi"}, {"--linux"}, {"--macos"}, {"--guix"}, {}}

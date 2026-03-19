@@ -1,0 +1,4461 @@
+[
+  {
+    "idx": 0,
+    "name": "internal/lisp/eval.go:CreateStandardEnv",
+    "cc": 109,
+    "loc": 398,
+    "depth": 6
+  },
+  {
+    "idx": 1,
+    "name": "cmd/boxxy/main.go:runMacOS",
+    "cc": 49,
+    "loc": 220,
+    "depth": 4
+  },
+  {
+    "idx": 2,
+    "name": "internal/lisp/eval.go:Eval",
+    "cc": 49,
+    "loc": 162,
+    "depth": 7
+  },
+  {
+    "idx": 3,
+    "name": "cmd/boxxy/main.go:runPinhole",
+    "cc": 43,
+    "loc": 189,
+    "depth": 4
+  },
+  {
+    "idx": 4,
+    "name": "internal/color/syntax.go:HighlightExpr",
+    "cc": 40,
+    "loc": 109,
+    "depth": 5
+  },
+  {
+    "idx": 5,
+    "name": "cmd/haiku-gui/main.go:run",
+    "cc": 34,
+    "loc": 193,
+    "depth": 5
+  },
+  {
+    "idx": 6,
+    "name": "cmd/alpine-gui/main.go:run",
+    "cc": 31,
+    "loc": 183,
+    "depth": 5
+  },
+  {
+    "idx": 7,
+    "name": "internal/vm/macos.go:CreateMacOSVM",
+    "cc": 30,
+    "loc": 169,
+    "depth": 3
+  },
+  {
+    "idx": 8,
+    "name": "internal/lisp/reader.go:Read",
+    "cc": 27,
+    "loc": 92,
+    "depth": 6
+  },
+  {
+    "idx": 9,
+    "name": "cmd/boxxy/main.go:runListSkills",
+    "cc": 26,
+    "loc": 100,
+    "depth": 5
+  },
+  {
+    "idx": 10,
+    "name": "internal/repl/agm.go:RegisterAGM",
+    "cc": 25,
+    "loc": 127,
+    "depth": 5
+  },
+  {
+    "idx": 11,
+    "name": "internal/runner/runner.go:parseRunArgs",
+    "cc": 23,
+    "loc": 66,
+    "depth": 3
+  },
+  {
+    "idx": 12,
+    "name": "cmd/boxxy/main.go:main",
+    "cc": 21,
+    "loc": 66,
+    "depth": 3
+  },
+  {
+    "idx": 13,
+    "name": "internal/vm/macos.go:RegisterMacOSLispFunctions",
+    "cc": 21,
+    "loc": 164,
+    "depth": 4
+  },
+  {
+    "idx": 14,
+    "name": "internal/skill/skill.go:parseFrontmatter",
+    "cc": 20,
+    "loc": 45,
+    "depth": 6
+  },
+  {
+    "idx": 15,
+    "name": "internal/scan/worksteal.go:workerLoop",
+    "cc": 20,
+    "loc": 81,
+    "depth": 6
+  },
+  {
+    "idx": 16,
+    "name": "internal/vm/macos.go:LoadMacOSVM",
+    "cc": 20,
+    "loc": 126,
+    "depth": 2
+  },
+  {
+    "idx": 17,
+    "name": "internal/skill/asi_import.go:SelectBalancedSubset",
+    "cc": 19,
+    "loc": 73,
+    "depth": 4
+  },
+  {
+    "idx": 18,
+    "name": "internal/skill/embedded.go:ValidateEmbedded",
+    "cc": 19,
+    "loc": 50,
+    "depth": 3
+  },
+  {
+    "idx": 19,
+    "name": "internal/scan/scan.go:BuildGeoFence",
+    "cc": 19,
+    "loc": 52,
+    "depth": 5
+  },
+  {
+    "idx": 20,
+    "name": "cmd/boxxy/main.go:runSkill",
+    "cc": 18,
+    "loc": 65,
+    "depth": 5
+  },
+  {
+    "idx": 21,
+    "name": "internal/skill/sideref_middleware.go:SiderefMiddleware",
+    "cc": 18,
+    "loc": 94,
+    "depth": 4
+  },
+  {
+    "idx": 22,
+    "name": "internal/exploit_arena/marketplace.go:validateWithConsensus",
+    "cc": 18,
+    "loc": 54,
+    "depth": 3
+  },
+  {
+    "idx": 23,
+    "name": "internal/repl/repl.go:Start",
+    "cc": 18,
+    "loc": 106,
+    "depth": 4
+  },
+  {
+    "idx": 24,
+    "name": "internal/pinhole/integration_test.go:TestCaptureLoopbackIntegration",
+    "cc": 18,
+    "loc": 100,
+    "depth": 3
+  },
+  {
+    "idx": 25,
+    "name": "cmd/boxxy/main.go:runNATS",
+    "cc": 16,
+    "loc": 59,
+    "depth": 4
+  },
+  {
+    "idx": 26,
+    "name": "internal/skill/skill.go:Validate",
+    "cc": 16,
+    "loc": 52,
+    "depth": 3
+  },
+  {
+    "idx": 27,
+    "name": "internal/scan/scan.go:ScoreWaymo",
+    "cc": 16,
+    "loc": 54,
+    "depth": 3
+  },
+  {
+    "idx": 28,
+    "name": "internal/vm/vm.go:CreateVM",
+    "cc": 16,
+    "loc": 86,
+    "depth": 2
+  },
+  {
+    "idx": 29,
+    "name": "cmd/scan/main.go:main",
+    "cc": 15,
+    "loc": 95,
+    "depth": 4
+  },
+  {
+    "idx": 30,
+    "name": "internal/scan/scan.go:ARPSweepNative",
+    "cc": 15,
+    "loc": 92,
+    "depth": 4
+  },
+  {
+    "idx": 31,
+    "name": "cmd/boxxy/main.go:runASISelectBalanced",
+    "cc": 14,
+    "loc": 74,
+    "depth": 3
+  },
+  {
+    "idx": 32,
+    "name": "cmd/boxxy/main.go:runASIExport",
+    "cc": 14,
+    "loc": 81,
+    "depth": 3
+  },
+  {
+    "idx": 33,
+    "name": "cmd/joker/interactive.go:handleInteractiveCommand",
+    "cc": 14,
+    "loc": 47,
+    "depth": 3
+  },
+  {
+    "idx": 34,
+    "name": "internal/scan/scan.go:classifyPacket",
+    "cc": 14,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 35,
+    "name": "internal/vm/vm.go:validateConfig",
+    "cc": 14,
+    "loc": 24,
+    "depth": 2
+  },
+  {
+    "idx": 36,
+    "name": "skills/joker-sims-parser/scripts/interactive.go:handleInteractiveCommand",
+    "cc": 14,
+    "loc": 47,
+    "depth": 3
+  },
+  {
+    "idx": 37,
+    "name": "cmd/boxxy/main.go:runASIList",
+    "cc": 13,
+    "loc": 59,
+    "depth": 4
+  },
+  {
+    "idx": 38,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestTriadicConsensusCreation",
+    "cc": 13,
+    "loc": 61,
+    "depth": 3
+  },
+  {
+    "idx": 39,
+    "name": "internal/pinhole/tshark.go:captureCount",
+    "cc": 13,
+    "loc": 38,
+    "depth": 5
+  },
+  {
+    "idx": 40,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureEndpointsParser",
+    "cc": 13,
+    "loc": 40,
+    "depth": 4
+  },
+  {
+    "idx": 41,
+    "name": "cmd/boxxy/main.go:runSkillRender",
+    "cc": 12,
+    "loc": 42,
+    "depth": 6
+  },
+  {
+    "idx": 42,
+    "name": "internal/lisp/reader.go:readString",
+    "cc": 12,
+    "loc": 35,
+    "depth": 4
+  },
+  {
+    "idx": 43,
+    "name": "internal/lisp/reader.go:readAtom",
+    "cc": 12,
+    "loc": 41,
+    "depth": 3
+  },
+  {
+    "idx": 44,
+    "name": "internal/skill/skill.go:isValidSkillName",
+    "cc": 12,
+    "loc": 20,
+    "depth": 4
+  },
+  {
+    "idx": 45,
+    "name": "internal/skill/embedded.go:isValidSkillNameEmbedded",
+    "cc": 12,
+    "loc": 20,
+    "depth": 4
+  },
+  {
+    "idx": 46,
+    "name": "internal/color/syntax.go:colorToken",
+    "cc": 12,
+    "loc": 38,
+    "depth": 3
+  },
+  {
+    "idx": 47,
+    "name": "internal/color/rainbow.go:RainbowParens",
+    "cc": 12,
+    "loc": 54,
+    "depth": 4
+  },
+  {
+    "idx": 48,
+    "name": "internal/scan/scan.go:MergeDevices",
+    "cc": 12,
+    "loc": 36,
+    "depth": 5
+  },
+  {
+    "idx": 49,
+    "name": "internal/scan/worksteal.go:Run",
+    "cc": 12,
+    "loc": 78,
+    "depth": 5
+  },
+  {
+    "idx": 50,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureEndpointsParserSingleEntry",
+    "cc": 12,
+    "loc": 31,
+    "depth": 4
+  },
+  {
+    "idx": 51,
+    "name": "internal/pinhole/proxy_test.go:TestProxyStats",
+    "cc": 12,
+    "loc": 60,
+    "depth": 3
+  },
+  {
+    "idx": 52,
+    "name": "internal/pinhole/integration_test.go:TestActivateDeactivateWithMockHelper",
+    "cc": 12,
+    "loc": 74,
+    "depth": 2
+  },
+  {
+    "idx": 53,
+    "name": "internal/vm/macos.go:queryIPSWURL",
+    "cc": 12,
+    "loc": 46,
+    "depth": 3
+  },
+  {
+    "idx": 54,
+    "name": "cmd/joker/main.go:main",
+    "cc": 11,
+    "loc": 29,
+    "depth": 2
+  },
+  {
+    "idx": 55,
+    "name": "internal/skill/vibesnipe_runtime.go:VerifyConsensusInvariant",
+    "cc": 11,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 56,
+    "name": "internal/color/nats_color.go:Subscribe",
+    "cc": 11,
+    "loc": 104,
+    "depth": 4
+  },
+  {
+    "idx": 57,
+    "name": "internal/color/color_test.go:TestGayMCPHexToColorful",
+    "cc": 11,
+    "loc": 41,
+    "depth": 3
+  },
+  {
+    "idx": 58,
+    "name": "internal/scan/scan.go:processPacket",
+    "cc": 11,
+    "loc": 40,
+    "depth": 3
+  },
+  {
+    "idx": 59,
+    "name": "internal/scan/worksteal.go:listenARPReplies",
+    "cc": 11,
+    "loc": 46,
+    "depth": 5
+  },
+  {
+    "idx": 60,
+    "name": "internal/scan/worksteal.go:executePacketProcess",
+    "cc": 11,
+    "loc": 51,
+    "depth": 3
+  },
+  {
+    "idx": 61,
+    "name": "internal/pinhole/tshark.go:captureEndpoints",
+    "cc": 11,
+    "loc": 26,
+    "depth": 4
+  },
+  {
+    "idx": 62,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureEndpointsParserEmpty",
+    "cc": 11,
+    "loc": 30,
+    "depth": 4
+  },
+  {
+    "idx": 63,
+    "name": "internal/pinhole/integration_test.go:TestPfctlHelperScript",
+    "cc": 11,
+    "loc": 47,
+    "depth": 3
+  },
+  {
+    "idx": 64,
+    "name": "internal/pinhole/integration_test.go:TestBoxxyPinholeCLI",
+    "cc": 11,
+    "loc": 40,
+    "depth": 2
+  },
+  {
+    "idx": 65,
+    "name": "internal/vm/rosetta_arm64.go:addRosettaDirectoryShare",
+    "cc": 11,
+    "loc": 34,
+    "depth": 2
+  },
+  {
+    "idx": 66,
+    "name": "skills/joker-sims-parser/scripts/main.go:main",
+    "cc": 11,
+    "loc": 29,
+    "depth": 2
+  },
+  {
+    "idx": 67,
+    "name": "cmd/boxxy/main.go:runSkillValidate",
+    "cc": 10,
+    "loc": 47,
+    "depth": 5
+  },
+  {
+    "idx": 68,
+    "name": "cmd/boxxy/main.go:runCheckBalance",
+    "cc": 10,
+    "loc": 63,
+    "depth": 3
+  },
+  {
+    "idx": 69,
+    "name": "cmd/joker/main.go:infoCmd",
+    "cc": 10,
+    "loc": 47,
+    "depth": 4
+  },
+  {
+    "idx": 70,
+    "name": "internal/lisp/reader.go:isTerminator",
+    "cc": 10,
+    "loc": 4,
+    "depth": 1
+  },
+  {
+    "idx": 71,
+    "name": "internal/streams/streams.go:StartFSEventsStream",
+    "cc": 10,
+    "loc": 64,
+    "depth": 7
+  },
+  {
+    "idx": 72,
+    "name": "internal/color/syntax.go:isNumber",
+    "cc": 10,
+    "loc": 26,
+    "depth": 4
+  },
+  {
+    "idx": 73,
+    "name": "internal/vm/macos_lifecycle.go:Create",
+    "cc": 10,
+    "loc": 45,
+    "depth": 3
+  },
+  {
+    "idx": 74,
+    "name": "internal/vm/vm.go:GetState",
+    "cc": 10,
+    "loc": 22,
+    "depth": 2
+  },
+  {
+    "idx": 75,
+    "name": "internal/vm/vm.go:WaitForShutdown",
+    "cc": 10,
+    "loc": 34,
+    "depth": 4
+  },
+  {
+    "idx": 76,
+    "name": "skills/sqlite-scanner/scripts/main.go:verifyCanariesCmd",
+    "cc": 10,
+    "loc": 58,
+    "depth": 3
+  },
+  {
+    "idx": 77,
+    "name": "skills/joker-sims-parser/scripts/main.go:infoCmd",
+    "cc": 10,
+    "loc": 47,
+    "depth": 4
+  },
+  {
+    "idx": 78,
+    "name": "internal/lisp/reader.go:skipWhitespace",
+    "cc": 9,
+    "loc": 25,
+    "depth": 5
+  },
+  {
+    "idx": 79,
+    "name": "internal/streams/streams.go:convertToLispValue",
+    "cc": 9,
+    "loc": 20,
+    "depth": 2
+  },
+  {
+    "idx": 80,
+    "name": "internal/color/color_test.go:TestColorDegradation",
+    "cc": 9,
+    "loc": 38,
+    "depth": 2
+  },
+  {
+    "idx": 81,
+    "name": "internal/scan/scan.go:GopacketCapture",
+    "cc": 9,
+    "loc": 39,
+    "depth": 4
+  },
+  {
+    "idx": 82,
+    "name": "internal/scan/scan.go:arpSweepFallback",
+    "cc": 9,
+    "loc": 38,
+    "depth": 6
+  },
+  {
+    "idx": 83,
+    "name": "internal/scan/scan.go:assignLocalIP",
+    "cc": 9,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 84,
+    "name": "internal/scan/worksteal.go:executeTask",
+    "cc": 9,
+    "loc": 30,
+    "depth": 4
+  },
+  {
+    "idx": 85,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesExtraPortsProperty",
+    "cc": 9,
+    "loc": 32,
+    "depth": 4
+  },
+  {
+    "idx": 86,
+    "name": "internal/pinhole/proxy_test.go:TestProxyCONNECTBlocked",
+    "cc": 9,
+    "loc": 41,
+    "depth": 3
+  },
+  {
+    "idx": 87,
+    "name": "internal/pinhole/proxy_test.go:TestProxyEnvVars",
+    "cc": 9,
+    "loc": 27,
+    "depth": 4
+  },
+  {
+    "idx": 88,
+    "name": "internal/vm/macos.go:DownloadLatestIPSW",
+    "cc": 9,
+    "loc": 40,
+    "depth": 5
+  },
+  {
+    "idx": 89,
+    "name": "internal/vm/macos.go:downloadIPSWDirect",
+    "cc": 9,
+    "loc": 41,
+    "depth": 2
+  },
+  {
+    "idx": 90,
+    "name": "internal/sims_parser/dbpf.go:NewDBPFPackage",
+    "cc": 9,
+    "loc": 32,
+    "depth": 3
+  },
+  {
+    "idx": 91,
+    "name": "internal/sims_parser/dbpf.go:parseIndex",
+    "cc": 9,
+    "loc": 44,
+    "depth": 3
+  },
+  {
+    "idx": 92,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:NewDBPFPackage",
+    "cc": 9,
+    "loc": 32,
+    "depth": 3
+  },
+  {
+    "idx": 93,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:parseIndex",
+    "cc": 9,
+    "loc": 44,
+    "depth": 3
+  },
+  {
+    "idx": 94,
+    "name": "cmd/boxxy/main.go:printUsage",
+    "cc": 8,
+    "loc": 53,
+    "depth": 1
+  },
+  {
+    "idx": 95,
+    "name": "internal/ternary/ternary_test.go:TestTritJSONMarshal",
+    "cc": 8,
+    "loc": 26,
+    "depth": 2
+  },
+  {
+    "idx": 96,
+    "name": "internal/skill/skill.go:ToPrompt",
+    "cc": 8,
+    "loc": 45,
+    "depth": 3
+  },
+  {
+    "idx": 97,
+    "name": "internal/skill/asi_import.go:AddSkill",
+    "cc": 8,
+    "loc": 33,
+    "depth": 3
+  },
+  {
+    "idx": 98,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestVibesniperTriadStatus",
+    "cc": 8,
+    "loc": 22,
+    "depth": 2
+  },
+  {
+    "idx": 99,
+    "name": "internal/skill/embedded_test.go:TestEmbeddedSkillRegistry",
+    "cc": 8,
+    "loc": 38,
+    "depth": 2
+  },
+  {
+    "idx": 100,
+    "name": "internal/runner/runner_fuzz_test.go:splitArgs",
+    "cc": 8,
+    "loc": 18,
+    "depth": 4
+  },
+  {
+    "idx": 101,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsModes",
+    "cc": 8,
+    "loc": 29,
+    "depth": 4
+  },
+  {
+    "idx": 102,
+    "name": "internal/repl/repl.go:printBanner",
+    "cc": 8,
+    "loc": 33,
+    "depth": 3
+  },
+  {
+    "idx": 103,
+    "name": "internal/scan/scan.go:Run",
+    "cc": 8,
+    "loc": 85,
+    "depth": 3
+  },
+  {
+    "idx": 104,
+    "name": "internal/pinhole/tshark.go:StopCapture",
+    "cc": 8,
+    "loc": 45,
+    "depth": 2
+  },
+  {
+    "idx": 105,
+    "name": "internal/pinhole/proxy_test.go:TestProxyAllowsHTTPOnPort80",
+    "cc": 8,
+    "loc": 47,
+    "depth": 2
+  },
+  {
+    "idx": 106,
+    "name": "internal/pinhole/proxy_test.go:TestProxyBlocksDisallowedPort",
+    "cc": 8,
+    "loc": 41,
+    "depth": 2
+  },
+  {
+    "idx": 107,
+    "name": "internal/pinhole/proxy_test.go:TestProxyCONNECTAllowed",
+    "cc": 8,
+    "loc": 55,
+    "depth": 4
+  },
+  {
+    "idx": 108,
+    "name": "internal/pinhole/pinhole.go:parseARPOutput",
+    "cc": 8,
+    "loc": 20,
+    "depth": 5
+  },
+  {
+    "idx": 109,
+    "name": "internal/pinhole/integration_test.go:TestVerifyComplianceIntegration",
+    "cc": 8,
+    "loc": 58,
+    "depth": 2
+  },
+  {
+    "idx": 110,
+    "name": "internal/uv/uv_test.go:TestAdaptiveColorFromGayHex",
+    "cc": 8,
+    "loc": 40,
+    "depth": 2
+  },
+  {
+    "idx": 111,
+    "name": "internal/vm/macos.go:InstallMacOS",
+    "cc": 8,
+    "loc": 31,
+    "depth": 4
+  },
+  {
+    "idx": 112,
+    "name": "internal/vm/vm.go:bootLoaderFromConfig",
+    "cc": 8,
+    "loc": 24,
+    "depth": 3
+  },
+  {
+    "idx": 113,
+    "name": "internal/sims_parser/dbpf.go:GameVersion",
+    "cc": 8,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 114,
+    "name": "internal/vtterm/vtterm.go:hslToRGB",
+    "cc": 8,
+    "loc": 32,
+    "depth": 2
+  },
+  {
+    "idx": 115,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:GameVersion",
+    "cc": 8,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 116,
+    "name": "cmd/vibesnipe-arena/main.go:DisplayMarketplaceRankings",
+    "cc": 7,
+    "loc": 40,
+    "depth": 3
+  },
+  {
+    "idx": 117,
+    "name": "cmd/boxxy/main.go:runDetectStrategy",
+    "cc": 7,
+    "loc": 42,
+    "depth": 3
+  },
+  {
+    "idx": 118,
+    "name": "cmd/joker/interactive.go:StartInteractiveShell",
+    "cc": 7,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 119,
+    "name": "cmd/joker/main.go:parseCmd",
+    "cc": 7,
+    "loc": 51,
+    "depth": 3
+  },
+  {
+    "idx": 120,
+    "name": "cmd/serve/main.go:main",
+    "cc": 7,
+    "loc": 82,
+    "depth": 5
+  },
+  {
+    "idx": 121,
+    "name": "internal/ternary/ternary_test.go:TestTritLogicGates",
+    "cc": 7,
+    "loc": 25,
+    "depth": 2
+  },
+  {
+    "idx": 122,
+    "name": "internal/skill/sideref.go:VerifySideref",
+    "cc": 7,
+    "loc": 31,
+    "depth": 3
+  },
+  {
+    "idx": 123,
+    "name": "internal/skill/skill.go:BatchToPrompt",
+    "cc": 7,
+    "loc": 30,
+    "depth": 3
+  },
+  {
+    "idx": 124,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestSelectionFunctions",
+    "cc": 7,
+    "loc": 29,
+    "depth": 2
+  },
+  {
+    "idx": 125,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestConvexCombination",
+    "cc": 7,
+    "loc": 27,
+    "depth": 4
+  },
+  {
+    "idx": 126,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestExportTriadAsJSON",
+    "cc": 7,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 127,
+    "name": "internal/skill/asi_import_test.go:TestVerifySideref",
+    "cc": 7,
+    "loc": 26,
+    "depth": 2
+  },
+  {
+    "idx": 128,
+    "name": "internal/skill/skill_test.go:TestParseSkillWithAllFields",
+    "cc": 7,
+    "loc": 36,
+    "depth": 2
+  },
+  {
+    "idx": 129,
+    "name": "internal/skill/embedded.go:ParseEmbeddedSkillLine",
+    "cc": 7,
+    "loc": 23,
+    "depth": 3
+  },
+  {
+    "idx": 130,
+    "name": "internal/streams/streams.go:fseventsStartLisp",
+    "cc": 7,
+    "loc": 34,
+    "depth": 3
+  },
+  {
+    "idx": 131,
+    "name": "internal/streams/streams.go:pollStreamLisp",
+    "cc": 7,
+    "loc": 30,
+    "depth": 3
+  },
+  {
+    "idx": 132,
+    "name": "internal/streams/streams.go:WatchVMState",
+    "cc": 7,
+    "loc": 25,
+    "depth": 5
+  },
+  {
+    "idx": 133,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsStress",
+    "cc": 7,
+    "loc": 24,
+    "depth": 3
+  },
+  {
+    "idx": 134,
+    "name": "internal/color/rainbow_test.go:TestGoldenSpiralMaximalDispersion",
+    "cc": 7,
+    "loc": 24,
+    "depth": 4
+  },
+  {
+    "idx": 135,
+    "name": "internal/repl/polyglot.go:PrintBackendList",
+    "cc": 7,
+    "loc": 35,
+    "depth": 3
+  },
+  {
+    "idx": 136,
+    "name": "internal/scan/narrative_test.go:TestNarrativeSheafCondition",
+    "cc": 7,
+    "loc": 44,
+    "depth": 2
+  },
+  {
+    "idx": 137,
+    "name": "internal/scan/narrative.go:VerifySheafCondition",
+    "cc": 7,
+    "loc": 23,
+    "depth": 4
+  },
+  {
+    "idx": 138,
+    "name": "internal/scan/worksteal.go:NewScheduler",
+    "cc": 7,
+    "loc": 43,
+    "depth": 3
+  },
+  {
+    "idx": 139,
+    "name": "internal/scan/worksteal.go:DistributePackets",
+    "cc": 7,
+    "loc": 27,
+    "depth": 4
+  },
+  {
+    "idx": 140,
+    "name": "internal/pinhole/proxy.go:handleHTTP",
+    "cc": 7,
+    "loc": 63,
+    "depth": 3
+  },
+  {
+    "idx": 141,
+    "name": "internal/pinhole/proxy.go:HostBridgeIP",
+    "cc": 7,
+    "loc": 19,
+    "depth": 4
+  },
+  {
+    "idx": 142,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRules",
+    "cc": 7,
+    "loc": 37,
+    "depth": 2
+  },
+  {
+    "idx": 143,
+    "name": "internal/uv/uv_test.go:TestPerceptualColorDistance",
+    "cc": 7,
+    "loc": 26,
+    "depth": 4
+  },
+  {
+    "idx": 144,
+    "name": "internal/vm/vm.go:storageDevicesFromConfig",
+    "cc": 7,
+    "loc": 30,
+    "depth": 3
+  },
+  {
+    "idx": 145,
+    "name": "internal/sims_parser/dbpf.go:extractResourceData",
+    "cc": 7,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 146,
+    "name": "internal/gf3/gf3_test.go:TestConservationLaw",
+    "cc": 7,
+    "loc": 19,
+    "depth": 6
+  },
+  {
+    "idx": 147,
+    "name": "internal/clj/clj_test.go:TestProviderQuadBalance",
+    "cc": 7,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 148,
+    "name": "std/gt/gt.go:SendMail",
+    "cc": 7,
+    "loc": 26,
+    "depth": 2
+  },
+  {
+    "idx": 149,
+    "name": "skills/sqlite-scanner/scripts/main.go:main",
+    "cc": 7,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 150,
+    "name": "skills/joker-sims-parser/scripts/interactive.go:StartInteractiveShell",
+    "cc": 7,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 151,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:extractResourceData",
+    "cc": 7,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 152,
+    "name": "skills/joker-sims-parser/scripts/main.go:parseCmd",
+    "cc": 7,
+    "loc": 51,
+    "depth": 3
+  },
+  {
+    "idx": 153,
+    "name": "cmd/boxxy/main.go:runSkillToPrompt",
+    "cc": 6,
+    "loc": 25,
+    "depth": 4
+  },
+  {
+    "idx": 154,
+    "name": "cmd/boxxy/main.go:runGenerateSideref",
+    "cc": 6,
+    "loc": 60,
+    "depth": 3
+  },
+  {
+    "idx": 155,
+    "name": "cmd/joker/main.go:listCmd",
+    "cc": 6,
+    "loc": 33,
+    "depth": 3
+  },
+  {
+    "idx": 156,
+    "name": "internal/lisp/reader.go:readList",
+    "cc": 6,
+    "loc": 21,
+    "depth": 3
+  },
+  {
+    "idx": 157,
+    "name": "internal/skill/skill.go:MinPerceptualSpread",
+    "cc": 6,
+    "loc": 22,
+    "depth": 4
+  },
+  {
+    "idx": 158,
+    "name": "internal/skill/skill.go:RenderTriadSummary",
+    "cc": 6,
+    "loc": 41,
+    "depth": 3
+  },
+  {
+    "idx": 159,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestReviseAndEquilibrium",
+    "cc": 6,
+    "loc": 29,
+    "depth": 2
+  },
+  {
+    "idx": 160,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestMultipleRevisions",
+    "cc": 6,
+    "loc": 23,
+    "depth": 3
+  },
+  {
+    "idx": 161,
+    "name": "internal/skill/asi_import_test.go:TestAddSkill",
+    "cc": 6,
+    "loc": 25,
+    "depth": 2
+  },
+  {
+    "idx": 162,
+    "name": "internal/skill/asi_import_test.go:TestSelectBalancedSubset",
+    "cc": 6,
+    "loc": 29,
+    "depth": 2
+  },
+  {
+    "idx": 163,
+    "name": "internal/skill/asi_import_test.go:TestExportForEmbedded",
+    "cc": 6,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 164,
+    "name": "internal/skill/vibesnipe_runtime.go:NewTriadicConsensus",
+    "cc": 6,
+    "loc": 52,
+    "depth": 2
+  },
+  {
+    "idx": 165,
+    "name": "internal/skill/embedded_test.go:TestRegistryCapacityLimit",
+    "cc": 6,
+    "loc": 37,
+    "depth": 3
+  },
+  {
+    "idx": 166,
+    "name": "internal/skill/skill_test.go:TestParseSkillWithFrontmatter",
+    "cc": 6,
+    "loc": 28,
+    "depth": 2
+  },
+  {
+    "idx": 167,
+    "name": "internal/skill/skill_test.go:TestValidateNameFormat",
+    "cc": 6,
+    "loc": 23,
+    "depth": 4
+  },
+  {
+    "idx": 168,
+    "name": "internal/skill/skill_test.go:TestValidateProgressiveDisclosureBodyLines",
+    "cc": 6,
+    "loc": 25,
+    "depth": 3
+  },
+  {
+    "idx": 169,
+    "name": "internal/skill/skill_test.go:TestValidateProgressiveDisclosureTokenLimit",
+    "cc": 6,
+    "loc": 25,
+    "depth": 3
+  },
+  {
+    "idx": 170,
+    "name": "internal/skill/skill_test.go:TestRenderASISkillIfAvailable",
+    "cc": 6,
+    "loc": 27,
+    "depth": 2
+  },
+  {
+    "idx": 171,
+    "name": "internal/streams/streams.go:StartDarwinNotifyStream",
+    "cc": 6,
+    "loc": 44,
+    "depth": 6
+  },
+  {
+    "idx": 172,
+    "name": "internal/scan/narrative_test.go:TestNarrativeSaveLoad",
+    "cc": 6,
+    "loc": 34,
+    "depth": 2
+  },
+  {
+    "idx": 173,
+    "name": "internal/scan/narrative.go:AddSnapshot",
+    "cc": 6,
+    "loc": 45,
+    "depth": 3
+  },
+  {
+    "idx": 174,
+    "name": "internal/scan/scan.go:normalizeMAC",
+    "cc": 6,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 175,
+    "name": "internal/scan/scan.go:estimateRadius",
+    "cc": 6,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 176,
+    "name": "internal/scan/scan.go:macEntropy",
+    "cc": 6,
+    "loc": 22,
+    "depth": 3
+  },
+  {
+    "idx": 177,
+    "name": "internal/scan/worksteal.go:StealHalf",
+    "cc": 6,
+    "loc": 26,
+    "depth": 3
+  },
+  {
+    "idx": 178,
+    "name": "internal/pinhole/proxy.go:Stats",
+    "cc": 6,
+    "loc": 47,
+    "depth": 3
+  },
+  {
+    "idx": 179,
+    "name": "internal/pinhole/proxy.go:handleConnect",
+    "cc": 6,
+    "loc": 83,
+    "depth": 2
+  },
+  {
+    "idx": 180,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureStatsJSONRoundTrip",
+    "cc": 6,
+    "loc": 30,
+    "depth": 2
+  },
+  {
+    "idx": 181,
+    "name": "internal/pinhole/pinhole_test.go:TestParseDHCPLeases",
+    "cc": 6,
+    "loc": 40,
+    "depth": 3
+  },
+  {
+    "idx": 182,
+    "name": "internal/pinhole/pinhole.go:parseDHCPLeases",
+    "cc": 6,
+    "loc": 21,
+    "depth": 3
+  },
+  {
+    "idx": 183,
+    "name": "internal/pinhole/pinhole.go:Activate",
+    "cc": 6,
+    "loc": 31,
+    "depth": 2
+  },
+  {
+    "idx": 184,
+    "name": "internal/pinhole/integration_test.go:TestGenerateAndWriteRulesIntegration",
+    "cc": 6,
+    "loc": 52,
+    "depth": 3
+  },
+  {
+    "idx": 185,
+    "name": "internal/pinhole/integration_test.go:activateWithHelper",
+    "cc": 6,
+    "loc": 25,
+    "depth": 2
+  },
+  {
+    "idx": 186,
+    "name": "internal/pinhole/integration_test.go:TestExampleJokeFileExists",
+    "cc": 6,
+    "loc": 28,
+    "depth": 3
+  },
+  {
+    "idx": 187,
+    "name": "internal/vm/macos_lifecycle.go:StateString",
+    "cc": 6,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 188,
+    "name": "internal/vm/vm.go:newLinuxBootLoaderLisp",
+    "cc": 6,
+    "loc": 26,
+    "depth": 2
+  },
+  {
+    "idx": 189,
+    "name": "internal/gf3/gf3_test.go:TestFindBalancer",
+    "cc": 6,
+    "loc": 13,
+    "depth": 5
+  },
+  {
+    "idx": 190,
+    "name": "internal/clj/clj_test.go:TestProviderConfigMarshal",
+    "cc": 6,
+    "loc": 32,
+    "depth": 2
+  },
+  {
+    "idx": 191,
+    "name": "std/gt/gt.go:CreateIssue",
+    "cc": 6,
+    "loc": 20,
+    "depth": 2
+  },
+  {
+    "idx": 192,
+    "name": "skills/joker-sims-parser/scripts/main.go:listCmd",
+    "cc": 6,
+    "loc": 33,
+    "depth": 3
+  },
+  {
+    "idx": 193,
+    "name": "cmd/vibesnipe-arena/main.go:SetupRuntimes",
+    "cc": 5,
+    "loc": 67,
+    "depth": 3
+  },
+  {
+    "idx": 194,
+    "name": "cmd/vibesnipe-arena/main.go:RunCompetitionRound",
+    "cc": 5,
+    "loc": 85,
+    "depth": 3
+  },
+  {
+    "idx": 195,
+    "name": "cmd/vibesnipe-arena/main.go:main",
+    "cc": 5,
+    "loc": 44,
+    "depth": 3
+  },
+  {
+    "idx": 196,
+    "name": "cmd/boxxy/main.go:getVersionDescription",
+    "cc": 5,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 197,
+    "name": "internal/ternary/ternary_test.go:TestCristalKleeneLogic",
+    "cc": 5,
+    "loc": 26,
+    "depth": 2
+  },
+  {
+    "idx": 198,
+    "name": "internal/skill/skill.go:countLines",
+    "cc": 5,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 199,
+    "name": "internal/skill/skill.go:ValidateDir",
+    "cc": 5,
+    "loc": 18,
+    "depth": 4
+  },
+  {
+    "idx": 200,
+    "name": "internal/skill/asi_import.go:getTritRole",
+    "cc": 5,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 201,
+    "name": "internal/skill/asi_import_test.go:TestTriadStatus",
+    "cc": 5,
+    "loc": 24,
+    "depth": 3
+  },
+  {
+    "idx": 202,
+    "name": "internal/skill/asi_import_test.go:TestFindSkill",
+    "cc": 5,
+    "loc": 17,
+    "depth": 2
+  },
+  {
+    "idx": 203,
+    "name": "internal/skill/asi_import_test.go:TestToJSON",
+    "cc": 5,
+    "loc": 24,
+    "depth": 2
+  },
+  {
+    "idx": 204,
+    "name": "internal/skill/asi_import_test.go:TestBindSiderefs",
+    "cc": 5,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 205,
+    "name": "internal/skill/asi_import_test.go:TestRegistryJSONRoundtrip",
+    "cc": 5,
+    "loc": 30,
+    "depth": 2
+  },
+  {
+    "idx": 206,
+    "name": "internal/skill/vibesnipe_runtime.go:verifyNashEquilibrium",
+    "cc": 5,
+    "loc": 22,
+    "depth": 3
+  },
+  {
+    "idx": 207,
+    "name": "internal/skill/vibesnipe_runtime.go:ComputeConvexCombination",
+    "cc": 5,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 208,
+    "name": "internal/skill/embedded_test.go:TestParseEmbeddedSkillLine",
+    "cc": 5,
+    "loc": 34,
+    "depth": 4
+  },
+  {
+    "idx": 209,
+    "name": "internal/skill/embedded_test.go:TestSerializeCompact",
+    "cc": 5,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 210,
+    "name": "internal/skill/embedded_test.go:TestMedicalDeviceCapabilities",
+    "cc": 5,
+    "loc": 40,
+    "depth": 2
+  },
+  {
+    "idx": 211,
+    "name": "internal/skill/skill_test.go:TestStyleForAllTritsDistinct",
+    "cc": 5,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 212,
+    "name": "internal/skill/skill_test.go:TestRenderSkill",
+    "cc": 5,
+    "loc": 39,
+    "depth": 2
+  },
+  {
+    "idx": 213,
+    "name": "internal/skill/skill_test.go:TestRenderDifferentTrits",
+    "cc": 5,
+    "loc": 23,
+    "depth": 4
+  },
+  {
+    "idx": 214,
+    "name": "internal/skill/skill_test.go:TestRenderTriadSummary",
+    "cc": 5,
+    "loc": 21,
+    "depth": 2
+  },
+  {
+    "idx": 215,
+    "name": "internal/skill/embedded.go:countLinesEmbedded",
+    "cc": 5,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 216,
+    "name": "internal/skill/embedded.go:Register",
+    "cc": 5,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 217,
+    "name": "internal/skill/embedded.go:SerializeCompact",
+    "cc": 5,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 218,
+    "name": "internal/skill/sideref_test.go:TestNewSiderefToken",
+    "cc": 5,
+    "loc": 20,
+    "depth": 2
+  },
+  {
+    "idx": 219,
+    "name": "internal/skill/sideref_test.go:TestMarshalUnmarshalSideref",
+    "cc": 5,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 220,
+    "name": "internal/exploit_arena/marketplace.go:RankExploits",
+    "cc": 5,
+    "loc": 19,
+    "depth": 4
+  },
+  {
+    "idx": 221,
+    "name": "internal/streams/streams.go:StartOSLogStream",
+    "cc": 5,
+    "loc": 44,
+    "depth": 6
+  },
+  {
+    "idx": 222,
+    "name": "internal/runner/runner.go:runVM",
+    "cc": 5,
+    "loc": 35,
+    "depth": 2
+  },
+  {
+    "idx": 223,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsDefaults",
+    "cc": 5,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 224,
+    "name": "internal/color/rainbow_test.go:TestRainbowPaletteDistinctness",
+    "cc": 5,
+    "loc": 16,
+    "depth": 4
+  },
+  {
+    "idx": 225,
+    "name": "internal/repl/agm.go:consistent",
+    "cc": 5,
+    "loc": 15,
+    "depth": 4
+  },
+  {
+    "idx": 226,
+    "name": "internal/repl/agm.go:symbolToString",
+    "cc": 5,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 227,
+    "name": "internal/scan/narrative_test.go:TestNarrativeSingleSnapshot",
+    "cc": 5,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 228,
+    "name": "internal/scan/narrative.go:LoadNarrative",
+    "cc": 5,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 229,
+    "name": "internal/scan/worksteal.go:DistributeARPSweep",
+    "cc": 5,
+    "loc": 26,
+    "depth": 3
+  },
+  {
+    "idx": 230,
+    "name": "internal/scan/worksteal.go:RunWorkStealing",
+    "cc": 5,
+    "loc": 43,
+    "depth": 2
+  },
+  {
+    "idx": 231,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureStatsJSON",
+    "cc": 5,
+    "loc": 28,
+    "depth": 2
+  },
+  {
+    "idx": 232,
+    "name": "internal/pinhole/pinhole_test.go:TestDefaultConfig",
+    "cc": 5,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 233,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesWritesToFile",
+    "cc": 5,
+    "loc": 29,
+    "depth": 2
+  },
+  {
+    "idx": 234,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesAlwaysBlocks",
+    "cc": 5,
+    "loc": 23,
+    "depth": 3
+  },
+  {
+    "idx": 235,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesAlwaysHasBaseRules",
+    "cc": 5,
+    "loc": 20,
+    "depth": 3
+  },
+  {
+    "idx": 236,
+    "name": "internal/pinhole/pinhole.go:DetectGuestIP",
+    "cc": 5,
+    "loc": 18,
+    "depth": 3
+  },
+  {
+    "idx": 237,
+    "name": "internal/pinhole/integration_test.go:TestDetectGuestIPFromLeases",
+    "cc": 5,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 238,
+    "name": "internal/pinhole/integration_test.go:TestZbScriptHelp",
+    "cc": 5,
+    "loc": 28,
+    "depth": 3
+  },
+  {
+    "idx": 239,
+    "name": "internal/uv/uv_test.go:TestXColorsAdaptivePalette",
+    "cc": 5,
+    "loc": 34,
+    "depth": 4
+  },
+  {
+    "idx": 240,
+    "name": "internal/vm/macos_lifecycle.go:State",
+    "cc": 5,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 241,
+    "name": "internal/vm/macos_lifecycle.go:Install",
+    "cc": 5,
+    "loc": 23,
+    "depth": 3
+  },
+  {
+    "idx": 242,
+    "name": "internal/vm/macos_lifecycle.go:Boot",
+    "cc": 5,
+    "loc": 29,
+    "depth": 3
+  },
+  {
+    "idx": 243,
+    "name": "internal/vm/vm.go:newEFIVariableStoreLisp",
+    "cc": 5,
+    "loc": 22,
+    "depth": 2
+  },
+  {
+    "idx": 244,
+    "name": "internal/vm/vm.go:newVirtioGraphicsDeviceLisp",
+    "cc": 5,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 245,
+    "name": "internal/vm/vm.go:startGraphicAppLisp",
+    "cc": 5,
+    "loc": 26,
+    "depth": 2
+  },
+  {
+    "idx": 246,
+    "name": "internal/vm/vm_plan_test.go:Generate",
+    "cc": 5,
+    "loc": 31,
+    "depth": 3
+  },
+  {
+    "idx": 247,
+    "name": "internal/vm/vm_plan_test.go:TestStoragePlanInvariants",
+    "cc": 5,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 248,
+    "name": "internal/vm/vm_plan_test.go:TestNetworkPlanInvariants",
+    "cc": 5,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 249,
+    "name": "internal/sims_parser/dbpf.go:GetResource",
+    "cc": 5,
+    "loc": 10,
+    "depth": 4
+  },
+  {
+    "idx": 250,
+    "name": "internal/gf3/gf3_test.go:TestAdditiveAssociativity",
+    "cc": 5,
+    "loc": 14,
+    "depth": 5
+  },
+  {
+    "idx": 251,
+    "name": "internal/gf3/gf3_test.go:TestMultiplicativeAssociativity",
+    "cc": 5,
+    "loc": 14,
+    "depth": 5
+  },
+  {
+    "idx": 252,
+    "name": "internal/gf3/gf3_test.go:TestDistributivity",
+    "cc": 5,
+    "loc": 14,
+    "depth": 5
+  },
+  {
+    "idx": 253,
+    "name": "internal/vtterm/vtterm_test.go:TestCellDamage",
+    "cc": 5,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 254,
+    "name": "internal/vtterm/vtterm_test.go:TestRectDamage",
+    "cc": 5,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 255,
+    "name": "internal/clj/clj_test.go:TestProviderTritJSONInterop",
+    "cc": 5,
+    "loc": 24,
+    "depth": 3
+  },
+  {
+    "idx": 256,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:GetResource",
+    "cc": 5,
+    "loc": 10,
+    "depth": 4
+  },
+  {
+    "idx": 257,
+    "name": "cmd/haiku-gui/main.go:cleanup",
+    "cc": 4,
+    "loc": 15,
+    "depth": 4
+  },
+  {
+    "idx": 258,
+    "name": "cmd/alpine-gui/main.go:cleanup",
+    "cc": 4,
+    "loc": 15,
+    "depth": 4
+  },
+  {
+    "idx": 259,
+    "name": "cmd/boxxy/main.go:detectVersionBump",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 260,
+    "name": "cmd/serve/main.go:safeEval",
+    "cc": 4,
+    "loc": 20,
+    "depth": 3
+  },
+  {
+    "idx": 261,
+    "name": "internal/ternary/ternary_test.go:TestTritGF3Values",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 262,
+    "name": "internal/lisp/reader.go:readKeyword",
+    "cc": 4,
+    "loc": 15,
+    "depth": 3
+  },
+  {
+    "idx": 263,
+    "name": "internal/lisp/reader.go:ReadAll",
+    "cc": 4,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 264,
+    "name": "internal/lisp/eval.go:isTruthy",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 265,
+    "name": "internal/skill/sideref.go:UnmarshalSideref",
+    "cc": 4,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 266,
+    "name": "internal/skill/sideref_middleware.go:allow",
+    "cc": 4,
+    "loc": 24,
+    "depth": 2
+  },
+  {
+    "idx": 267,
+    "name": "internal/skill/skill.go:ParseSkill",
+    "cc": 4,
+    "loc": 26,
+    "depth": 3
+  },
+  {
+    "idx": 268,
+    "name": "internal/skill/skill.go:LoadSkillDir",
+    "cc": 4,
+    "loc": 17,
+    "depth": 4
+  },
+  {
+    "idx": 269,
+    "name": "internal/skill/asi_import.go:FromJSON",
+    "cc": 4,
+    "loc": 14,
+    "depth": 3
+  },
+  {
+    "idx": 270,
+    "name": "internal/skill/asi_import.go:ExportForEmbedded",
+    "cc": 4,
+    "loc": 22,
+    "depth": 3
+  },
+  {
+    "idx": 271,
+    "name": "internal/skill/skill_fuzz_test.go:FuzzParseSkill",
+    "cc": 4,
+    "loc": 21,
+    "depth": 3
+  },
+  {
+    "idx": 272,
+    "name": "internal/skill/asi_import_test.go:TestNewASIRegistry",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 273,
+    "name": "internal/skill/asi_import_test.go:TestAddSkillDuplicate",
+    "cc": 4,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 274,
+    "name": "internal/skill/asi_import_test.go:TestIsBalanced",
+    "cc": 4,
+    "loc": 24,
+    "depth": 2
+  },
+  {
+    "idx": 275,
+    "name": "internal/skill/asi_import_test.go:TestFromJSON",
+    "cc": 4,
+    "loc": 21,
+    "depth": 2
+  },
+  {
+    "idx": 276,
+    "name": "internal/skill/vibesnipe_runtime.go:Revise",
+    "cc": 4,
+    "loc": 28,
+    "depth": 2
+  },
+  {
+    "idx": 277,
+    "name": "internal/skill/vibesnipe_runtime.go:selectGenerative",
+    "cc": 4,
+    "loc": 20,
+    "depth": 2
+  },
+  {
+    "idx": 278,
+    "name": "internal/skill/vibesnipe_runtime.go:selectCoordinating",
+    "cc": 4,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 279,
+    "name": "internal/skill/vibesnipe_runtime.go:selectVerifying",
+    "cc": 4,
+    "loc": 20,
+    "depth": 2
+  },
+  {
+    "idx": 280,
+    "name": "internal/skill/embedded_fuzz_test.go:FuzzParseEmbeddedSkillLine",
+    "cc": 4,
+    "loc": 22,
+    "depth": 3
+  },
+  {
+    "idx": 281,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_RateLimit",
+    "cc": 4,
+    "loc": 27,
+    "depth": 3
+  },
+  {
+    "idx": 282,
+    "name": "internal/skill/skill_test.go:TestShare3HashDistribution",
+    "cc": 4,
+    "loc": 18,
+    "depth": 3
+  },
+  {
+    "idx": 283,
+    "name": "internal/skill/skill_test.go:TestShare3HashCoversAllTrits",
+    "cc": 4,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 284,
+    "name": "internal/skill/skill_test.go:TestParseSkillWithoutFrontmatter",
+    "cc": 4,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 285,
+    "name": "internal/skill/skill_test.go:TestParseSkillTrits",
+    "cc": 4,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 286,
+    "name": "internal/skill/skill_test.go:TestLoadSkillDir",
+    "cc": 4,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 287,
+    "name": "internal/skill/skill_test.go:TestStyleForTrit",
+    "cc": 4,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 288,
+    "name": "internal/skill/skill_test.go:TestValidateNameRequired",
+    "cc": 4,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 289,
+    "name": "internal/skill/skill_test.go:TestValidateNameTooLong",
+    "cc": 4,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 290,
+    "name": "internal/skill/skill_test.go:TestValidateDescriptionRequired",
+    "cc": 4,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 291,
+    "name": "internal/skill/embedded.go:ValidateAll",
+    "cc": 4,
+    "loc": 12,
+    "depth": 4
+  },
+  {
+    "idx": 292,
+    "name": "internal/skill/sideref_test.go:TestVerifySideref_WrongName",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 293,
+    "name": "internal/skill/sideref_test.go:TestVerifySideref_WrongSecret",
+    "cc": 4,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 294,
+    "name": "internal/skill/sideref_test.go:TestWithExpiration",
+    "cc": 4,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 295,
+    "name": "internal/skill/sideref_test.go:TestMarshalCompactV2",
+    "cc": 4,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 296,
+    "name": "internal/exploit_arena/marketplace.go:GetArenaStats",
+    "cc": 4,
+    "loc": 37,
+    "depth": 3
+  },
+  {
+    "idx": 297,
+    "name": "internal/streams/streams.go:oslogStartLisp",
+    "cc": 4,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 298,
+    "name": "internal/streams/streams.go:darwinStartLisp",
+    "cc": 4,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 299,
+    "name": "internal/runner/runner.go:RunScript",
+    "cc": 4,
+    "loc": 22,
+    "depth": 2
+  },
+  {
+    "idx": 300,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsGuixArchEnablesRosetta",
+    "cc": 4,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 301,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsPinholeWithHardened",
+    "cc": 4,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 302,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsCustomResources",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 303,
+    "name": "internal/color/nats_color.go:Publish",
+    "cc": 4,
+    "loc": 36,
+    "depth": 2
+  },
+  {
+    "idx": 304,
+    "name": "internal/color/syntax_test.go:TestHighlightSpecialForms",
+    "cc": 4,
+    "loc": 12,
+    "depth": 3
+  },
+  {
+    "idx": 305,
+    "name": "internal/color/rainbow.go:PaletteToLipgloss",
+    "cc": 4,
+    "loc": 11,
+    "depth": 3
+  },
+  {
+    "idx": 306,
+    "name": "internal/color/rainbow_test.go:TestDefaultRainbowPalette",
+    "cc": 4,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 307,
+    "name": "internal/belief/acset.go:GetIncomparablePairs",
+    "cc": 4,
+    "loc": 25,
+    "depth": 3
+  },
+  {
+    "idx": 308,
+    "name": "internal/repl/agm.go:worlds",
+    "cc": 4,
+    "loc": 18,
+    "depth": 4
+  },
+  {
+    "idx": 309,
+    "name": "internal/scan/narrative_test.go:TestNarrativeUnbalanced",
+    "cc": 4,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 310,
+    "name": "internal/scan/narrative.go:FrobeniusFixed",
+    "cc": 4,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 311,
+    "name": "internal/scan/scan.go:tritAdd",
+    "cc": 4,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 312,
+    "name": "internal/scan/scan.go:LookupOUI",
+    "cc": 4,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 313,
+    "name": "internal/scan/scan.go:addProto",
+    "cc": 4,
+    "loc": 11,
+    "depth": 3
+  },
+  {
+    "idx": 314,
+    "name": "internal/scan/scan.go:isMulticastMAC",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 315,
+    "name": "internal/scan/worksteal.go:Pop",
+    "cc": 4,
+    "loc": 25,
+    "depth": 2
+  },
+  {
+    "idx": 316,
+    "name": "internal/pinhole/tshark.go:VerifyPinholeCompliance",
+    "cc": 4,
+    "loc": 21,
+    "depth": 2
+  },
+  {
+    "idx": 317,
+    "name": "internal/pinhole/proxy.go:writeLog",
+    "cc": 4,
+    "loc": 21,
+    "depth": 3
+  },
+  {
+    "idx": 318,
+    "name": "internal/pinhole/tshark_test.go:TestVerifyPinholeComplianceFilter",
+    "cc": 4,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 319,
+    "name": "internal/pinhole/pinhole_test.go:TestConfPathProperty",
+    "cc": 4,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 320,
+    "name": "internal/pinhole/proxy_test.go:TestProxyStopWritesLog",
+    "cc": 4,
+    "loc": 24,
+    "depth": 2
+  },
+  {
+    "idx": 321,
+    "name": "internal/pinhole/proxy_test.go:TestProxyDoubleStopFails",
+    "cc": 4,
+    "loc": 22,
+    "depth": 2
+  },
+  {
+    "idx": 322,
+    "name": "internal/pinhole/proxy_test.go:TestHostBridgeIP",
+    "cc": 4,
+    "loc": 12,
+    "depth": 3
+  },
+  {
+    "idx": 323,
+    "name": "internal/pinhole/pinhole.go:DetectGuestIPRetry",
+    "cc": 4,
+    "loc": 12,
+    "depth": 3
+  },
+  {
+    "idx": 324,
+    "name": "internal/pinhole/pinhole.go:generateRules",
+    "cc": 4,
+    "loc": 27,
+    "depth": 2
+  },
+  {
+    "idx": 325,
+    "name": "internal/pinhole/pinhole.go:Deactivate",
+    "cc": 4,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 326,
+    "name": "internal/pinhole/integration_test.go:TestConfigYAMLExists",
+    "cc": 4,
+    "loc": 23,
+    "depth": 3
+  },
+  {
+    "idx": 327,
+    "name": "internal/pinhole/integration_test.go:findProjectRoot",
+    "cc": 4,
+    "loc": 15,
+    "depth": 3
+  },
+  {
+    "idx": 328,
+    "name": "internal/vm/vm.go:networkDevicesFromConfig",
+    "cc": 4,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 329,
+    "name": "internal/vm/vm.go:newDiskAttachmentLisp",
+    "cc": 4,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 330,
+    "name": "internal/vm/vm.go:validateConfigLisp",
+    "cc": 4,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 331,
+    "name": "internal/vm/vm.go:createDiskImageLisp",
+    "cc": 4,
+    "loc": 20,
+    "depth": 2
+  },
+  {
+    "idx": 332,
+    "name": "internal/sims_parser/skill_integration.go:SkillMarkdown",
+    "cc": 4,
+    "loc": 44,
+    "depth": 1
+  },
+  {
+    "idx": 333,
+    "name": "internal/gf3/gf3_test.go:TestAdditiveCommutativity",
+    "cc": 4,
+    "loc": 10,
+    "depth": 4
+  },
+  {
+    "idx": 334,
+    "name": "internal/gf3/gf3_test.go:TestMultiplicativeCommutativity",
+    "cc": 4,
+    "loc": 10,
+    "depth": 4
+  },
+  {
+    "idx": 335,
+    "name": "internal/gf3/gf3_test.go:TestMultiplicativeInverse",
+    "cc": 4,
+    "loc": 11,
+    "depth": 3
+  },
+  {
+    "idx": 336,
+    "name": "internal/gf3/gf3_test.go:TestBalancedMapping",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 337,
+    "name": "internal/gf3/gf3_test.go:TestExampleQuads",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 338,
+    "name": "internal/gf3/gf3_test.go:TestCayleyAddition",
+    "cc": 4,
+    "loc": 17,
+    "depth": 4
+  },
+  {
+    "idx": 339,
+    "name": "internal/gf3/gf3_test.go:TestCayleyMultiplication",
+    "cc": 4,
+    "loc": 17,
+    "depth": 4
+  },
+  {
+    "idx": 340,
+    "name": "internal/gf3/gf3.go:ToBalanced",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 341,
+    "name": "internal/gf3/gf3.go:FromBalanced",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 342,
+    "name": "internal/gf3/gf3.go:RoleToElem",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 343,
+    "name": "internal/gf3/gf3.go:ElemToRole",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 344,
+    "name": "internal/gf3/gf3.go:String",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 345,
+    "name": "internal/gf3/gf3.go:String",
+    "cc": 4,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 346,
+    "name": "internal/vtterm/vtterm_test.go:TestColorStreamGoldenAngleDispersion",
+    "cc": 4,
+    "loc": 19,
+    "depth": 3
+  },
+  {
+    "idx": 347,
+    "name": "internal/vtterm/vtterm_test.go:TestColorStreamTrit",
+    "cc": 4,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 348,
+    "name": "internal/vtterm/vtterm_test.go:TestGF3PaletteColors",
+    "cc": 4,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 349,
+    "name": "internal/vtterm/vtterm_test.go:TestFullPipeline",
+    "cc": 4,
+    "loc": 28,
+    "depth": 2
+  },
+  {
+    "idx": 350,
+    "name": "skills/joker-sims-parser/scripts/lib/skill_integration.go:SkillMarkdown",
+    "cc": 4,
+    "loc": 44,
+    "depth": 1
+  },
+  {
+    "idx": 351,
+    "name": "cmd/vibesnipe-arena/main.go:VerifyFormalProperties",
+    "cc": 3,
+    "loc": 24,
+    "depth": 3
+  },
+  {
+    "idx": 352,
+    "name": "cmd/joker/main.go:printUsage",
+    "cc": 3,
+    "loc": 15,
+    "depth": 1
+  },
+  {
+    "idx": 353,
+    "name": "internal/ternary/ternary_test.go:TestTritBalancedTernaryQuad",
+    "cc": 3,
+    "loc": 23,
+    "depth": 3
+  },
+  {
+    "idx": 354,
+    "name": "internal/ternary/ternary_test.go:TestCristalBochvarLogic",
+    "cc": 3,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 355,
+    "name": "internal/lisp/reader.go:read",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 356,
+    "name": "internal/lisp/eval.go:Get",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 357,
+    "name": "internal/skill/sideref.go:MarshalCompactV2",
+    "cc": 3,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 358,
+    "name": "internal/skill/sideref.go:UnmarshalCompactV2",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 359,
+    "name": "internal/skill/sideref.go:DeviceSecretFromBytes",
+    "cc": 3,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 360,
+    "name": "internal/skill/skill.go:Render",
+    "cc": 3,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 361,
+    "name": "internal/skill/asi_import.go:FindSkillsByTrit",
+    "cc": 3,
+    "loc": 9,
+    "depth": 3
+  },
+  {
+    "idx": 362,
+    "name": "internal/skill/asi_import.go:FindSkill",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 363,
+    "name": "internal/skill/asi_import.go:VerifySideref",
+    "cc": 3,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 364,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestTriadicConsensusImbalancedReject",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 365,
+    "name": "internal/skill/vibesnipe_runtime_test.go:BenchmarkSelectionFunctionPerformance",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 366,
+    "name": "internal/skill/asi_import_test.go:TestAddSkillInvalidTrit",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 367,
+    "name": "internal/skill/asi_import_test.go:TestFindSkillsByTrit",
+    "cc": 3,
+    "loc": 17,
+    "depth": 2
+  },
+  {
+    "idx": 368,
+    "name": "internal/skill/asi_import_test.go:TestSelectBalancedSubset_TooLarge",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 369,
+    "name": "internal/skill/asi_import_test.go:TestGetTritRole",
+    "cc": 3,
+    "loc": 18,
+    "depth": 3
+  },
+  {
+    "idx": 370,
+    "name": "internal/skill/asi_import_test.go:BenchmarkSelectBalancedSubset",
+    "cc": 3,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 371,
+    "name": "internal/skill/asi_import_test.go:BenchmarkBindSiderefs",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 372,
+    "name": "internal/skill/vibesnipe_runtime.go:computeAdmissible",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 373,
+    "name": "internal/skill/embedded_test.go:TestEmbeddedSkillValidate",
+    "cc": 3,
+    "loc": 89,
+    "depth": 4
+  },
+  {
+    "idx": 374,
+    "name": "internal/skill/embedded_test.go:TestIsValidSkillNameEmbedded",
+    "cc": 3,
+    "loc": 28,
+    "depth": 4
+  },
+  {
+    "idx": 375,
+    "name": "internal/skill/embedded_test.go:TestCountLinesEmbedded",
+    "cc": 3,
+    "loc": 22,
+    "depth": 4
+  },
+  {
+    "idx": 376,
+    "name": "internal/skill/embedded_test.go:TestEstimateTokensEmbedded",
+    "cc": 3,
+    "loc": 22,
+    "depth": 4
+  },
+  {
+    "idx": 377,
+    "name": "internal/skill/embedded_test.go:TestComputeTritEmbedded",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 378,
+    "name": "internal/skill/embedded_test.go:TestMarshalUnmarshalCompact",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 379,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_ValidToken",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 380,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_ExpiredToken",
+    "cc": 3,
+    "loc": 17,
+    "depth": 2
+  },
+  {
+    "idx": 381,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_AllowedSkills",
+    "cc": 3,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 382,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_MinTokenVersion",
+    "cc": 3,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 383,
+    "name": "internal/skill/skill_test.go:TestShare3HashDeterministic",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 384,
+    "name": "internal/skill/skill_test.go:TestParseSkillFile",
+    "cc": 3,
+    "loc": 26,
+    "depth": 2
+  },
+  {
+    "idx": 385,
+    "name": "internal/skill/skill_test.go:TestParseSkillFileNotFound",
+    "cc": 3,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 386,
+    "name": "internal/skill/skill_test.go:TestMinPerceptualSpread",
+    "cc": 3,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 387,
+    "name": "internal/skill/skill_test.go:TestValidateNameFormatValid",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 388,
+    "name": "internal/skill/skill_test.go:TestCountLines",
+    "cc": 3,
+    "loc": 20,
+    "depth": 3
+  },
+  {
+    "idx": 389,
+    "name": "internal/skill/skill_test.go:TestEstimateTokens",
+    "cc": 3,
+    "loc": 19,
+    "depth": 3
+  },
+  {
+    "idx": 390,
+    "name": "internal/skill/embedded.go:Lookup",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 391,
+    "name": "internal/skill/embedded.go:ByTrit",
+    "cc": 3,
+    "loc": 9,
+    "depth": 3
+  },
+  {
+    "idx": 392,
+    "name": "internal/skill/embedded.go:UnmarshalCompact",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 393,
+    "name": "internal/skill/sideref_test.go:TestVerifySideref_NilToken",
+    "cc": 3,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 394,
+    "name": "internal/skill/sideref_test.go:TestWithExpiration_Expired",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 395,
+    "name": "internal/skill/sideref_test.go:TestWithVersion",
+    "cc": 3,
+    "loc": 17,
+    "depth": 2
+  },
+  {
+    "idx": 396,
+    "name": "internal/skill/sideref_test.go:TestUnmarshalSideref_TooSmall",
+    "cc": 3,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 397,
+    "name": "internal/skill/sideref_test.go:TestUnmarshalSideref_InvalidNameLength",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 398,
+    "name": "internal/skill/sideref_test.go:TestDeviceSecretFromBytes",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 399,
+    "name": "internal/skill/sideref_test.go:TestDeviceSecretFromBytes_Short",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 400,
+    "name": "internal/skill/sideref_test.go:TestString",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 401,
+    "name": "internal/exploit_arena/marketplace.go:validateExploitSignature",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 402,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsGuixRequiresInput",
+    "cc": 3,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 403,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsPinholeFlag",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 404,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsPinholeDefaultFalse",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 405,
+    "name": "internal/color/color_test.go:TestColorProfileLevels",
+    "cc": 3,
+    "loc": 20,
+    "depth": 3
+  },
+  {
+    "idx": 406,
+    "name": "internal/color/color_test.go:TestColorProfileDetection",
+    "cc": 3,
+    "loc": 17,
+    "depth": 2
+  },
+  {
+    "idx": 407,
+    "name": "internal/color/syntax_test.go:TestDefaultTheme",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 408,
+    "name": "internal/color/syntax_test.go:TestHighlightStrings",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 409,
+    "name": "internal/color/syntax_test.go:TestHighlightBooleans",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 410,
+    "name": "internal/color/syntax_test.go:TestHighlightComment",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 411,
+    "name": "internal/color/syntax_test.go:TestHighlightComplexExpression",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 412,
+    "name": "internal/color/syntax_test.go:TestHighlightAGMExpressions",
+    "cc": 3,
+    "loc": 17,
+    "depth": 3
+  },
+  {
+    "idx": 413,
+    "name": "internal/color/rainbow_test.go:TestPaletteToLipglossForcedRenderer",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 414,
+    "name": "internal/color/rainbow_test.go:TestRainbowParensBasic",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 415,
+    "name": "internal/color/rainbow_test.go:TestGayMCPSeedColor",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 416,
+    "name": "internal/repl/polyglot.go:FindBackend",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 417,
+    "name": "internal/repl/polyglot.go:Launch",
+    "cc": 3,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 418,
+    "name": "internal/repl/repl.go:evalString",
+    "cc": 3,
+    "loc": 18,
+    "depth": 3
+  },
+  {
+    "idx": 419,
+    "name": "internal/repl/repl.go:printColorHelp",
+    "cc": 3,
+    "loc": 81,
+    "depth": 4
+  },
+  {
+    "idx": 420,
+    "name": "internal/repl/agm.go:contract",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 421,
+    "name": "internal/scan/narrative_test.go:TestNarrativeEmpty",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 422,
+    "name": "internal/scan/narrative_test.go:TestNarrativeGF9Frobenius",
+    "cc": 3,
+    "loc": 30,
+    "depth": 2
+  },
+  {
+    "idx": 423,
+    "name": "internal/scan/narrative.go:IsBalanced",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 424,
+    "name": "internal/scan/narrative.go:Save",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 425,
+    "name": "internal/scan/scan.go:addFlag",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 426,
+    "name": "internal/scan/scan.go:clamp",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 427,
+    "name": "internal/scan/worksteal.go:Steal",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 428,
+    "name": "internal/scan/worksteal.go:AddGlobalTask",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 429,
+    "name": "internal/pinhole/tshark.go:StartCapture",
+    "cc": 3,
+    "loc": 31,
+    "depth": 2
+  },
+  {
+    "idx": 430,
+    "name": "internal/pinhole/proxy.go:Start",
+    "cc": 3,
+    "loc": 21,
+    "depth": 2
+  },
+  {
+    "idx": 431,
+    "name": "internal/pinhole/proxy.go:Stop",
+    "cc": 3,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 432,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureNotRunningError",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 433,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureIsRunning",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 434,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureStopTwiceFails",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 435,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureFieldsAfterConstruction",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 436,
+    "name": "internal/pinhole/pinhole_test.go:TestParseARPOutput",
+    "cc": 3,
+    "loc": 49,
+    "depth": 4
+  },
+  {
+    "idx": 437,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesWithExtraPorts",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 438,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesSessionComment",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 439,
+    "name": "internal/pinhole/pinhole_test.go:TestActivateRequiresGuestIP",
+    "cc": 3,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 440,
+    "name": "internal/pinhole/pinhole_test.go:TestParseARPOutputEdgeCases",
+    "cc": 3,
+    "loc": 36,
+    "depth": 4
+  },
+  {
+    "idx": 441,
+    "name": "internal/pinhole/pinhole_test.go:TestActivateFailsWithBadHelper",
+    "cc": 3,
+    "loc": 19,
+    "depth": 2
+  },
+  {
+    "idx": 442,
+    "name": "internal/pinhole/proxy_test.go:TestProxyDefaultConfig",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 443,
+    "name": "internal/pinhole/proxy_test.go:TestParsePort",
+    "cc": 3,
+    "loc": 18,
+    "depth": 3
+  },
+  {
+    "idx": 444,
+    "name": "internal/pinhole/integration_test.go:TestDetectGuestIPIntegration",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 445,
+    "name": "internal/pinhole/integration_test.go:deactivateWithHelper",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 446,
+    "name": "internal/uv/uv_test.go:TestLipglossColorFromGayHex",
+    "cc": 3,
+    "loc": 24,
+    "depth": 4
+  },
+  {
+    "idx": 447,
+    "name": "internal/vm/macos_lifecycle.go:WaitForSSH",
+    "cc": 3,
+    "loc": 12,
+    "depth": 3
+  },
+  {
+    "idx": 448,
+    "name": "internal/vm/macos_lifecycle.go:RunSSH",
+    "cc": 3,
+    "loc": 24,
+    "depth": 3
+  },
+  {
+    "idx": 449,
+    "name": "internal/vm/macos_lifecycle.go:Summary",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 450,
+    "name": "internal/vm/rosetta_other.go:addRosettaDirectoryShare",
+    "cc": 3,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 451,
+    "name": "internal/vm/vm.go:createEFIBootLoader",
+    "cc": 3,
+    "loc": 12,
+    "depth": 3
+  },
+  {
+    "idx": 452,
+    "name": "internal/vm/vm.go:createLinuxBootLoader",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 453,
+    "name": "internal/vm/vm.go:RegisterNamespace",
+    "cc": 3,
+    "loc": 46,
+    "depth": 1
+  },
+  {
+    "idx": 454,
+    "name": "internal/vm/vm.go:newEFIBootLoaderLisp",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 455,
+    "name": "internal/vm/vm.go:newVirtioBlockDeviceLisp",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 456,
+    "name": "internal/vm/vm.go:newUSBMassStorageLisp",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 457,
+    "name": "internal/vm/vm.go:newVirtioNetworkLisp",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 458,
+    "name": "internal/vm/vm.go:newVMConfigLisp",
+    "cc": 3,
+    "loc": 20,
+    "depth": 2
+  },
+  {
+    "idx": 459,
+    "name": "internal/vm/vm.go:addStorageDevicesLisp",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 460,
+    "name": "internal/vm/vm.go:addNetworkDevicesLisp",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 461,
+    "name": "internal/vm/vm.go:newVMLisp",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 462,
+    "name": "internal/vm/vm.go:startVMLisp",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 463,
+    "name": "internal/vm/vm.go:stopVMLisp",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 464,
+    "name": "internal/vm/vm.go:pauseVMLisp",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 465,
+    "name": "internal/vm/vm.go:resumeVMLisp",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 466,
+    "name": "internal/vm/vm.go:waitForShutdownLisp",
+    "cc": 3,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 467,
+    "name": "internal/vm/vm.go:addGraphicsDevicesLisp",
+    "cc": 3,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 468,
+    "name": "internal/vm/vm_plan_test.go:TestPinholeModeUsesNAT",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 469,
+    "name": "internal/vm/vm_plan_test.go:TestPinholeModeHardenedOverrides",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 470,
+    "name": "internal/vm/vm_plan_test.go:TestConfigPinholePortsStored",
+    "cc": 3,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 471,
+    "name": "internal/gf3/gf3_test.go:TestAdditiveIdentity",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 472,
+    "name": "internal/gf3/gf3_test.go:TestAdditiveInverse",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 473,
+    "name": "internal/gf3/gf3_test.go:TestMultiplicativeIdentity",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 474,
+    "name": "internal/gf3/gf3_test.go:TestZeroAnnihilation",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 475,
+    "name": "internal/gf3/gf3_test.go:TestBalancedRoundtrip",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 476,
+    "name": "internal/gf3/gf3_test.go:TestBalancedRoundtripInverse",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 477,
+    "name": "internal/gf3/gf3_test.go:TestRoleRoundtrip",
+    "cc": 3,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 478,
+    "name": "internal/gf3/gf3_test.go:TestNegationTable",
+    "cc": 3,
+    "loc": 10,
+    "depth": 3
+  },
+  {
+    "idx": 479,
+    "name": "internal/gf3/gf3.go:Inv",
+    "cc": 3,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 480,
+    "name": "internal/vtterm/vtterm_test.go:TestScreenDamage",
+    "cc": 3,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 481,
+    "name": "internal/vtterm/vtterm_test.go:TestDamageInterface",
+    "cc": 3,
+    "loc": 14,
+    "depth": 3
+  },
+  {
+    "idx": 482,
+    "name": "internal/vtterm/vtterm_test.go:TestEntropyCollectorEmpty",
+    "cc": 3,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 483,
+    "name": "internal/vtterm/vtterm_test.go:TestEntropyFromKeystrokes",
+    "cc": 3,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 484,
+    "name": "internal/vtterm/vtterm_test.go:TestEntropyFromCursor",
+    "cc": 3,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 485,
+    "name": "internal/vtterm/vtterm_test.go:TestColorStreamDeterministic",
+    "cc": 3,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 486,
+    "name": "internal/vtterm/vtterm_test.go:TestHexColor",
+    "cc": 3,
+    "loc": 18,
+    "depth": 3
+  },
+  {
+    "idx": 487,
+    "name": "std/gt/gt.go:Spawn",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 488,
+    "name": "std/gt/gt.go:ListIssues",
+    "cc": 3,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 489,
+    "name": "skills/sqlite-scanner/scripts/main.go:scanCmd",
+    "cc": 3,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 490,
+    "name": "skills/sqlite-scanner/scripts/main.go:scanJSONCmd",
+    "cc": 3,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 491,
+    "name": "skills/joker-sims-parser/scripts/main.go:printUsage",
+    "cc": 3,
+    "loc": 15,
+    "depth": 1
+  },
+  {
+    "idx": 492,
+    "name": "hof_test.go:TestHofJoke",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 493,
+    "name": "hof_test.go:TestHofCue",
+    "cc": 3,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 494,
+    "name": "cmd/haiku-gui/main.go:main",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 495,
+    "name": "cmd/alpine-gui/main.go:main",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 496,
+    "name": "cmd/vibesnipe-arena/main.go:DisplayArenaStats",
+    "cc": 2,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 497,
+    "name": "cmd/boxxy/main.go:findHelper",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 498,
+    "name": "cmd/joker/interactive.go:printInteractiveHelp",
+    "cc": 2,
+    "loc": 16,
+    "depth": 1
+  },
+  {
+    "idx": 499,
+    "name": "cmd/joker/main.go:extractCmd",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 500,
+    "name": "internal/lisp/reader_fuzz_test.go:FuzzReaderReadAll",
+    "cc": 2,
+    "loc": 17,
+    "depth": 2
+  },
+  {
+    "idx": 501,
+    "name": "internal/lisp/reader.go:String",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 502,
+    "name": "internal/lisp/reader.go:String",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 503,
+    "name": "internal/lisp/reader.go:String",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 504,
+    "name": "internal/lisp/reader.go:String",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 505,
+    "name": "internal/lisp/reader.go:peek",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 506,
+    "name": "internal/lisp/reader.go:readVector",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 507,
+    "name": "internal/skill/sideref.go:String",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 508,
+    "name": "internal/skill/skill.go:ParseSkillFile",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 509,
+    "name": "internal/skill/skill.go:renderHeader",
+    "cc": 2,
+    "loc": 37,
+    "depth": 2
+  },
+  {
+    "idx": 510,
+    "name": "internal/skill/skill.go:isTriadBalanced",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 511,
+    "name": "internal/skill/skill.go:findBalancingTrit",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 512,
+    "name": "internal/skill/asi_import.go:BindSiderefs",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 513,
+    "name": "internal/skill/vibesnipe_runtime_test.go:TestInvariantViolation",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 514,
+    "name": "internal/skill/vibesnipe_runtime_test.go:BenchmarkRevisePerformance",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 515,
+    "name": "internal/skill/vibesnipe_runtime_test.go:createBalancedTriad",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 516,
+    "name": "internal/skill/asi_import_test.go:TestExportForEmbedded_NoSubset",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 517,
+    "name": "internal/skill/vibesnipe_runtime.go:IsBalanced",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 518,
+    "name": "internal/skill/vibesnipe_runtime.go:TriadStatus",
+    "cc": 2,
+    "loc": 22,
+    "depth": 3
+  },
+  {
+    "idx": 519,
+    "name": "internal/skill/vibesnipe_runtime.go:ExportTriadAsJSON",
+    "cc": 2,
+    "loc": 21,
+    "depth": 3
+  },
+  {
+    "idx": 520,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_MissingToken",
+    "cc": 2,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 521,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_InvalidHex",
+    "cc": 2,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 522,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_WrongSecret",
+    "cc": 2,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 523,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_FutureExpiry_Allowed",
+    "cc": 2,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 524,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_SkillHeaderMismatch",
+    "cc": 2,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 525,
+    "name": "internal/skill/sideref_middleware_test.go:TestMiddleware_HealthBypass",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 526,
+    "name": "internal/skill/sideref_middleware_test.go:BenchmarkMiddleware_Verify",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 527,
+    "name": "internal/skill/skill_test.go:TestTriadSummaryBalanced",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 528,
+    "name": "internal/skill/skill_test.go:TestTriadSummaryUnbalanced",
+    "cc": 2,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 529,
+    "name": "internal/skill/skill_test.go:TestValidateValidSkill",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 530,
+    "name": "internal/skill/embedded.go:NewRegistry",
+    "cc": 2,
+    "loc": 5,
+    "depth": 2
+  },
+  {
+    "idx": 531,
+    "name": "internal/skill/embedded.go:IsBalanced",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 532,
+    "name": "internal/skill/embedded.go:VerifySiderefBinding",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 533,
+    "name": "internal/skill/sideref_test.go:TestSiderefTokenDeterministic",
+    "cc": 2,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 534,
+    "name": "internal/skill/sideref_test.go:TestSiderefTokenUnforgeable",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 535,
+    "name": "internal/skill/sideref_test.go:TestVerifySideref_Valid",
+    "cc": 2,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 536,
+    "name": "internal/skill/sideref_test.go:TestMarshalSideref_BufferSize",
+    "cc": 2,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 537,
+    "name": "internal/skill/sideref_test.go:BenchmarkNewSiderefToken",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 538,
+    "name": "internal/skill/sideref_test.go:BenchmarkVerifySideref",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 539,
+    "name": "internal/skill/sideref_test.go:BenchmarkMarshalSideref",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 540,
+    "name": "internal/exploit_arena/marketplace.go:RegisterRuntime",
+    "cc": 2,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 541,
+    "name": "internal/exploit_arena/marketplace.go:SubmitExploit",
+    "cc": 2,
+    "loc": 18,
+    "depth": 2
+  },
+  {
+    "idx": 542,
+    "name": "internal/exploit_arena/marketplace.go:VerifyGF3Balance",
+    "cc": 2,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 543,
+    "name": "internal/exploit_arena/marketplace.go:StartCompetition",
+    "cc": 2,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 544,
+    "name": "internal/streams/streams.go:Stop",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 545,
+    "name": "internal/streams/streams.go:ListStreams",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 546,
+    "name": "internal/streams/streams.go:fseventsStopLisp",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 547,
+    "name": "internal/streams/streams.go:oslogStopLisp",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 548,
+    "name": "internal/streams/streams.go:darwinPostLisp",
+    "cc": 2,
+    "loc": 11,
+    "depth": 2
+  },
+  {
+    "idx": 549,
+    "name": "internal/streams/streams.go:darwinStopLisp",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 550,
+    "name": "internal/streams/streams.go:listStreamsLisp",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 551,
+    "name": "internal/streams/streams.go:stopAllStreamsLisp",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 552,
+    "name": "internal/runner/runner.go:Run",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 553,
+    "name": "internal/runner/runner_fuzz_test.go:FuzzParseRunArgs",
+    "cc": 2,
+    "loc": 17,
+    "depth": 2
+  },
+  {
+    "idx": 554,
+    "name": "internal/runner/runner_test.go:TestParseRunArgsRequiresMode",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 555,
+    "name": "internal/color/syntax_test.go:TestHighlightKeywords",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 556,
+    "name": "internal/color/syntax_test.go:TestHighlightNumbers",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 557,
+    "name": "internal/color/syntax_test.go:TestHighlightNamespace",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 558,
+    "name": "internal/color/syntax_test.go:TestHighlightEmptyInput",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 559,
+    "name": "internal/color/syntax_test.go:TestHighlightPreservesWhitespace",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 560,
+    "name": "internal/color/rainbow.go:RainbowPalette",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 561,
+    "name": "internal/color/rainbow.go:ParenStyle",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 562,
+    "name": "internal/color/rainbow_test.go:TestGoldenAngle",
+    "cc": 2,
+    "loc": 5,
+    "depth": 2
+  },
+  {
+    "idx": 563,
+    "name": "internal/color/rainbow_test.go:TestPlasticAngle",
+    "cc": 2,
+    "loc": 5,
+    "depth": 2
+  },
+  {
+    "idx": 564,
+    "name": "internal/color/rainbow_test.go:TestPaletteToLipgloss",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 565,
+    "name": "internal/color/rainbow_test.go:TestRainbowParensNested",
+    "cc": 2,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 566,
+    "name": "internal/color/rainbow_test.go:TestRainbowParensStringLiterals",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 567,
+    "name": "internal/color/rainbow_test.go:TestRainbowParensBrackets",
+    "cc": 2,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 568,
+    "name": "internal/belief/acset.go:NewACSet",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 569,
+    "name": "internal/belief/acset.go:GF3Sum",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 570,
+    "name": "internal/repl/polyglot.go:IsAvailable",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 571,
+    "name": "internal/repl/polyglot.go:Exec",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 572,
+    "name": "internal/repl/agm.go:listBeliefs",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 573,
+    "name": "internal/repl/agm.go:negate",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 574,
+    "name": "internal/scan/narrative_test.go:TestNarrativeBalanced",
+    "cc": 2,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 575,
+    "name": "internal/scan/narrative_test.go:TestNarrativeInterval",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 576,
+    "name": "internal/scan/scan.go:getOrCreate",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 577,
+    "name": "internal/scan/scan.go:subnetBase",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 578,
+    "name": "internal/scan/scan.go:hexMaskToCIDR",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 579,
+    "name": "internal/scan/worksteal.go:Push",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 580,
+    "name": "internal/scan/worksteal.go:grow",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 581,
+    "name": "internal/scan/worksteal.go:Close",
+    "cc": 2,
+    "loc": 5,
+    "depth": 2
+  },
+  {
+    "idx": 582,
+    "name": "internal/scan/worksteal.go:executeARP",
+    "cc": 2,
+    "loc": 22,
+    "depth": 2
+  },
+  {
+    "idx": 583,
+    "name": "internal/scan/worksteal.go:PrintStats",
+    "cc": 2,
+    "loc": 14,
+    "depth": 2
+  },
+  {
+    "idx": 584,
+    "name": "internal/scan/worksteal.go:WorkerStatsSlice",
+    "cc": 2,
+    "loc": 14,
+    "depth": 3
+  },
+  {
+    "idx": 585,
+    "name": "internal/pinhole/tshark.go:captureSummary",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 586,
+    "name": "internal/pinhole/proxy.go:NewProxy",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 587,
+    "name": "internal/pinhole/proxy.go:ListenAddr",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 588,
+    "name": "internal/pinhole/proxy.go:handleRequest",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 589,
+    "name": "internal/pinhole/proxy.go:parsePort",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 590,
+    "name": "internal/pinhole/tshark_test.go:TestCaptureStatsJSONOmitsEmpty",
+    "cc": 2,
+    "loc": 12,
+    "depth": 2
+  },
+  {
+    "idx": 591,
+    "name": "internal/pinhole/tshark_test.go:TestCapturePcapPath",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 592,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesWithNATS",
+    "cc": 2,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 593,
+    "name": "internal/pinhole/pinhole_test.go:TestConfPath",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 594,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesNATSProperty",
+    "cc": 2,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 595,
+    "name": "internal/pinhole/pinhole_test.go:Generate",
+    "cc": 2,
+    "loc": 16,
+    "depth": 2
+  },
+  {
+    "idx": 596,
+    "name": "internal/pinhole/pinhole_test.go:TestGenerateRulesNeverPanics",
+    "cc": 2,
+    "loc": 16,
+    "depth": 3
+  },
+  {
+    "idx": 597,
+    "name": "internal/pinhole/proxy_test.go:startTestHTTPServer",
+    "cc": 2,
+    "loc": 15,
+    "depth": 2
+  },
+  {
+    "idx": 598,
+    "name": "internal/pinhole/proxy_test.go:portFromAddr",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 599,
+    "name": "internal/pinhole/pinhole.go:IsActive",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 600,
+    "name": "internal/pinhole/pinhole.go:Status",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 601,
+    "name": "internal/pinhole/integration_test.go:canCapture",
+    "cc": 2,
+    "loc": 6,
+    "depth": 1
+  },
+  {
+    "idx": 602,
+    "name": "internal/uv/uv_test.go:TestXColorsGreenIsLipglossColor",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 603,
+    "name": "internal/vm/macos_lifecycle.go:init",
+    "cc": 2,
+    "loc": 4,
+    "depth": 1
+  },
+  {
+    "idx": 604,
+    "name": "internal/vm/macos_lifecycle.go:WritePIDFile",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 605,
+    "name": "internal/vm/vm.go:StartVM",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 606,
+    "name": "internal/vm/vm.go:StopVM",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 607,
+    "name": "internal/vm/vm.go:PauseVM",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 608,
+    "name": "internal/vm/vm.go:ResumeVM",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 609,
+    "name": "internal/vm/vm.go:newMacOSBootLoaderLisp",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 610,
+    "name": "internal/vm/vm.go:newGenericPlatformLisp",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 611,
+    "name": "internal/vm/vm.go:newNATNetworkLisp",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 612,
+    "name": "internal/vm/vm.go:vmStateLisp",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 613,
+    "name": "internal/vm/vm_plan_test.go:TestValidateConfigAcceptsValid",
+    "cc": 2,
+    "loc": 19,
+    "depth": 3
+  },
+  {
+    "idx": 614,
+    "name": "internal/vm/vm_plan_test.go:TestValidateConfigRejectsInvalid",
+    "cc": 2,
+    "loc": 15,
+    "depth": 3
+  },
+  {
+    "idx": 615,
+    "name": "internal/sims_parser/dbpf.go:ListResources",
+    "cc": 2,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 616,
+    "name": "internal/sims_parser/dbpf.go:CompressedSizeValue",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 617,
+    "name": "internal/sims_parser/dbpf.go:decompressQFS",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 618,
+    "name": "internal/gf3/gf3_test.go:TestInvZeroPanics",
+    "cc": 2,
+    "loc": 8,
+    "depth": 3
+  },
+  {
+    "idx": 619,
+    "name": "internal/gf3/gf3.go:SeqSum",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 620,
+    "name": "internal/vtterm/vtterm.go:Seed",
+    "cc": 2,
+    "loc": 13,
+    "depth": 2
+  },
+  {
+    "idx": 621,
+    "name": "internal/vtterm/vtterm.go:NewColorStream",
+    "cc": 2,
+    "loc": 7,
+    "depth": 1
+  },
+  {
+    "idx": 622,
+    "name": "internal/vtterm/vtterm_test.go:TestEntropyFromDamage",
+    "cc": 2,
+    "loc": 22,
+    "depth": 2
+  },
+  {
+    "idx": 623,
+    "name": "internal/vtterm/vtterm_test.go:TestEntropyMixed",
+    "cc": 2,
+    "loc": 24,
+    "depth": 2
+  },
+  {
+    "idx": 624,
+    "name": "internal/vtterm/vtterm_test.go:TestDifferentInteractionsDifferentSeeds",
+    "cc": 2,
+    "loc": 23,
+    "depth": 2
+  },
+  {
+    "idx": 625,
+    "name": "internal/vtterm/vtterm_test.go:TestColorStreamDifferentSeeds",
+    "cc": 2,
+    "loc": 10,
+    "depth": 2
+  },
+  {
+    "idx": 626,
+    "name": "internal/vtterm/vtterm_test.go:TestColorAtMatchesSequence",
+    "cc": 2,
+    "loc": 9,
+    "depth": 2
+  },
+  {
+    "idx": 627,
+    "name": "std/gt/gt.go:run",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 628,
+    "name": "std/gt/gt.go:runJSON",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 629,
+    "name": "std/gt/gt.go:GetPolecatState",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  },
+  {
+    "idx": 630,
+    "name": "skills/sqlite-scanner/scripts/lib/skill_integration.go:NewSQLiteScannerSkill",
+    "cc": 2,
+    "loc": 15,
+    "depth": 3
+  },
+  {
+    "idx": 631,
+    "name": "skills/sqlite-scanner/scripts/main.go:printUsage",
+    "cc": 2,
+    "loc": 17,
+    "depth": 1
+  },
+  {
+    "idx": 632,
+    "name": "skills/joker-sims-parser/scripts/interactive.go:printInteractiveHelp",
+    "cc": 2,
+    "loc": 16,
+    "depth": 1
+  },
+  {
+    "idx": 633,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:ListResources",
+    "cc": 2,
+    "loc": 13,
+    "depth": 3
+  },
+  {
+    "idx": 634,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:CompressedSizeValue",
+    "cc": 2,
+    "loc": 6,
+    "depth": 2
+  },
+  {
+    "idx": 635,
+    "name": "skills/joker-sims-parser/scripts/lib/dbpf.go:decompressQFS",
+    "cc": 2,
+    "loc": 8,
+    "depth": 2
+  },
+  {
+    "idx": 636,
+    "name": "skills/joker-sims-parser/scripts/main.go:extractCmd",
+    "cc": 2,
+    "loc": 7,
+    "depth": 2
+  }
+]

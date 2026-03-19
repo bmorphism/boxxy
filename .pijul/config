@@ -1,0 +1,5 @@
+default_remote = "nest"
+
+[[remotes]]
+name = "nest"
+ssh = "bmorphism@nest.pijul.com:bmorphism/boxxy"

@@ -9,6 +9,7 @@ import (
 	"strings"
 
 	"github.com/bmorphism/boxxy/internal/lisp"
+	"github.com/bmorphism/boxxy/internal/tropical"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
 
@@ -25,6 +26,7 @@ type RunConfig struct {
 	DisableNetwork bool
 	EnableRosetta  bool
 	RosettaTag     string
+	PinholeMode    bool
 }
 
 func Run(args []string) error {
@@ -38,6 +40,9 @@ func Run(args []string) error {
 func runVM(cfg *RunConfig) error {
 	fmt.Printf("Starting VM: mode=%s cpus=%d memory=%dGB\n",
 		cfg.BootMode, cfg.CPUs, cfg.Memory)
+	if cfg.PinholeMode {
+		fmt.Println("Pinhole mode: pf filtering will be applied externally (DNS+HTTP+HTTPS)")
+	}
 
 	vmInstance, err := vm.CreateVM(vm.Config{
 		BootMode:       cfg.BootMode,
@@ -52,6 +57,7 @@ func runVM(cfg *RunConfig) error {
 		DisableNetwork: cfg.DisableNetwork,
 		EnableRosetta:  cfg.EnableRosetta,
 		RosettaTag:     cfg.RosettaTag,
+		PinholeMode:    cfg.PinholeMode,
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create VM: %w", err)
@@ -88,6 +94,7 @@ func parseRunArgs(args []string) (*RunConfig, error) {
 	fs.IntVar(&cfg.CPUs, "cpus", 2, "CPU count")
 	fs.StringVar(&cfg.NVRAM, "nvram", "boxxy-nvram", "EFI NVRAM path")
 	fs.BoolVar(&cfg.DisableNetwork, "hardened", false, "Disable networking for stronger sandboxing")
+	fs.BoolVar(&cfg.PinholeMode, "pinhole", false, "Enable pinhole networking (DNS+HTTPS only, pf-filtered)")
 	fs.BoolVar(&cfg.EnableRosetta, "rosetta", false, "Enable Rosetta for Linux x86_64 binaries (Apple Silicon)")
 	fs.StringVar(&cfg.RosettaTag, "rosetta-tag", "rosetta", "VirtioFS tag for Rosetta directory share")
 	guixArch := fs.String("guix-arch", "aarch64", "Guix architecture: aarch64 or x86_64 (x86_64 requires --rosetta)")
@@ -142,6 +149,7 @@ func RunScript(path string) error {
 	// Initialize environment
 	env := lisp.CreateStandardEnv()
 	vm.RegisterNamespace(env)
+	tropical.RegisterNamespace(env)
 
 	reader := lisp.NewReader(strings.NewReader(string(content)))
 	exprs, err := reader.ReadAll()

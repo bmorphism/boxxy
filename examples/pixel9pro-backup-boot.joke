@@ -1,0 +1,227 @@
+#!/usr/bin/env boxxy
+;; pixel9pro-backup-boot.joke — Boot Pixel 9 Pro backup in boxxy
+;;
+;; Boots an Android emulator matching Pixel 9 Pro specs, signs into
+;; Google account to trigger cloud backup restore, then exposes
+;; programmatic push notification access via ADB notification listener.
+;;
+;; Prerequisites:
+;;   1. Android SDK at ~/.boxxy/android-sdk (already present)
+;;   2. gcloud auth: gcloud auth login barton@plurigrid.com
+;;   3. Run: boxxy examples/pixel9pro-backup-boot.joke
+;;
+;; Push notification flow:
+;;   Google account sign-in → backup restore → apps reinstall →
+;;   FCM registration → notifications arrive → ADB dumpsys reads them
+
+(ns pixel9pro-backup
+  (:require [vz :as vz]))
+
+;; Pixel 9 Pro specs: 6.3" LTPO OLED, 1280x2856, 16GB RAM, Tensor G4
+(def config
+  {:name          "pixel9pro-backup"
+   :api-level     "35"
+   :image-type    "google_apis_playstore"
+   :abi           "arm64-v8a"
+   :device-id     "pixel_7_pro"  ;; closest available profile
+   :memory-mb     8192           ;; 8GB for emulator (real device: 16GB)
+   :disk-gb       32             ;; space for backup restore
+   :gpu           "host"
+   :headless      false
+   ;; wide-open network for backup restore + FCM
+   :allowed-ports [53 80 443 5228 5229 5230 5236 19302]
+   :allowed-domains
+   ["*.google.com"
+    "*.googleapis.com"
+    "*.gstatic.com"
+    "*.android.com"
+    "*.googleusercontent.com"
+    "play.google.com"
+    "*.firebase.com"
+    "*.firebaseio.com"
+    "*.fcm.googleapis.com"
+    "mtalk.google.com"         ;; FCM push channel
+    "alt1-mtalk.google.com"
+    "alt2-mtalk.google.com"
+    "alt3-mtalk.google.com"
+    "*.1e100.net"]})
+
+;; ═══════════════════════════════════════════════════════════════
+;; SETUP
+;; ═══════════════════════════════════════════════════════════════
+
+(defn setup []
+  "Install SDK components and create Pixel 9 Pro AVD"
+  (println "╔════════════════════════════════════════════════╗")
+  (println "║  boxxy: Pixel 9 Pro Backup Boot               ║")
+  (println "║  Your Own Backup Plan                          ║")
+  (println "╚════════════════════════════════════════════════╝")
+  (println)
+  (android/setup config)
+  ;; Patch AVD config for Pixel 9 Pro display
+  (android/shell "echo" "hw.lcd.width=1280" ">>" 
+    (str (System/getProperty "user.home")
+         "/.android/avd/pixel9pro-backup.avd/config.ini"))
+  (android/shell "echo" "hw.lcd.height=2856" ">>"
+    (str (System/getProperty "user.home")
+         "/.android/avd/pixel9pro-backup.avd/config.ini")))
+
+(defn boot []
+  "Boot the Pixel 9 Pro emulator"
+  (println "Booting Pixel 9 Pro emulator...")
+  (println "  Memory: " (:memory-mb config) "MB")
+  (println "  Disk:   " (:disk-gb config) "GB")
+  (println "  FCM ports: 5228-5230 (mtalk.google.com)")
+  (println)
+  (android/boot config))
+
+;; ═══════════════════════════════════════════════════════════════
+;; GOOGLE ACCOUNT + BACKUP RESTORE
+;; ═══════════════════════════════════════════════════════════════
+
+(defn add-account []
+  "Open Google account setup wizard for backup restore"
+  (println "[BACKUP] Opening Google account setup...")
+  (println "[BACKUP] Sign in with barton@plurigrid.com to trigger backup restore")
+  (println "[BACKUP] The device will restore:")
+  (println "         - App list + data")
+  (println "         - Device settings")
+  (println "         - SMS/MMS messages")
+  (println "         - Call history")
+  (println "         - WiFi passwords")
+  (println)
+  (android/shell "am start -a android.settings.ADD_ACCOUNT_SETTINGS"))
+
+(defn check-backup-status []
+  "Check if backup restore is in progress or complete"
+  (let [status (android/shell "dumpsys backup | grep -E '(Restore|restore|pending|running)'")]
+    (println "[BACKUP] Status:" status)
+    status))
+
+(defn list-restored-apps []
+  "List all installed packages (restored from backup)"
+  (let [pkgs (android/shell "pm list packages -3")]
+    (println "[BACKUP] Installed third-party apps:")
+    (println pkgs)
+    pkgs))
+
+;; ═══════════════════════════════════════════════════════════════
+;; PUSH NOTIFICATION INTERFACE
+;; ═══════════════════════════════════════════════════════════════
+
+(defn install-notification-listener []
+  "Enable notification listener via ADB for programmatic access.
+   Uses Android's NotificationListenerService + dumpsys."
+  ;; Grant notification access to shell
+  (android/shell "cmd notification allow_listener android/com.android.shell")
+  ;; Enable notification listener for ADB
+  (android/shell (str "settings put secure enabled_notification_listeners "
+                       "com.android.shell/com.android.shell.NotificationListener"))
+  (println "[NOTIFY] Notification listener enabled"))
+
+(defn get-notifications []
+  "Get all active notifications as structured data"
+  (let [raw (android/shell "dumpsys notification --noredact")]
+    (println "[NOTIFY] Active notifications:")
+    (println raw)
+    raw))
+
+(defn get-notification-history []
+  "Get notification history (recent notifications)"
+  (let [raw (android/shell "cmd notification get_notification_history")]
+    (println "[NOTIFY] Notification history:")
+    (println raw)
+    raw))
+
+(defn watch-notifications [duration-secs]
+  "Watch for new notifications in real-time via logcat"
+  (println "[NOTIFY] Watching notifications for" duration-secs "seconds...")
+  (android/shell
+    (str "logcat -s NotificationService:* -t " duration-secs)))
+
+(defn dismiss-notification [key]
+  "Dismiss a specific notification by key"
+  (android/shell (str "cmd notification snooze --for 1 " key))
+  (println "[NOTIFY] Dismissed:" key))
+
+(defn tap-notification [key]
+  "Tap/open a notification's content intent"
+  (android/shell (str "cmd notification open " key))
+  (println "[NOTIFY] Opened:" key))
+
+(defn get-fcm-status []
+  "Check Firebase Cloud Messaging connection status"
+  (let [status (android/shell "dumpsys activity services | grep -i 'fcm\\|firebase\\|gcm\\|mtalk'")]
+    (println "[FCM] Connection status:")
+    (println status)
+    status))
+
+(defn poll-notifications [interval-secs callback]
+  "Poll notifications at interval, call callback with new ones"
+  (println "[NOTIFY] Polling every" interval-secs "seconds...")
+  (loop [prev-ids #{}]
+    (let [raw (android/shell "dumpsys notification --noredact | grep -E 'pkg=|key=|text='")
+          lines (clojure.string/split-lines raw)
+          new-lines (remove #(contains? prev-ids %) lines)]
+      (when (seq new-lines)
+        (println "[NOTIFY] New notifications:")
+        (doseq [l new-lines] (println "  " l))
+        (when callback (callback new-lines)))
+      (Thread/sleep (* interval-secs 1000))
+      (recur (into prev-ids lines)))))
+
+;; ═══════════════════════════════════════════════════════════════
+;; DRIVE BACKUP METADATA (requires gcloud token)
+;; ═══════════════════════════════════════════════════════════════
+
+(defn list-drive-backups []
+  "List Android backup files in Google Drive (requires valid gcloud token)"
+  (println "[DRIVE] Querying backup files...")
+  (let [token (slurp "/tmp/gcloud_token.txt")]
+    (if (empty? token)
+      (println "[DRIVE] No token. Run: gcloud auth login barton@plurigrid.com")
+      (let [resp (android/shell
+                   (str "curl -s -H 'Authorization: Bearer " token "' "
+                        "'https://www.googleapis.com/drive/v3/files"
+                        "?q=name+contains+%27backup%27"
+                        "&spaces=appDataFolder,drive"
+                        "&fields=files(id,name,size,modifiedTime,mimeType)'"
+                        ))]
+        (println "[DRIVE] Backup files:" resp)
+        resp))))
+
+;; ═══════════════════════════════════════════════════════════════
+;; MAIN
+;; ═══════════════════════════════════════════════════════════════
+
+(println)
+(println "╔════════════════════════════════════════════════════════════╗")
+(println "║  Pixel 9 Pro Backup Boot — Your Own Backup Plan          ║")
+(println "║                                                          ║")
+(println "║  Boot → Sign In → Restore → Notifications → Programmatic║")
+(println "╚════════════════════════════════════════════════════════════╝")
+(println)
+(println "Step 1: Setup + Boot")
+(println "  (setup)                        ; Create AVD")
+(println "  (boot)                         ; Start emulator")
+(println)
+(println "Step 2: Google Account + Backup Restore")
+(println "  (add-account)                  ; Sign in to restore backup")
+(println "  (check-backup-status)          ; Monitor restore progress")
+(println "  (list-restored-apps)           ; See what was restored")
+(println)
+(println "Step 3: Push Notification Access")
+(println "  (install-notification-listener) ; Enable ADB notification access")
+(println "  (get-notifications)             ; Dump all active notifications")
+(println "  (get-notification-history)      ; Recent notification history")
+(println "  (watch-notifications 60)        ; Watch live for 60 seconds")
+(println "  (poll-notifications 5 nil)      ; Poll every 5s")
+(println "  (tap-notification \"key\")        ; Open a notification")
+(println "  (dismiss-notification \"key\")    ; Dismiss a notification")
+(println "  (get-fcm-status)               ; Check FCM connection")
+(println)
+(println "Step 4: Drive Backup Metadata")
+(println "  (list-drive-backups)           ; Query backup files in Drive")
+(println)
+(println "Prerequisite: gcloud auth login barton@plurigrid.com")
+(println)

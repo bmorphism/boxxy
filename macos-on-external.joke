@@ -1,0 +1,267 @@
+#!/usr/bin/env joker
+;; macos-on-external.joke
+;;
+;; Tile paradigm: stage macos-on-macos assets onto external volume
+;;
+;; tile : GuestState ⊗ Config → GuestState' ⊗ Result
+;;
+;; Sequential composition of tiles:
+;;   T₀ (redirect)  ; wire VM base dir → external volume
+;;   T₁ (ipsw)      ; fetch/link restore image
+;;   T₂ (create)    ; hardware model + machine ID + aux storage
+;;   T₃ (disk)      ; sparse disk image on external SSD
+;;   T₄ (witness)   ; sha256 every asset, print tile summary
+
+(ns macos-on-external
+  (:require [joker.os :as os]
+            [joker.string :as s]
+            [joker.filepath :as fp]))
+
+;; ─── Configuration ──────────────────────────────────────────────────────
+(def external-volume "/Volumes/Build")
+(def boxxy-bin "/Users/bob/i/boxxy/boxxy")
+(def home (os/get-env "HOME"))
+(def vm-name "build")
+(def cpus 8)
+(def mem-gb 8)
+(def disk-gb 128)
+
+;; Derived paths
+(def ext-base (fp/join external-volume "boxxy-macos" vm-name))
+(def int-base (fp/join home ".boxxy" "macos" vm-name))
+(def existing-ipsw (fp/join home ".boxxy" "macos" "zerobrew" "restore.ipsw"))
+
+;; ─── Tile helpers ───────────────────────────────────────────────────────
+
+(defn tile-header [n label]
+  (println (str "\n┌─── T" n " (" label ") ───────────────────────────────────┐")))
+
+(defn tile-footer [n result]
+  (println (str "└─── T" n " → " result " ──────────────────────────────────┘\n")))
+
+(defn file-exists? [path]
+  (try
+    (os/stat path)
+    true
+    (catch Error _ false)))
+
+(defn dir-exists? [path]
+  (try
+    (let [info (os/stat path)]
+      (.isDir info))
+    (catch Error _ false)))
+
+(defn sh [& args]
+  (let [cmd (first args)
+        cmd-args (rest args)
+        result (os/exec cmd {:args (vec cmd-args)})]
+    (if (zero? (:exit result))
+      (:out result)
+      (do
+        (println (str "ERROR: " cmd " " (s/join " " cmd-args)))
+        (println (:err result))
+        nil))))
+
+(defn sh! [& args]
+  (let [result (apply sh args)]
+    (when (nil? result)
+      (println "FATAL: tile failed, aborting")
+      (os/exit 1))
+    result))
+
+(defn file-size-human [path]
+  (try
+    (let [info (os/stat path)
+          bytes (.size info)]
+      (cond
+        (>= bytes 1e9) (str (format "%.1f" (/ bytes 1e9)) " GB")
+        (>= bytes 1e6) (str (format "%.1f" (/ bytes 1e6)) " MB")
+        (>= bytes 1e3) (str (format "%.1f" (/ bytes 1e3)) " KB")
+        :else (str bytes " B")))
+    (catch Error _ "?")))
+
+(defn sha256-file [path]
+  (let [result (sh "shasum" "-a" "256" path)]
+    (when result
+      (first (s/split result " ")))))
+
+;; ─── T₀: Redirect ──────────────────────────────────────────────────────
+;; Wire the VM base dir to the external volume via symlink
+;; This is the boxxy paradigm: redirect without modification
+
+(defn tile-0-redirect []
+  (tile-header 0 "redirect")
+  (println (str "  target: " int-base))
+  (println (str "  rewrite: " ext-base))
+
+  ;; Ensure external target exists
+  (when-not (dir-exists? ext-base)
+    (println (str "  mkdir -p " ext-base))
+    (os/mkdir-all ext-base))
+
+  ;; Ensure parent of internal link exists
+  (let [int-parent (fp/dir int-base)]
+    (when-not (dir-exists? int-parent)
+      (os/mkdir-all int-parent)))
+
+  ;; Create or verify symlink
+  (if (file-exists? int-base)
+    (let [target (try (os/readlink int-base) (catch Error _ nil))]
+      (if (= target ext-base)
+        (println "  symlink already correct")
+        (do
+          (println (str "  WARNING: " int-base " exists but is not symlink to " ext-base))
+          (println "  backing up and relinking...")
+          (sh "mv" int-base (str int-base ".bak." (str (System/currentTimeMillis))))
+          (os/symlink ext-base int-base)
+          (println "  symlink created"))))
+    (do
+      (os/symlink ext-base int-base)
+      (println (str "  symlink: " int-base " → " ext-base))))
+
+  (tile-footer 0 "wired"))
+
+;; ─── T₁: IPSW ──────────────────────────────────────────────────────────
+;; Fetch or link the macOS restore image
+
+(defn tile-1-ipsw []
+  (tile-header 1 "ipsw")
+  (let [ipsw-dest (fp/join ext-base "restore.ipsw")]
+    (cond
+      ;; Already have it on external
+      (file-exists? ipsw-dest)
+      (do
+        (println (str "  exists: " ipsw-dest " (" (file-size-human ipsw-dest) ")"))
+        (tile-footer 1 "cached"))
+
+      ;; Reuse existing zerobrew IPSW via hardlink (same APFS volume won't work cross-volume)
+      ;; Use reflink/clone for APFS speed, fall back to cp
+      (file-exists? existing-ipsw)
+      (do
+        (println (str "  source: " existing-ipsw " (" (file-size-human existing-ipsw) ")"))
+        (println "  cloning to external volume (cp -c for APFS clone)...")
+        (let [start (System/currentTimeMillis)
+              ;; cp -c tries APFS clone, falls back to copy
+              result (sh "cp" existing-ipsw ipsw-dest)
+              elapsed (/ (- (System/currentTimeMillis) start) 1000.0)]
+          (if result
+            (do
+              (println (str "  copied in " (format "%.1f" elapsed) "s → " (file-size-human ipsw-dest)))
+              (tile-footer 1 "cloned"))
+            (do
+              (println "  copy failed, will download fresh")
+              (tile-footer 1 "NEEDS-DOWNLOAD")))))
+
+      ;; No IPSW anywhere - boxxy macos create will download
+      :else
+      (do
+        (println "  no IPSW found, boxxy will download (~15 GB)")
+        (tile-footer 1 "pending-download")))))
+
+;; ─── T₂: Create ────────────────────────────────────────────────────────
+;; Create VM: hardware model, machine ID, aux storage
+
+(defn tile-2-create []
+  (tile-header 2 "create")
+  (let [hw-path (fp/join ext-base "hardware_model.bin")
+        mid-path (fp/join ext-base "machine_id.bin")]
+    (if (and (file-exists? hw-path) (file-exists? mid-path))
+      (do
+        (println "  hardware model + machine ID already exist")
+        (tile-footer 2 "cached"))
+      (do
+        (println (str "  invoking: " boxxy-bin " macos create --name " vm-name
+                      " --cpus " cpus " --memory " mem-gb " --disk " disk-gb))
+        (let [start (System/currentTimeMillis)
+              result (sh boxxy-bin "macos" "create"
+                        "--name" vm-name
+                        "--cpus" (str cpus)
+                        "--memory" (str mem-gb)
+                        "--disk" (str disk-gb))
+              elapsed (/ (- (System/currentTimeMillis) start) 1000.0)]
+          (if result
+            (do
+              (println result)
+              (println (str "  created in " (format "%.1f" elapsed) "s"))
+              (tile-footer 2 "created"))
+            (tile-footer 2 "FAILED")))))))
+
+;; ─── T₃: Disk ──────────────────────────────────────────────────────────
+;; Verify sparse disk image on external SSD
+
+(defn tile-3-disk []
+  (tile-header 3 "disk")
+  (let [disk-path (fp/join ext-base "disk.img")]
+    (if (file-exists? disk-path)
+      (do
+        (println (str "  disk: " disk-path " (" (file-size-human disk-path) ")"))
+        (let [du-out (sh "du" "-sh" disk-path)]
+          (when du-out
+            (println (str "  actual usage: " (s/trim du-out)))))
+        (tile-footer 3 "ready"))
+      (do
+        (println "  no disk image yet (created by T₂)")
+        (tile-footer 3 "pending")))))
+
+;; ─── T₄: Witness ───────────────────────────────────────────────────────
+;; Hash every asset, print tile summary
+
+(defn tile-4-witness []
+  (tile-header 4 "witness")
+  (let [assets ["hardware_model.bin" "machine_id.bin" "auxiliary.bin"
+                "restore.ipsw" "disk.img" ".installed"]]
+    (doseq [a assets]
+      (let [path (fp/join ext-base a)]
+        (if (file-exists? path)
+          (let [hash (sha256-file path)
+                size (file-size-human path)]
+            (println (str "  " (format "%-22s" a) " " (subs (or hash "?") 0 (min 16 (count (or hash "?")))) "... " size)))
+          (println (str "  " (format "%-22s" a) " (absent)")))))
+
+    ;; Print tile composition summary
+    (println)
+    (println "  Tile composition:")
+    (println "    T₀(redirect) ; T₁(ipsw) ; T₂(create) ; T₃(disk) ; T₄(witness)")
+    (println (str "    target volume: " external-volume))
+    (println (str "    VM path: " ext-base))
+    (println (str "    symlink: " int-base " → " ext-base))
+
+    ;; Verify symlink integrity
+    (let [target (try (os/readlink int-base) (catch Error _ nil))]
+      (if (= target ext-base)
+        (println "    wire integrity: OK")
+        (println (str "    wire integrity: BROKEN (points to " target ")"))))
+
+    (tile-footer 4 "witnessed")))
+
+;; ─── T₅: Status ────────────────────────────────────────────────────────
+
+(defn tile-5-status []
+  (tile-header 5 "status")
+  (let [result (sh boxxy-bin "macos" "status" "--name" vm-name)]
+    (when result
+      (doseq [line (s/split-lines result)]
+        (println (str "  " line)))))
+  (tile-footer 5 "complete"))
+
+;; ─── Main: sequential composition of all tiles ─────────────────────────
+
+(defn -main []
+  (println "╔═══════════════════════════════════════════════════════════╗")
+  (println "║  boxxy macos-on-external: tile sequential composition    ║")
+  (println "║  tile : GuestState ⊗ Config → GuestState' ⊗ Result      ║")
+  (println "╚═══════════════════════════════════════════════════════════╝")
+  (println)
+  (println (str "  external: " external-volume))
+  (println (str "  VM name:  " vm-name))
+  (println (str "  config:   " cpus " CPU, " mem-gb " GB RAM, " disk-gb " GB disk"))
+
+  ;; T₀ ; T₁ ; T₂ ; T₃ ; T₄ ; T₅
+  (tile-0-redirect)
+  (tile-1-ipsw)
+  (tile-2-create)
+  (tile-3-disk)
+  (tile-4-witness)
+  (tile-5-status))
+
+(-main)
