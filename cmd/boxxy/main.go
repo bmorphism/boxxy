@@ -30,6 +30,8 @@ func main() {
 		runMacOS(os.Args[2:])
 	case "windows":
 		runWindows(os.Args[2:])
+	case "parallels":
+		runParallels(os.Args[2:])
 	case "android":
 		runAndroid(os.Args[2:])
 	case "haiku":
@@ -490,6 +492,123 @@ Options:
 	}
 }
 
+func runParallels(args []string) {
+	vmName := "Windows 11"
+
+	if len(args) == 0 {
+		fmt.Fprintln(os.Stderr, `usage: boxxy parallels <subcommand> [options]
+
+Subcommands:
+  start              Start the VM
+  stop               Stop the VM
+  status             Show VM state
+  usb-list           List USB devices
+  usb-connect ID     Connect USB device to VM
+  usb-disconnect ID  Disconnect USB device from VM
+  share NAME PATH    Add shared folder
+  exec CMD           Run command in guest (requires Parallels Tools)
+
+Options:
+  --vm NAME          VM name (default: "Windows 11")`)
+		os.Exit(1)
+	}
+
+	subcmd := args[0]
+	args = args[1:]
+
+	for i := 0; i < len(args); i++ {
+		if args[i] == "--vm" && i+1 < len(args) {
+			i++
+			vmName = args[i]
+		}
+	}
+
+	p := vm.NewParallelsVM(vmName)
+
+	switch subcmd {
+	case "start":
+		out, err := p.Start()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n%s\n", err, out)
+			os.Exit(1)
+		}
+		fmt.Println(out)
+
+	case "stop":
+		out, err := p.Stop()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n%s\n", err, out)
+			os.Exit(1)
+		}
+		fmt.Println(out)
+
+	case "status":
+		fmt.Print(p.Summary())
+
+	case "usb-list":
+		out, err := p.ListUSB()
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n%s\n", err, out)
+			os.Exit(1)
+		}
+		fmt.Println(out)
+
+	case "usb-connect":
+		if len(args) < 2 {
+			fmt.Fprintln(os.Stderr, "usage: boxxy parallels usb-connect <device-id>")
+			os.Exit(1)
+		}
+		deviceID := args[1]
+		out, err := p.ConnectUSB(deviceID)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n%s\n", err, out)
+			os.Exit(1)
+		}
+		fmt.Println(out)
+
+	case "usb-disconnect":
+		if len(args) < 2 {
+			fmt.Fprintln(os.Stderr, "usage: boxxy parallels usb-disconnect <device-id>")
+			os.Exit(1)
+		}
+		deviceID := args[1]
+		out, err := p.DisconnectUSB(deviceID)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n%s\n", err, out)
+			os.Exit(1)
+		}
+		fmt.Println(out)
+
+	case "share":
+		if len(args) < 3 {
+			fmt.Fprintln(os.Stderr, "usage: boxxy parallels share <name> <path>")
+			os.Exit(1)
+		}
+		out, err := p.AddSharedFolder(args[1], args[2])
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n%s\n", err, out)
+			os.Exit(1)
+		}
+		fmt.Println(out)
+
+	case "exec":
+		if len(args) < 2 {
+			fmt.Fprintln(os.Stderr, "usage: boxxy parallels exec <command>")
+			os.Exit(1)
+		}
+		out, err := p.Exec(strings.Join(args[1:], " "))
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n%s\n", err, out)
+			os.Exit(1)
+		}
+		fmt.Println(out)
+
+	default:
+		fmt.Fprintf(os.Stderr, "unknown parallels subcommand: %s\n", subcmd)
+		os.Exit(1)
+	}
+}
+
 func runWindows(args []string) {
 	name := "default"
 	cpus := 4
@@ -690,10 +809,12 @@ Usage:
   boxxy macos ssh [cmd]                SSH into running guest
   boxxy macos status                   Show VM state
   boxxy macos stop                     Stop VM
-  boxxy windows up --iso <path>        Create + boot Windows ARM64 VM
-  boxxy windows install --iso <path>   Install Windows from ISO
-  boxxy windows boot                   Boot installed Windows VM
-  boxxy windows status                 Show VM state
+  boxxy parallels start                Start Parallels Windows VM
+  boxxy parallels usb-list             List USB devices for passthrough
+  boxxy parallels usb-connect ID       Pass USB device to Windows VM
+  boxxy parallels exec CMD             Run command in Windows guest
+  boxxy windows up --iso <path>        Create + boot Windows ARM64 VM (VZ)
+  boxxy windows boot                   Boot installed Windows VM (VZ)
   boxxy android setup                  Download SDK + create hardened AVD
   boxxy android boot [--proxy ADDR]    Boot emulator through pinhole proxy
   boxxy android probe                  Launch UberEats attack surface probe
