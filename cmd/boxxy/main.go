@@ -28,6 +28,8 @@ func main() {
 	switch os.Args[1] {
 	case "macos":
 		runMacOS(os.Args[2:])
+	case "windows":
+		runWindows(os.Args[2:])
 	case "android":
 		runAndroid(os.Args[2:])
 	case "haiku":
@@ -488,6 +490,198 @@ Options:
 	}
 }
 
+func runWindows(args []string) {
+	name := "default"
+	cpus := 4
+	memGB := 8
+	diskGB := 64
+	isoPath := ""
+
+	if len(args) == 0 {
+		fmt.Fprintln(os.Stderr, `usage: boxxy windows <subcommand> [options]
+
+Subcommands:
+  create       Create disk image and NVRAM for Windows ARM64 VM
+  install      Boot from ISO to install Windows (interactive)
+  boot         Boot an installed Windows VM
+  up           Create + install (if needed) + boot
+  mark-done    Mark installation as complete
+  status       Show VM state
+  stop         Stop the running VM
+
+Options:
+  --name NAME      VM name (default: default)
+  --cpus N         CPU count (default: 4)
+  --memory N       Memory in GB (default: 8)
+  --disk N         Disk in GB (default: 64)
+  --iso PATH       Windows ARM64 ISO path (required for install)
+
+Getting a Windows ARM64 ISO:
+  1. UUP dump: https://uupdump.net (select arm64, build ISO)
+  2. Microsoft Insider: https://www.microsoft.com/en-us/software-download/windowsinsiderpreviewARM64
+  3. CrystalFetch: brew install crystalfetch && crystalfetch`)
+		os.Exit(1)
+	}
+
+	subcmd := args[0]
+	args = args[1:]
+
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--name":
+			if i+1 < len(args) {
+				i++
+				name = args[i]
+			}
+		case "--cpus":
+			if i+1 < len(args) {
+				i++
+				cpus, _ = strconv.Atoi(args[i])
+			}
+		case "--memory":
+			if i+1 < len(args) {
+				i++
+				memGB, _ = strconv.Atoi(args[i])
+			}
+		case "--disk":
+			if i+1 < len(args) {
+				i++
+				diskGB, _ = strconv.Atoi(args[i])
+			}
+		case "--iso":
+			if i+1 < len(args) {
+				i++
+				abs, err := filepath.Abs(args[i])
+				if err == nil {
+					isoPath = abs
+				} else {
+					isoPath = args[i]
+				}
+			}
+		}
+	}
+
+	lc := vm.NewWindowsLifecycle(name, cpus, memGB, diskGB)
+	if isoPath != "" {
+		lc.ISOPath = isoPath
+	}
+
+	switch subcmd {
+	case "create":
+		fmt.Printf("Creating Windows ARM64 VM %q (%d CPU, %d GB RAM, %d GB disk)...\n", name, cpus, memGB, diskGB)
+		if err := lc.Create(context.Background()); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Println("VM created. Run 'boxxy windows install --iso <path>' to install.")
+
+	case "install":
+		if isoPath == "" {
+			fmt.Fprintln(os.Stderr, "error: --iso required for install")
+			os.Exit(1)
+		}
+		if lc.State() == vm.WindowsStateNone {
+			fmt.Printf("Creating Windows ARM64 VM %q...\n", name)
+			if err := lc.Create(context.Background()); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+		}
+		fmt.Printf("Booting %q from ISO for installation...\n", name)
+		fmt.Println("Complete Windows Setup in the GUI window.")
+		fmt.Println("After install, run: boxxy windows mark-done")
+		if err := lc.Boot(); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		vm.WritePIDFile()
+		defer vm.RemovePIDFile()
+		vm.WaitForShutdown(lc.Instance())
+
+	case "boot":
+		if lc.State() < vm.WindowsStateCreated {
+			fmt.Fprintln(os.Stderr, "error: VM not created. Run 'boxxy windows create' first.")
+			os.Exit(1)
+		}
+		fmt.Printf("Booting Windows VM %q...\n", name)
+		if err := lc.Boot(); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		vm.WritePIDFile()
+		defer vm.RemovePIDFile()
+		fmt.Println("VM running. Press Ctrl+C to stop.")
+		vm.WaitForShutdown(lc.Instance())
+
+	case "up":
+		ctx := context.Background()
+		state := lc.State()
+
+		if state == vm.WindowsStateNone {
+			if isoPath == "" {
+				fmt.Fprintln(os.Stderr, "error: --iso required for first-time setup")
+				os.Exit(1)
+			}
+			fmt.Printf("Creating Windows ARM64 VM %q (%d CPU, %d GB RAM, %d GB disk)...\n", name, cpus, memGB, diskGB)
+			if err := lc.Create(ctx); err != nil {
+				fmt.Fprintf(os.Stderr, "error: %v\n", err)
+				os.Exit(1)
+			}
+		}
+
+		fmt.Printf("Booting %q...\n", name)
+		if err := lc.Boot(); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		vm.WritePIDFile()
+		defer vm.RemovePIDFile()
+		if lc.State() < vm.WindowsStateInstalled {
+			fmt.Println("Complete Windows Setup in the GUI window.")
+			fmt.Println("After install, run: boxxy windows mark-done")
+		}
+		fmt.Println("VM running. Press Ctrl+C to stop.")
+		vm.WaitForShutdown(lc.Instance())
+
+	case "mark-done":
+		if err := lc.MarkInstalled(); err != nil {
+			fmt.Fprintf(os.Stderr, "error: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("VM %q marked as installed.\n", name)
+
+	case "status":
+		fmt.Print(lc.Summary())
+
+	case "stop":
+		home, _ := os.UserHomeDir()
+		data, err := os.ReadFile(filepath.Join(home, ".boxxy", "vm.pid"))
+		if err != nil {
+			fmt.Fprintln(os.Stderr, "no running VM (no PID file)")
+			os.Exit(1)
+		}
+		pid, _ := strconv.Atoi(strings.TrimSpace(string(data)))
+		if pid <= 0 {
+			fmt.Fprintln(os.Stderr, "invalid PID")
+			os.Exit(1)
+		}
+		proc, err := os.FindProcess(pid)
+		if err != nil {
+			fmt.Fprintf(os.Stderr, "process %d not found\n", pid)
+			os.Exit(1)
+		}
+		if err := proc.Signal(syscall.SIGTERM); err != nil {
+			fmt.Fprintf(os.Stderr, "signal failed: %v\n", err)
+			os.Exit(1)
+		}
+		fmt.Printf("Sent stop to VM process %d\n", pid)
+
+	default:
+		fmt.Fprintf(os.Stderr, "unknown windows subcommand: %s\n", subcmd)
+		os.Exit(1)
+	}
+}
+
 func printUsage() {
 	fmt.Print(`boxxy — proof-of-attack VM platform via Apple Virtualization.framework
 
@@ -496,6 +690,10 @@ Usage:
   boxxy macos ssh [cmd]                SSH into running guest
   boxxy macos status                   Show VM state
   boxxy macos stop                     Stop VM
+  boxxy windows up --iso <path>        Create + boot Windows ARM64 VM
+  boxxy windows install --iso <path>   Install Windows from ISO
+  boxxy windows boot                   Boot installed Windows VM
+  boxxy windows status                 Show VM state
   boxxy android setup                  Download SDK + create hardened AVD
   boxxy android boot [--proxy ADDR]    Boot emulator through pinhole proxy
   boxxy android probe                  Launch UberEats attack surface probe
