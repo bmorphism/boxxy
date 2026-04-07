@@ -1,21 +1,23 @@
 ---
 name: cognionics-hd72
-description: Cognionics HD-72 64CH EEG acquisition via FTDI serial dongle. Protocol FULLY REVERSED from CGX Acquisition v66 .NET decompilation. Uses delta-compressed encoding (NOT the legacy 0xFF-sync format). 3 Mbaud via FTDI D2XX. 69 channels (64 EEG + 3 ACC + counter + trigger).
+description: "Cognionics HD-72 64CH EEG acquisition via FTDI serial dongle. Protocol FULLY REVERSED and LIVE VALIDATED. Legacy 0xFF-sync format. 3 Mbaud. 67 channels (64 EEG + 3 ACC). 207 bytes/packet at ~333 Hz. 100% counter continuity confirmed."
 license: MIT
 compatibility: macOS (FTDI VCP driver), Linux. Requires pyserial or direct POSIX termios. FTDI FT232R dongle (VID=0x0403 PID=0x6001).
 metadata:
-  version: 0.1.0
+  version: 0.2.0
   device: "Cognionics HD-72 64CH 1702HDG"
   dongle-chip: "FTDI FT232R"
   baud: 3000000
-  channels: 69
-  channel-breakdown: "64 EEG + 3 ACC + 1 packet_counter + 1 trigger"
+  channels: 67
+  channel-breakdown: "64 EEG + 3 ACC (counter/trigger/battery in packet overhead)"
+  sample-rate: "~333 Hz"
+  packet-size: 207
   adc: "24-bit (ADS1299-family)"
   wireless: "Proprietary 2.4 GHz (Nordic nRF-family)"
-  encoding: "delta-compressed (3 modes: 7-bit/14-bit/24-bit per channel)"
+  encoding: "legacy 0xFF-sync, non-standard 3-byte channel packing"
   gf3-trit: "-1"
   trit-role: "SENSOR (raw acquisition)"
-  protocol-status: "fully-reversed"
+  protocol-status: "fully-reversed-and-validated"
 allowed-tools: "Bash(python3:*) Bash(cc:*) Bash(zig:*) Read"
 ---
 
@@ -26,93 +28,104 @@ allowed-tools: "Bash(python3:*) Bash(cc:*) Bash(zig:*) Read"
 - **Headset**: Cognionics HD-72 64CH, model 1702HDG
 - **Dongle**: FTDI FT232R USB-UART (VID=0x0403, PID=0x6001, serial AI1B2OSR)
 - **Port**: `/dev/cu.usbserial-AI1B2OSR` (macOS)
-- **Baud**: 1,500,000 (1.5 Mbaud), 8N1
-- **Throughput**: 55-77 KB/s streaming, 1-2 KB/s idle (wireless-gated)
+- **Baud**: **3,000,000 (3 Mbaud), 8N1** — NOT 1.5 Mbaud!
+- **Throughput**: ~69 KB/s streaming, 1-2 KB/s idle (wireless-gated)
+- **Sample Rate**: ~333 Hz
 
-## Protocol Status
+## Protocol (FULLY REVERSED & VALIDATED)
 
-### What We Know
+### Packet Structure (207 bytes)
 
-1. **Always streaming** — no start/stop command required, device ignores unknown bytes
-2. **0x12 command** sustains full-rate streaming (55-77 KB/s). Single send, no keepalive needed.
-3. **0x11 command** starts streaming with impedance interleave (52 KB/s). Keepalive floods corrupt data.
-4. **Unframed** — no 0xFF sync byte, no counter, no header/tail at any candidate packet size
-5. **High entropy** (6.83 bits/byte) — consistent with raw 24-bit ADC at mid-rail DC bias
-6. **3-byte channel grouping** confirmed via XOR differential analysis (period-3 structure)
-7. **104-byte autocorrelation** peak (corr=0.16) with harmonics at 208, 311 — ADC signal correlation, not packet framing
-8. **Best packet candidate**: 69 channels × 3 bytes = 207 bytes/sample at ~314 Hz
-9. **NOT encrypted** — XOR analysis proves ADC structure preserved, no cipher key period detected
-10. **FT232R is transparent** — no data transformation by dongle chip
-11. **Radio whitening** (nRF PN9) stripped at receiver before UART — invisible to host
-
-### What We Don't Know
-
-- Exact channel count per sample (64? 69? other?)
-- Byte ordering within 3-byte samples (standard big-endian or Cognionics non-standard shifts?)
-- Whether bit packing matches old protocol: `(msb<<24)|(lsb2<<17)|(lsb1<<10)` or standard `(msb<<16)|(mid<<8)|lsb`
-- Sample boundaries (no sync/framing to anchor alignment)
-- Presence of trigger/impedance/counter bytes interleaved with channel data
-
-### Old Protocol (NOT used by HD-72 1702HDG)
-
-The documented Cognionics protocol (from App-Cognionics and OpenViBE) uses:
 ```
-[0xFF sync] [counter mod 128] [N × 3B channels] [0x10 or 0x11 tail]
+[0xFF sync] [counter mod 128] [67 × 3B channels] [tail] [battery] [trigger_hi] [trigger_lo]
 ```
 
-Bit packing (NON-STANDARD):
+| Field    | Bytes | Description |
+|----------|-------|-------------|
+| Sync     | 1     | `0xFF` |
+| Counter  | 1     | Mod 128, increments by 1 per sample |
+| Channels | 201   | 67 channels × 3 bytes (64 EEG + 3 ACC) |
+| Tail     | 1     | `0x11` = impedance ON, `0x10` = impedance OFF |
+| Battery  | 1     | Raw byte, scale by BatteryGain |
+| Trigger  | 2     | Big-endian 16-bit |
+
+### Channel Bit Packing (NON-STANDARD)
+
+Each 3-byte channel uses Cognionics non-standard packing:
+
 ```c
 raw = (msb << 24) | (lsb2 << 17) | (lsb1 << 10);
-uV  = raw * (1e6 / 4294967296.0);
+value = raw >> 8;  // arithmetic shift (sign-extends)
+uV = value * (1e6 / 4294967296.0);
 ```
 
-The HD-72 1702HDG emits NONE of this structure. Zero 0xFF bytes in 122K samples. Completely flat per-position variance.
+This is NOT standard big-endian `(msb << 16) | (mid << 8) | lsb`.
 
-## Acquisition Scripts
+### Channel Layout
 
-### Quick Capture (Python)
+| Index  | Type         | Count | Notes |
+|--------|--------------|-------|-------|
+| 0..63  | EEG          | 64    | Remap via `hd72.map` for electrode positions |
+| 64..66 | Accelerometer| 3     | Post-decode shift `<<5` for full range |
+
+### Critical: Baud Rate
+
+**MUST be 3 Mbaud, not 1.5 Mbaud.** At 1.5 Mbaud the FTDI chip negotiates a connection
+but introduces bit errors that destroy the 0xFF sync bytes, making the stream appear
+unframed with high entropy. This caused weeks of misdiagnosis.
+
+The CGX Acquisition software uses FTDI D2XX direct API at 3 Mbaud. The macOS VCP driver
+also supports 3 Mbaud via pyserial `serial.Serial(port, 3000000)`.
+
+## Live Decoder (Python)
 
 ```python
 import serial, time
 
-ser = serial.Serial('/dev/cu.usbserial-AI1B2OSR', 1500000, timeout=1)
+NUM_CH = 67
+PKT_SIZE = 207
+UV_SCALE = 1e6 / (2**32)
+
+def decode_ch(msb, lsb2, lsb1):
+    raw = (msb << 24) | (lsb2 << 17) | (lsb1 << 10)
+    if raw >= 2**31: raw -= 2**32
+    return raw >> 8
+
+ser = serial.Serial('/dev/cu.usbserial-AI1B2OSR', 3000000, timeout=1)
 time.sleep(0.3)
 ser.reset_input_buffer()
-ser.write(b'\x12')  # start streaming (strip impedance)
+ser.write(b'\x12')  # strip impedance
 
 buf = bytearray()
 t0 = time.time()
 while time.time() - t0 < 5:
     d = ser.read(8192)
-    if d:
-        buf.extend(d)
-
+    if d: buf.extend(d)
 ser.close()
-with open('/tmp/cognionics-raw.bin', 'wb') as f:
-    f.write(buf)
-print(f'{len(buf)} bytes captured ({len(buf)/(time.time()-t0):.0f} B/s)')
+
+# Find sync and decode
+pos = buf.index(0xFF)
+while pos + PKT_SIZE <= len(buf):
+    if buf[pos] != 0xFF:
+        pos += 1; continue
+    counter = buf[pos+1]
+    channels = []
+    for ch in range(NUM_CH):
+        base = pos + 2 + ch*3
+        channels.append(decode_ch(buf[base], buf[base+1], buf[base+2]))
+    pos += PKT_SIZE
+    eeg_uv = [c * UV_SCALE for c in channels[:64]]
+    print(f'#{counter:3d}: ch0={eeg_uv[0]:.1f}uV')
 ```
 
-### C Streamer (macOS, 1.5Mbaud via IOSSIOSPEED)
+Full decoder with sync recovery, counter tracking, and channel stats:
+`~/i/cgx_legacy_decode.py`
 
-Pre-built at `~/i/cognionics-fast.c`. Compile:
-```bash
-cc -O2 -o cognionics-fast cognionics-fast.c -framework IOKit -framework CoreFoundation -lpthread
-```
+## Impedance
 
-### Existing Parsers (old protocol, need adaptation)
-
-- **Zig**: `~/worlds/color/ergodic/zig-syrup-cognionics/src/cognionics_parser.zig` (18K, propagator cell)
-- **Clojure**: `~/worlds/color/plus/brainfloj-cognionics/src/brainfloj/cognionics/serial.clj` (jssc)
-- **C**: `~/i/cognionics-fast.c` (POSIX termios + IOSSIOSPEED)
-- **Python**: `~/i/cognionics-stream.py` (pyserial + LSL)
-
-## Paths to Full Streaming
-
-1. **CGX Acquisition** (Windows VM) — proprietary app outputs LSL. USB passthrough FTDI dongle.
-2. **Contact CGX** — info@cognionics.com, they provide protocol details for custom applications.
-3. **NeuroPype Academic Edition** — free, inspect CognionicsInput Python source for HD-72 code path.
-4. **Known-plaintext sniff** — run CGX software + raw serial capture simultaneously, correlate to reverse-engineer framing.
+- GAIN=3.0, VREF=2.5V, ISTIM=24nA
+- Tail byte `0x11` enables impedance interleave
+- `ADC_TO_VOLTS = 2 * (2.5 / (2^32 * 3.0))`
 
 ## Related Trees
 
@@ -120,12 +133,8 @@ cc -O2 -o cognionics-fast cognionics-fast.c -framework IOKit -framework CoreFoun
 - `bcf-0053` — Live serial acquisition log (this skill's empirical source)
 - `cgt-0002` — Resource sharing game, 64ch montage
 
-## ADC Physics
+## Revision History
 
-The ADS1299 biases inputs to Vref/2 (~2.4V on 4.8V ref). 24-bit samples at mid-rail produce near-uniform byte distribution (explaining 6.83 bits/byte entropy). MSB of each 3-byte group clusters around 0x7F-0x80. This is raw physics, not scrambling.
-
-## Impedance
-
-- GAIN=3.0, VREF=2.5V, ISTIM=24nA
-- Impedance Z = 1.4 / (ISTIM × 2.0) × |alternating sample difference| × ADC_TO_VOLTS
-- 4-sample ring buffer per channel for impedance computation
+- v0.1.0: Initial delta-compressed protocol hypothesis (INCORRECT)
+- v0.2.0: **CORRECTED** to legacy 0xFF-sync format. Live validated at 3 Mbaud.
+  Root cause of earlier confusion: 1.5 Mbaud bit errors destroyed sync bytes.
