@@ -1,19 +1,21 @@
 ---
 name: cognionics-hd72
-description: Cognionics HD-72 64CH EEG acquisition via FTDI serial dongle. Protocol reverse-engineered from serial captures, App-Cognionics source, and OpenViBE driver. The HD-72 1702HDG firmware uses a proprietary unframed protocol incompatible with the documented 0xFF-sync format.
+description: Cognionics HD-72 64CH EEG acquisition via FTDI serial dongle. Protocol FULLY REVERSED from CGX Acquisition v66 .NET decompilation. Uses delta-compressed encoding (NOT the legacy 0xFF-sync format). 3 Mbaud via FTDI D2XX. 69 channels (64 EEG + 3 ACC + counter + trigger).
 license: MIT
 compatibility: macOS (FTDI VCP driver), Linux. Requires pyserial or direct POSIX termios. FTDI FT232R dongle (VID=0x0403 PID=0x6001).
 metadata:
   version: 0.1.0
   device: "Cognionics HD-72 64CH 1702HDG"
   dongle-chip: "FTDI FT232R"
-  baud: 1500000
-  channels: 64
+  baud: 3000000
+  channels: 69
+  channel-breakdown: "64 EEG + 3 ACC + 1 packet_counter + 1 trigger"
   adc: "24-bit (ADS1299-family)"
   wireless: "Proprietary 2.4 GHz (Nordic nRF-family)"
+  encoding: "delta-compressed (3 modes: 7-bit/14-bit/24-bit per channel)"
   gf3-trit: "-1"
   trit-role: "SENSOR (raw acquisition)"
-  protocol-status: "partially-reversed"
+  protocol-status: "fully-reversed"
 allowed-tools: "Bash(python3:*) Bash(cc:*) Bash(zig:*) Read"
 ---
 
