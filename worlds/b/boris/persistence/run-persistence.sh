@@ -15,7 +15,7 @@ VENV_PYTHON="\$HOME/ripser-venv/bin/python3"
 DIM="${1:-2}"
 THRESHOLD="${2:-50}"
 
-echo "basin/persistence: boxxy → ripser on ${SPARK_HOST}"
+echo "boris/persistence: boxxy → ripser on ${SPARK_HOST}"
 echo "  repo: ${REPO_ROOT}"
 echo "  dim=${DIM} threshold=${THRESHOLD}"
 

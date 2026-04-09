@@ -14,3 +14,4 @@ session Boxxy_AGM = HOL +
     Abelian_Extensions
     Narratives
     Byzantine_Vector_Clock
+    Neighbor_Corona

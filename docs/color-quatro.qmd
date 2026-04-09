@@ -1,0 +1,334 @@
+---
+title: "GF(3) Color Rendering: Cross-Platform Trit-Tick Pipeline"
+author: "boxxy"
+format:
+  html:
+    code-fold: true
+    theme: darkly
+  pdf:
+    colorlinks: true
+  typst:
+    margin:
+      x: 1.5cm
+      y: 2cm
+---
+
+## 1. The Color Pipeline
+
+The boxxy color pipeline transforms interaction entropy into deterministic,
+perceptually-dispersed color streams across every rendering substrate.
+
+**Seed derivation.** Terminal interactions (damage regions, keystrokes, cursor
+moves) feed an `EntropyCollector` that hashes events via SHA-256 into a 64-bit
+seed (per RFC 6943 §4). The seed is then scattered through the golden ratio
+fractional part to maximize hue dispersion even for adjacent seed values.
+
+**Golden angle spiral.** Each successive color advances by
+$\varphi^{-2} \times 360° \approx 137.508°$ on the HCL hue wheel---the same
+angle that maximizes packing in sunflower phyllotaxis. This is the `GoldenAnglePrecise`
+constant (`137.5077640500378`). A secondary `PlasticAngle` ($\approx 205.14°$)
+from the plastic constant $\rho$ ($x^3 = x + 1$) provides the ternary/3D analog.
+
+**GF(3) tagging.** Every color in the stream carries a trit: index mod 3 maps to
+`{Zero, One, Two}` = `{Coordinator(0), Generator(+1), Verifier(-1)}` in balanced
+ternary. The `GF3Palette` assigns canonical RGBA values:
+
+| GF(3) Elem | Balanced | Role | Color |
+|---|---|---|---|
+| 0 | 0 | Coordinator | `#F59E0B` (amber) |
+| 1 | +1 | Generator | `#A855F7` (purple) |
+| 2 | -1 | Verifier | `#2E5FA3` (blue) |
+
+**Flick timing.** Each color event is stamped with a `TritTick`---a flick
+(1/705,600,000 s) tagged with a GF(3) element. Within each frame, a
+`FrameTriad` places Plus at offset 0, Ergodic at 1/3, Minus at 2/3, ensuring
+per-frame conservation: $1 + 0 + 2 \equiv 0 \pmod{3}$.
+
+```{mermaid}
+%%| label: fig-pipeline
+%%| fig-cap: "GF(3) Color Pipeline"
+flowchart LR
+    A["Terminal Interaction<br/>(damage, keys, cursor)"] --> B["EntropyCollector<br/>SHA-256 → 64-bit seed"]
+    B --> C["SplitMix64 / φ scatter<br/>baseHue ∈ [0,360)"]
+    C --> D["Golden Angle Spiral<br/>hue += 137.508° per step"]
+    D --> E["HCL → RGB<br/>S=0.7, L=0.55"]
+    E --> F{"Platform Router"}
+    F --> G["macOS<br/>Core Graphics / Metal"]
+    F --> H["HaikuOS<br/>app_server / BView"]
+    F --> I["Terminal<br/>ANSI SGR 24-bit"]
+    F --> J["EWW / Emacs<br/>CSS rgb()"]
+    F --> K["Web / Quarto<br/>Canvas + CSS"]
+
+    style A fill:#2E5FA3,color:#fff
+    style B fill:#A855F7,color:#fff
+    style C fill:#F59E0B,color:#000
+    style D fill:#A855F7,color:#fff
+    style E fill:#2E5FA3,color:#fff
+```
+
+## 2. Platform Matrix
+
+| Platform | Renderer | Color depth | Flick divisor | Trit encoding |
+|---|---|---|---|---|
+| macOS (boxxy native) | Core Graphics / Metal | 30-bit HDR | All Hz integer | RGBA + trit byte |
+| HaikuOS (boxxy haiku) | app_server / BView | 32-bit BGRA | All Hz integer | BGRATrit struct |
+| Terminal (Ghostty) | ANSI SGR 24-bit | 24-bit RGB | 144Hz native | `ESC[38;2;r;g;b` + trit |
+| Terminal (Kitty) | Kitty graphics protocol | 24-bit + alpha | 60Hz typical | Sixel or kitty PNG |
+| EWW (Emacs) | HTML/CSS `rgb()` | 24-bit CSS | N/A (repaint) | `span.trit-plus/minus/zero` |
+| Web (Quarto HTML) | CSS + Canvas | 32-bit RGBA | `requestAnimationFrame` | CSS custom property |
+
+## 3. Haiku Color Rendering
+
+HaikuOS provides a direct rendering path with no X11 or Wayland intermediary.
+The `app_server` composites BView-drawn content through a
+display-server-integrated pipeline---the same architecture that made BeOS
+famous for media responsiveness.
+
+### BView Color API
+
+```cpp
+// GF(3) palette mapped to BView high/low colors
+void TritColorView::Draw(BRect updateRect) {
+    // GF3Palette equivalents in Haiku's rgb_color
+    static const rgb_color kCoordinator = {0xF5, 0x9E, 0x0B, 0xFF}; // amber
+    static const rgb_color kGenerator   = {0xA8, 0x55, 0xF7, 0xFF}; // purple
+    static const rgb_color kVerifier    = {0x2E, 0x5F, 0xA3, 0xFF}; // blue
+
+    // SetHighColor for foreground trit glyph
+    SetHighColor(kGenerator);
+    // SetLowColor for background field
+    SetLowColor(kCoordinator);
+
+    FillRect(updateRect, B_SOLID_LOW);
+    DrawString("⊕", BPoint(10, 20));  // trit +1 glyph
+}
+```
+
+### Native BGRA32 Pixel Format
+
+Haiku's `BBitmap` uses BGRA32 natively (B_RGBA32 = B, G, R, A byte order),
+matching the app_server's internal compositing format. No swizzling needed.
+The trit byte occupies a fifth channel in the boxxy `BGRATrit` struct:
+
+```cpp
+struct BGRATrit {
+    uint8 blue;
+    uint8 green;
+    uint8 red;
+    uint8 alpha;
+    int8  trit;  // -1, 0, +1 (balanced ternary)
+};
+```
+
+### BMessage-Based Trit-Tick Protocol
+
+boxxy's Haiku VM (running under Apple Virtualization.framework on macOS)
+communicates color updates via BMessage---Haiku's native IPC:
+
+```cpp
+// Sending a trit-tick color update
+BMessage msg('TRIT');
+msg.AddInt64("flick", when);           // flick timestamp
+msg.AddInt8("trit", tritValue);        // -1, 0, +1
+msg.AddInt32("rgb", (r << 16) | (g << 8) | b);
+msg.AddFloat("hue", hue);             // golden angle position
+messenger.SendMessage(&msg);
+```
+
+The Haiku tile runs as a `Verifier(-1)` in the cross-platform GF(3) balance,
+providing a substrate-independent validation of color conservation.
+
+## 4. Bandwidth Stack by Platform
+
+Each platform imposes a different perception bandwidth ceiling. The pyramid
+below computes bits-per-second of color information reaching the observer,
+factoring in color depth, frame rate, and the GF(3) trit overhead.
+
+```{ojs}
+//| label: fig-bandwidth
+//| fig-cap: "Perception Bandwidth Pyramid by Platform"
+
+platforms = [
+  { name: "macOS (Metal HDR)",    depth: 30, hz: 120, tritBits: 1.585,
+    area: 3840*2160, fillFrac: 0.3 },
+  { name: "HaikuOS (app_server)", depth: 32, hz: 60,  tritBits: 1.585,
+    area: 1920*1080, fillFrac: 0.5 },
+  { name: "Ghostty (SGR 24-bit)", depth: 24, hz: 144, tritBits: 1.585,
+    area: 200*50,    fillFrac: 1.0 },
+  { name: "Kitty (graphics)",     depth: 32, hz: 60,  tritBits: 1.585,
+    area: 200*50,    fillFrac: 0.8 },
+  { name: "EWW (CSS rgb)",        depth: 24, hz: 30,  tritBits: 1.585,
+    area: 120*40,    fillFrac: 0.6 },
+  { name: "Quarto (Canvas)",      depth: 32, hz: 60,  tritBits: 1.585,
+    area: 800*600,   fillFrac: 0.4 }
+]
+
+bandwidth = platforms.map(p => ({
+  ...p,
+  bitsPerPixelPerFrame: p.depth + p.tritBits,
+  pixelsPerFrame: p.area * p.fillFrac,
+  get bps() { return this.bitsPerPixelPerFrame * this.pixelsPerFrame * p.hz; },
+  get mbps() { return this.bps / 1e6; }
+}))
+
+Plot = import("https://esm.sh/@observablehq/plot@0.6")
+
+Plot.plot({
+  marginLeft: 180,
+  height: 300,
+  x: { label: "Megabits per second", type: "log" },
+  marks: [
+    Plot.barX(bandwidth, {
+      y: "name",
+      x: "mbps",
+      fill: d => d.name.includes("macOS") ? "#A855F7"
+               : d.name.includes("Haiku") ? "#2E5FA3"
+               : "#F59E0B",
+      sort: { y: "x", reverse: true }
+    }),
+    Plot.text(bandwidth, {
+      y: "name",
+      x: "mbps",
+      text: d => `${d.mbps.toFixed(1)} Mb/s`,
+      dx: 5,
+      textAnchor: "start"
+    })
+  ]
+})
+```
+
+## 5. GF(3) Conservation Across Platforms
+
+When boxxy tiles span multiple substrates simultaneously, the GF(3)
+conservation law holds **across rendering backends**:
+
+| Tile | Platform | Trit | Role |
+|---|---|---|---|
+| Top-left | macOS (native) | +1 | Generator |
+| Top-right | HaikuOS (VM) | -1 | Verifier |
+| Bottom-left | Terminal (Ghostty) | 0 | Coordinator |
+| Bottom-right | EWW (Emacs) | 0 | Coordinator |
+
+$$\sum \text{trits} = (+1) + (-1) + 0 + 0 = 0 \quad \checkmark$$
+
+This is precisely `gf3.IsBalanced([]gf3.Elem{One, Two, Zero, Zero})` returning
+`true`---the same conservation law from `verified/GF3.dfy` now enforced across
+physical rendering substrates.
+
+The `FindBalancer` function from `gf3.go` generalizes this: given any three
+platform trits, it computes the fourth tile's required role. If macOS is
+Generator(+1), Ghostty is Coordinator(0), and EWW is Coordinator(0), then:
+
+$$d = (3 - (1 + 0 + 0)) \bmod 3 = 2 \implies \text{Verifier}(-1)$$
+
+Haiku **must** be the Verifier. The substrate is determined by the algebra.
+
+## 6. Flick Arithmetic
+
+A **flick** is $1/705{,}600{,}000$ of a second. The magic of this number:
+$705{,}600{,}000 = 2^6 \times 3^2 \times 5^2 \times 7^2 \times 8 \times 25$,
+or more precisely $2^9 \times 3^2 \times 5^5 \times 7^2$. Every standard frame
+rate divides it evenly---no floating-point frame boundaries.
+
+```{python}
+#| label: fig-flick-divisors
+#| fig-cap: "Flick divisors for standard frame rates"
+
+FLICKS_PER_SECOND = 705_600_000
+
+frame_rates = [24, 25, 30, 48, 50, 60, 90, 100, 120, 144]
+rows = []
+for hz in frame_rates:
+    fpf = FLICKS_PER_SECOND // hz
+    remainder = FLICKS_PER_SECOND % hz
+    rows.append({"Hz": hz, "Flicks/frame": fpf, "Remainder": remainder,
+                 "Frame ms": round(1000/hz, 4)})
+
+import pandas as pd
+df = pd.DataFrame(rows)
+print(df.to_string(index=False))
+print(f"\nAll remainders zero: {all(r['Remainder'] == 0 for r in rows)}")
+```
+
+```{ojs}
+//| label: fig-divisibility-lattice
+//| fig-cap: "Frame rate divisibility lattice"
+
+rates = [24, 25, 30, 48, 50, 60, 90, 100, 120, 144]
+
+// Build divisibility edges: a -> b if b % a == 0 and b != a
+edges = []
+for (const a of rates) {
+  for (const b of rates) {
+    if (b > a && b % a === 0) {
+      // Check it's a direct divisor (no intermediate c with a|c|b)
+      let direct = true
+      for (const c of rates) {
+        if (c > a && c < b && c % a === 0 && b % c === 0) {
+          direct = false
+          break
+        }
+      }
+      if (direct) edges.push({ from: a, to: b })
+    }
+  }
+}
+
+// Assign y-position by "level" in lattice (number of divisors in set)
+levelOf = (hz) => rates.filter(r => r < hz && hz % r === 0).length
+nodes = rates.map(hz => ({
+  hz,
+  level: levelOf(hz),
+  fpf: 705600000 / hz
+}))
+
+maxLevel = Math.max(...nodes.map(n => n.level))
+
+// Simple force-directed-ish layout: x by hz, y by level
+nodePos = Object.fromEntries(nodes.map((n, i) => [
+  n.hz,
+  { x: 50 + (i / (nodes.length - 1)) * 500, y: 250 - n.level * 55 }
+]))
+
+svg`<svg width="600" height="300" style="background:#1a1a2e;font-family:monospace">
+  ${edges.map(e => {
+    const p1 = nodePos[e.from], p2 = nodePos[e.to]
+    return svg`<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}"
+                     stroke="#F59E0B" stroke-width="1.5" opacity="0.6"/>`
+  })}
+  ${nodes.map(n => {
+    const p = nodePos[n.hz]
+    const fill = n.hz % 3 === 0 ? "#A855F7" : n.hz % 2 === 0 ? "#2E5FA3" : "#F59E0B"
+    return svg`<g>
+      <circle cx="${p.x}" cy="${p.y}" r="18" fill="${fill}" opacity="0.9"/>
+      <text x="${p.x}" y="${p.y + 4}" text-anchor="middle"
+            fill="white" font-size="11">${n.hz}</text>
+    </g>`
+  })}
+  <text x="300" y="290" text-anchor="middle" fill="#888" font-size="10">
+    705,600,000 = 2⁹ × 3² × 5⁵ × 7²  —  all Hz divide evenly
+  </text>
+</svg>`
+```
+
+### Trit-Tick Frame Triads
+
+Within each frame, `FrameTriad` distributes three sub-frame trit-ticks at
+offsets 0, 1/3, and 2/3 of the frame duration:
+
+```{python}
+#| label: tbl-triads
+#| tbl-cap: "Sub-frame trit-tick positions for 60Hz and 144Hz"
+
+FLICKS = 705_600_000
+for hz in [60, 144]:
+    fpf = FLICKS // hz
+    third = fpf // 3
+    print(f"\n{hz}Hz — {fpf:,} flicks/frame ({1000/hz:.3f} ms)")
+    for i, (offset_frac, trit, role) in enumerate([
+        (0, "+1", "Generator"), (1, " 0", "Coordinator"), (2, "-1", "Verifier")
+    ]):
+        offset = i * third
+        print(f"  [{trit}] {role:12s} @ flick {offset:>10,}  ({offset/FLICKS*1000:.4f} ms)")
+    print(f"  Sum: +1 + 0 + (-1) = 0  ✓")
+```

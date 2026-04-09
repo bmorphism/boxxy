@@ -57,6 +57,23 @@ Sleep 1s
 
 Type "(+ (/ 1 3) (/ 1 6))"
 Enter
+Sleep 1s
+
+Type "(* (/ 2 3) (/ 3 4))"
+Enter
+Sleep 1s
+
+# Keywords as functions
+Type "(def lang {:name \"nanoclj\" :runtime :zig :loc 32000})"
+Enter
+Sleep 1s
+
+Type "(:name lang)"
+Enter
+Sleep 1s
+
+Type "(:missing lang :unknown)"
+Enter
 Sleep 1.5s
 
 # Lazy sequences

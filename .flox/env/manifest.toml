@@ -158,6 +158,20 @@ mgba.pkg-path = "mgba"
 mgba.systems = ["aarch64-linux", "x86_64-linux"]
 
 ## ═══════════════════════════════════════════════════════════════════
+## Wine — Win32/64 on POSIX via Rosetta x86_64 translation
+##
+##   wine64 setup_mafia.exe          # install GOG game
+##   wine64 ~/.wine/drive_c/.../Game.exe  # run
+##
+## Runs as x86_64-darwin binary under Rosetta 2. D3D8/9/10/11 via wined3d.
+## ═══════════════════════════════════════════════════════════════════
+wine64.pkg-path = "wine64"
+wine64.systems = ["x86_64-darwin", "x86_64-linux"]
+
+winetricks.pkg-path = "winetricks"
+winetricks.systems = ["x86_64-darwin", "x86_64-linux"]
+
+## ═══════════════════════════════════════════════════════════════════
 ## Renode — multi-node embedded system emulator
 ##
 ## Emulates complete SoCs without hardware:
@@ -353,6 +367,10 @@ common = '''
     wasmtime "${base}.wasm"
   }
 
+  # ── Game tiles ────────────────────────────────────────────────
+  alias mafia-run="boxxy examples/mafia-lost-heaven.joke"
+  alias mafia-setup="mkdir -p ~/.boxxy/games && qemu-img create -f qcow2 ~/.boxxy/games/winxp-mafia.qcow2 10G && echo 'Now boot with MAFIA_ISO=/path/to/winxp.iso mafia-run'"
+
   # ── Emulator shortcuts ───────────────────────────────────────
   alias gba-run="mgba-qt"
 
@@ -396,6 +414,9 @@ common = '''
   # ── Quick RISC-V cross-compile ───────────────────────────────
   alias joker-riscv="joker-cross linux riscv64"
   alias boxxy-riscv="boxxy-cross linux riscv64"
+
+  # ── Mafia (2002) tile ──────────────────────────────────────
+  alias mafia-run="boxxy examples/mafia-winxp.joke"
 
   # ── FPGA flow: Verilog -> synthesis -> P&R -> flash ──────────
   # Example: synthesize a RISC-V soft-core for iCE40

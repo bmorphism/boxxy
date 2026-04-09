@@ -14,26 +14,30 @@ Set Theme "Catppuccin Mocha"
 Set TypingSpeed 35ms
 Set Padding 20
 
-# --- Terminal 1: start nanoclj-zig with nREPL ---
-Type "cd ~/i/nanoclj-zig && zig build run -- --nrepl &"
-Enter
-Sleep 3s
-
-# --- Terminal 2: start clerk bridge ---
-Type "bb clerk/serve.clj"
+# --- Start nanoclj-zig REPL ---
+Type "cd ~/i/nanoclj-zig && zig build run"
 Enter
 Sleep 2s
 
+# --- Start nREPL from inside the REPL ---
+Type "(nrepl-start 7888)"
+Enter
+Sleep 2s
+
+Type "(nrepl-status)"
+Enter
+Sleep 1.5s
+
 # Show what's happening
-Type "# nREPL on port 7888 (TCP/bencode)"
+Type ";; nREPL on port 7888 (TCP/bencode)"
 Enter
 Sleep 1s
 
-Type "# Clerk on http://localhost:8484 (HTTP/SSE)"
+Type ";; In another terminal: bb clerk/serve.clj 7888"
 Enter
 Sleep 1s
 
-Type "# Each eval carries: x-color-r/g/b, x-trit-phase, x-fuel-remaining"
+Type ";; Each eval carries: x-color-r/g/b, x-trit-phase, x-fuel-remaining"
 Enter
 Sleep 2s
 

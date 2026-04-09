@@ -1,0 +1,92 @@
+#!/usr/bin/env boxxy
+;; mafia-lost-heaven.joke — Mafia: The City of Lost Heaven (2002) via QEMU x86
+;;
+;; Runs a Windows XP guest under QEMU with HVF acceleration.
+;; Mafia needs DirectX 8.1 — software-rendered, no GPU passthrough required.
+;; A 2002 game on a 2002 OS: the simplest tile that works.
+;;
+;; Usage:
+;;   boxxy examples/mafia-lost-heaven.joke
+;;
+;; Setup (one-time):
+;;   qemu-img create -f qcow2 ~/.boxxy/games/winxp-mafia.qcow2 10G
+;;   # Boot XP installer, install Mafia from GOG/disc, snapshot
+;;   # Or: restore a pre-built qcow2 image
+;;
+;; Requires:
+;;   - flox activate (qemu is in the boxxy manifest)
+;;   - winxp-mafia.qcow2 with game installed
+;;
+;; GF(3): boot(+1) play(0) quit(-1) = 0 mod 3
+;;   Tommy's moral arc conserves the same trit-sum.
+
+;; ── Configuration ──────────────────────────────────────────────────────
+
+(def games-dir    (or (env "BOXXY_GAMES") (str (env "HOME") "/.boxxy/games")))
+(def disk-path    (or (env "MAFIA_DISK")  (str games-dir "/winxp-mafia.qcow2")))
+(def iso-path     (env "MAFIA_ISO"))  ;; optional: installer ISO for first-time setup
+(def memory       (or (env "MAFIA_MEMORY") "512"))
+(def smp          (or (env "MAFIA_SMP") "2"))
+(def audio-driver (or (env "MAFIA_AUDIO") "coreaudio"))
+(def display      (or (env "MAFIA_DISPLAY") "cocoa,zoom-to-fit=on"))
+(def snapshot     (env "MAFIA_SNAPSHOT"))  ;; optional: load named snapshot
+
+;; ── Banner ─────────────────────────────────────────────────────────────
+
+(println "╔════════════════════════════════════════════════════════╗")
+(println "║  boxxy game tile — Mafia: The City of Lost Heaven     ║")
+(println "║                                                       ║")
+(println "║  Illusion Softworks, 2002. Lost Heaven, 1930-1938.    ║")
+(println "║                                                       ║")
+(println "║  GF(3): loyalty(+1) compliance(0) betrayal(-1) = 0   ║")
+(println "╚════════════════════════════════════════════════════════╝")
+(println)
+
+;; ── Preflight ──────────────────────────────────────────────────────────
+
+(when-not (file-exists? disk-path)
+  (println "[!] Disk image not found: " disk-path)
+  (println "    Create one:")
+  (println "      mkdir -p " games-dir)
+  (println "      qemu-img create -f qcow2 " disk-path " 10G")
+  (println "    Then boot with MAFIA_ISO=/path/to/winxp.iso to install.")
+  (System/exit 1))
+
+;; ── Build QEMU command ────────────────────────────────────────────────
+
+(def qemu-args
+  (concat
+    ["qemu-system-i386"
+     "-accel" "hvf"
+     "-m" memory
+     "-smp" smp
+     "-drive" (str "file=" disk-path ",format=qcow2,if=ide")
+     "-display" display
+     "-audiodev" (str audio-driver ",id=snd0")
+     "-device" "AC97,audiodev=snd0"
+     "-usb" "-device" "usb-tablet"
+     "-rtc" "base=localtime"
+     "-net" "nic,model=rtl8139"
+     "-net" "user"]
+    ;; Optional installer ISO
+    (when iso-path
+      ["-cdrom" iso-path "-boot" "d"])
+    ;; Optional snapshot
+    (when snapshot
+      ["-loadvm" snapshot])))
+
+;; ── Launch ─────────────────────────────────────────────────────────────
+
+(println "[+1] Booting Windows XP guest...")
+(println "     Disk: " disk-path)
+(when iso-path  (println "     ISO:  " iso-path))
+(when snapshot  (println "     Snap: " snapshot))
+(println "     " smp " CPUs, " memory "MB RAM")
+(println "     Audio: " audio-driver)
+(println)
+(println "  QEMU monitor: Ctrl-Alt-2")
+(println "  Save state:   (monitor) savevm mafia-save")
+(println "  Quit:         Ctrl-Alt-Q or close window")
+(println)
+
+(apply shell (filter some? qemu-args))

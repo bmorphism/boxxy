@@ -1,0 +1,85 @@
+#!/usr/bin/env boxxy
+;; mafia-winxp.joke — Mafia (2002) via Wine on macOS (no VM)
+;;
+;; The original Illusion Softworks classic. Lost Heaven, Tommy Angelo,
+;; the best racing mission ever made.
+;;
+;; Stack: Rosetta 2 (x86→ARM) → Wine (Win32→POSIX) → wined3d (D3D8→OpenGL)
+;; No hypervisor. No guest kernel. Three translation layers, all userspace.
+;;
+;; Prerequisites:
+;;   1. GOG version of Mafia (setup_mafia.exe) — DRM-free, pre-patched
+;;   2. Wine: brew install --cask whisky  OR  nix-shell -p wine64
+;;   3. Rosetta: softwareupdate --install-rosetta --agree-to-license
+;;
+;; Usage:
+;;   boxxy examples/mafia-winxp.joke
+;;   MAFIA_INSTALLER=/path/to/setup_mafia.exe boxxy examples/mafia-winxp.joke
+
+;; ── Configuration ──────────────────────────────────────────────────────
+
+(def wine-bin     (or (env "MAFIA_WINE")      "wine64"))
+(def prefix       (or (env "MAFIA_PREFIX")     (str (env "HOME") "/.wine-mafia")))
+(def installer    (env "MAFIA_INSTALLER"))
+(def game-exe     (or (env "MAFIA_EXE")
+                      (str prefix "/drive_c/GOG Games/Mafia/Game.exe")))
+
+;; ── Banner ─────────────────────────────────────────────────────────────
+
+(println "╔════════════════════════════════════════════════════════╗")
+(println "║  boxxy — Mafia (2002) via Wine + Rosetta x86_64      ║")
+(println "║                                                      ║")
+(println "║  \"You know, Tommy, even a small city can have        ║")
+(println "║   big problems.\"                     — Don Salieri   ║")
+(println "║                                                      ║")
+(println "║  GF(3): rosetta(+1) wine(0) mafia(-1) = 0 mod 3     ║")
+(println "╚════════════════════════════════════════════════════════╝")
+(println)
+
+;; ── Wine prefix setup ──────────────────────────────────────────────────
+
+(def prefix-exists (file-exists? (str prefix "/system.reg")))
+
+(when (not prefix-exists)
+  (println "[+1] Creating Wine prefix: " prefix)
+  (println "     This takes ~30s on first run...")
+  (shell {:env {"WINEPREFIX" prefix}} wine-bin "wineboot" "--init")
+  (println "     Prefix ready.")
+  (println))
+
+;; ── Install or Launch ──────────────────────────────────────────────────
+
+(def game-installed (file-exists? game-exe))
+
+(cond
+  ;; Case 1: Game not installed, installer provided → install
+  (and (not game-installed) installer)
+  (do
+    (println "[ 0] Installing Mafia from: " installer)
+    (println "     Follow the GOG installer prompts.")
+    (println)
+    (shell {:env {"WINEPREFIX" prefix}} wine-bin installer))
+
+  ;; Case 2: Game not installed, no installer → tell user
+  (not game-installed)
+  (do
+    (println "[!] Game not found at: " game-exe)
+    (println)
+    (println "    To install, run with:")
+    (println "    MAFIA_INSTALLER=/path/to/setup_mafia.exe boxxy examples/mafia-winxp.joke")
+    (println)
+    (println "    Or set MAFIA_EXE if installed elsewhere."))
+
+  ;; Case 3: Game installed → launch
+  :else
+  (do
+    (println "[-1] Launching Mafia...")
+    (println "     Exe: " game-exe)
+    (println "     Prefix: " prefix)
+    (println)
+    (println "     D3D8 → wined3d → OpenGL → MoltenVK → Metal")
+    (println "     Press Ctrl+C to quit.")
+    (println)
+    (shell {:env {"WINEPREFIX" prefix
+                  "WINEDLLOVERRIDES" "d3d8=b"}}
+           wine-bin game-exe)))
