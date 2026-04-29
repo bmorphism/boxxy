@@ -333,6 +333,7 @@ func buildMacOSVM(cfg MacOSVMConfig, platform *vz.MacPlatformConfiguration) (*VM
 	return &VMInstance{
 		VM:       vm,
 		Config:   vmConfig,
+		Attrs:    make(map[string]any),
 		shutdown: make(chan struct{}),
 	}, nil
 }

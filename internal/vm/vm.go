@@ -17,10 +17,12 @@ import (
         "github.com/bmorphism/boxxy/internal/lisp"
 )
 
-// vm:// URI scheme constants (borrowing from vibespace-mcp pattern)
+// URI scheme constants (borrowing from vibespace-mcp pattern).
+// color:// is a view/lens over vm://; it never stores separately.
 const (
-        VMScheme   = "vm://"
-        VMListURI  = "vm://list"
+        VMScheme    = "vm://"
+        VMListURI   = "vm://list"
+        ColorScheme = "color://"
 )
 
 func init() {
@@ -54,10 +56,13 @@ type Config struct {
         SaveStatePath     string
 }
 
-// VMInstance wraps a running VM
+// VMInstance wraps a running VM.
+// Attrs is the open accumulator: keywords appear when placed, nothing forces them.
+// color:// reads from here as a lens; any interaction can deposit attributes.
 type VMInstance struct {
         VM       *vz.VirtualMachine
         Config   *vz.VirtualMachineConfiguration
+        Attrs    map[string]any
         mu       sync.Mutex
         shutdown chan struct{}
 }
@@ -218,6 +223,7 @@ func CreateVM(cfg Config) (*VMInstance, error) {
         return &VMInstance{
                 VM:       vm,
                 Config:   vmConfig,
+                Attrs:    make(map[string]any),
                 shutdown: make(chan struct{}),
         }, nil
 }
@@ -468,6 +474,180 @@ func ResolveVMURI(uri string) lisp.Value {
                 return lisp.Nil{}
         default:
                 panic(fmt.Sprintf("vm/resolve: unknown sub-resource: %s", sub))
+        }
+}
+
+// SetAttr deposits a key-value pair into the VM's open accumulator.
+// Nothing validates; anything can be placed. Perceivable but not forced.
+func SetAttr(inst *VMInstance, key string, val any) {
+        inst.mu.Lock()
+        defer inst.mu.Unlock()
+        if inst.Attrs == nil {
+                inst.Attrs = make(map[string]any)
+        }
+        inst.Attrs[key] = val
+}
+
+// GetAttr reads a single attribute. Returns (val, true) or (nil, false).
+func GetAttr(inst *VMInstance, key string) (any, bool) {
+        inst.mu.Lock()
+        defer inst.mu.Unlock()
+        v, ok := inst.Attrs[key]
+        return v, ok
+}
+
+// stateHue maps VM state to a hue degree — the only non-optional projection.
+func stateHue(state string) float64 {
+        switch state {
+        case "running":
+                return 120 // green
+        case "paused":
+                return 60 // yellow
+        case "starting":
+                return 180 // cyan
+        case "error":
+                return 0 // red
+        default:
+                return 240 // blue (stopped / unknown)
+        }
+}
+
+// ResolveColorURI is a lens over vm://.
+// It reads the same VMInstance but projects color semantics from the open Attrs.
+// Accumulation happens elsewhere (vm/set-attr!); this only reads.
+//
+//   color://{name}          → hashmap with :hue :saturation :lightness :name :source-uri + any attrs
+//   color://{name}/hue      → float
+//   color://{name}/hex      → string "#RRGGBB"
+func ResolveColorURI(uri string) lisp.Value {
+        if !strings.HasPrefix(uri, ColorScheme) {
+                panic(fmt.Sprintf("color/resolve: not a color:// URI: %s", uri))
+        }
+
+        path := strings.TrimPrefix(uri, ColorScheme)
+        parts := strings.SplitN(path, "/", 2)
+        name := parts[0]
+        inst, ok := GetVM(name)
+        if !ok {
+                return lisp.Nil{}
+        }
+
+        state := GetState(inst)
+        hue := stateHue(state)
+        sat := 0.6
+        lit := 0.5
+
+        // Overlay attrs: if someone deposited "hue", "saturation", "lightness", use those.
+        inst.mu.Lock()
+        if v, exists := inst.Attrs["hue"]; exists {
+                if f, ok := v.(float64); ok {
+                        hue = f
+                }
+        }
+        if v, exists := inst.Attrs["saturation"]; exists {
+                if f, ok := v.(float64); ok {
+                        sat = f
+                }
+        }
+        if v, exists := inst.Attrs["lightness"]; exists {
+                if f, ok := v.(float64); ok {
+                        lit = f
+                }
+        }
+        inst.mu.Unlock()
+
+        if len(parts) == 2 {
+                switch parts[1] {
+                case "hue":
+                        return lisp.Float(hue)
+                case "hex":
+                        return lisp.String(hslToHex(hue, sat, lit))
+                default:
+                        // passthrough to attrs
+                        if v, ok := GetAttr(inst, parts[1]); ok {
+                                return anyToLisp(v)
+                        }
+                        return lisp.Nil{}
+                }
+        }
+
+        // Full projection
+        m := make(lisp.HashMap)
+        m[lisp.Keyword("name")] = lisp.String(name)
+        m[lisp.Keyword("source-uri")] = lisp.String(VMScheme + name)
+        m[lisp.Keyword("state")] = lisp.String(state)
+        m[lisp.Keyword("hue")] = lisp.Float(hue)
+        m[lisp.Keyword("saturation")] = lisp.Float(sat)
+        m[lisp.Keyword("lightness")] = lisp.Float(lit)
+        m[lisp.Keyword("hex")] = lisp.String(hslToHex(hue, sat, lit))
+
+        // Merge all open attrs as keywords
+        inst.mu.Lock()
+        for k, v := range inst.Attrs {
+                kw := lisp.Keyword(k)
+                if _, already := m[kw]; !already {
+                        m[kw] = anyToLisp(v)
+                }
+        }
+        inst.mu.Unlock()
+
+        return m
+}
+
+func anyToLisp(v any) lisp.Value {
+        switch x := v.(type) {
+        case string:
+                return lisp.String(x)
+        case float64:
+                return lisp.Float(x)
+        case bool:
+                return lisp.Bool(x)
+        case nil:
+                return lisp.Nil{}
+        default:
+                return lisp.String(fmt.Sprintf("%v", x))
+        }
+}
+
+func hslToHex(h, s, l float64) string {
+        h = h / 360.0
+        var r, g, b float64
+        if s == 0 {
+                r, g, b = l, l, l
+        } else {
+                var q float64
+                if l < 0.5 {
+                        q = l * (1 + s)
+                } else {
+                        q = l + s - l*s
+                }
+                p := 2*l - q
+                r = hueToRGB(p, q, h+1.0/3.0)
+                g = hueToRGB(p, q, h)
+                b = hueToRGB(p, q, h-1.0/3.0)
+        }
+        ri := int(r*255 + 0.5)
+        gi := int(g*255 + 0.5)
+        bi := int(b*255 + 0.5)
+        return fmt.Sprintf("#%02X%02X%02X", ri, gi, bi)
+}
+
+func hueToRGB(p, q, t float64) float64 {
+        if t < 0 {
+                t += 1
+        }
+        if t > 1 {
+                t -= 1
+        }
+        switch {
+        case t < 1.0/6.0:
+                return p + (q-p)*6*t
+        case t < 1.0/2.0:
+                return q
+        case t < 2.0/3.0:
+                return p + (q-p)*(2.0/3.0-t)*6
+        default:
+                return p
         }
 }
 
@@ -884,6 +1064,62 @@ func RegisterNamespace(env *lisp.Env) {
                         uris = append(uris, lisp.String(VMScheme+name))
                 }
                 return uris
+        })
+
+        // Open accumulator: deposit any keyword into a VM's Attrs.
+        // (vm/set-attr! "alpine" "mood" "calm")
+        reg("vm/set-attr!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 3 {
+                        panic("vm/set-attr!: requires (name key value)")
+                }
+                name := string(args[0].(lisp.String))
+                key := string(args[1].(lisp.String))
+                inst, ok := GetVM(name)
+                if !ok {
+                        return lisp.Nil{}
+                }
+                var val any
+                switch v := args[2].(type) {
+                case lisp.String:
+                        val = string(v)
+                case lisp.Float:
+                        val = float64(v)
+                case lisp.Int:
+                        val = float64(v)
+                case lisp.Bool:
+                        val = bool(v)
+                default:
+                        val = v.String()
+                }
+                SetAttr(inst, key, val)
+                return lisp.Keyword(key)
+        })
+
+        // (vm/get-attr "alpine" "mood") → value or nil
+        reg("vm/get-attr", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vm/get-attr: requires (name key)")
+                }
+                name := string(args[0].(lisp.String))
+                key := string(args[1].(lisp.String))
+                inst, ok := GetVM(name)
+                if !ok {
+                        return lisp.Nil{}
+                }
+                v, ok := GetAttr(inst, key)
+                if !ok {
+                        return lisp.Nil{}
+                }
+                return anyToLisp(v)
+        })
+
+        // color:// lens: (color/resolve "color://alpine") → hashmap with color projection
+        reg("color/resolve", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("color/resolve: requires (uri)")
+                }
+                uri := string(args[0].(lisp.String))
+                return ResolveColorURI(uri)
         })
 }
 
