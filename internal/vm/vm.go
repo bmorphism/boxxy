@@ -22,26 +22,29 @@ func init() {
 
 // Config holds VM configuration
 type Config struct {
-        BootMode       string // efi, linux, macos
-        Kernel         string
-        Initrd         string
-        Cmdline        string
-        ISO            string
-        Disk           string
-        Memory         int // GB
-        CPUs           int
-        NVRAM          string
-        DisableNetwork bool
-        EnableRosetta  bool
-        RosettaTag     string
-        PinholeMode    bool
-        PinholePorts   []int
-        SharedDirs     map[string]string // tag -> path
-        Graphics       bool
-        Width          int
-        Height         int
-        Keyboard       bool
-        Pointer        bool
+        BootMode          string // efi, linux, macos
+        Kernel            string
+        Initrd            string
+        Cmdline           string
+        ISO               string
+        Disk              string
+        Memory            int // GB
+        CPUs              int
+        NVRAM             string
+        DisableNetwork    bool
+        EnableRosetta     bool
+        RosettaTag        string
+        PinholeMode       bool
+        PinholePorts      []int
+        SharedDirs        map[string]string // tag -> path
+        Graphics          bool
+        Width             int
+        Height            int
+        Keyboard          bool
+        Pointer           bool
+        EnableNestedVirt  bool
+        EnableXHCI        bool
+        SaveStatePath     string
 }
 
 // VMInstance wraps a running VM
@@ -75,6 +78,11 @@ func CreateVM(cfg Config) (*VMInstance, error) {
         )
         if err != nil {
                 return nil, fmt.Errorf("vm config: %w", err)
+        }
+        if cfg.EnableNestedVirt {
+                if err := platform.SetNestedVirtualizationEnabled(true); err != nil {
+                        return nil, fmt.Errorf("nested virtualization: %w", err)
+                }
         }
         vmConfig.SetPlatformVirtualMachineConfiguration(platform)
 
@@ -178,6 +186,14 @@ func CreateVM(cfg Config) (*VMInstance, error) {
                 return nil, fmt.Errorf("vsock: %w", err)
         }
         vmConfig.SetSocketDevicesVirtualMachineConfiguration([]vz.SocketDeviceConfiguration{socketDev})
+
+        if cfg.EnableXHCI {
+                xhci, err := vz.NewXHCIControllerConfiguration()
+                if err != nil {
+                        return nil, fmt.Errorf("xhci controller: %w", err)
+                }
+                vmConfig.SetUSBControllersVirtualMachineConfiguration([]vz.USBControllerConfiguration{xhci})
+        }
 
         ok, err := vmConfig.Validate()
         if err != nil {
@@ -706,6 +722,67 @@ func RegisterNamespace(env *lisp.Env) {
                 }
                 f.Close()
                 return lisp.Bool(true)
+        })
+
+        // -- Nested Virtualization --
+
+        reg("vz/nested-virt-supported?", func(args []lisp.Value) lisp.Value {
+                return lisp.Bool(vz.IsNestedVirtualizationSupported())
+        })
+
+        // -- XHCI (USB 3.0) Controller --
+
+        reg("vz/new-xhci-controller", func(args []lisp.Value) lisp.Value {
+                xhci, err := vz.NewXHCIControllerConfiguration()
+                if err != nil {
+                        panic(fmt.Sprintf("vz/new-xhci-controller: %v", err))
+                }
+                return &lisp.ExternalValue{Value: xhci, Type: "XHCIController"}
+        })
+
+        // -- Save / Restore State --
+
+        reg("vz/save-state!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vz/save-state!: requires (vm path)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                instance := ext.Value.(*VMInstance)
+                path := string(args[1].(lisp.String))
+                instance.mu.Lock()
+                defer instance.mu.Unlock()
+                if err := instance.VM.SaveMachineStateToPath(path); err != nil {
+                        panic(fmt.Sprintf("vz/save-state!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("vz/restore-state!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vz/restore-state!: requires (vm path)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                instance := ext.Value.(*VMInstance)
+                path := string(args[1].(lisp.String))
+                instance.mu.Lock()
+                defer instance.mu.Unlock()
+                if err := instance.VM.RestoreMachineStateFromURL(path); err != nil {
+                        panic(fmt.Sprintf("vz/restore-state!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("vz/validate-save-restore", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("vz/validate-save-restore: requires (vm)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                instance := ext.Value.(*VMInstance)
+                ok, err := instance.Config.ValidateSaveRestoreSupport()
+                if err != nil {
+                        return lisp.Bool(false)
+                }
+                return lisp.Bool(ok)
         })
 }
 
