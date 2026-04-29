@@ -5,10 +5,12 @@ package vm
 import (
         "context"
         "fmt"
+        "hash/fnv"
         "io"
         "os"
         "os/signal"
         "runtime"
+        "sort"
         "strings"
         "sync"
         "syscall"
@@ -59,12 +61,21 @@ type Config struct {
 // VMInstance wraps a running VM.
 // Attrs is the open accumulator: keywords appear when placed, nothing forces them.
 // color:// reads from here as a lens; any interaction can deposit attributes.
+//
+// SPI fields (Gay.jl SplitMix64):
+//   Seed        — deterministic identity derived from name via FNV-1a
+//   Invocation  — monotonic counter advanced on every SetAttr call
+//   Fingerprint — XOR accumulator of splitmix64(seed^invocation) at each step;
+//                 identical seed + identical interaction sequence → identical fingerprint
 type VMInstance struct {
-        VM       *vz.VirtualMachine
-        Config   *vz.VirtualMachineConfiguration
-        Attrs    map[string]any
-        mu       sync.Mutex
-        shutdown chan struct{}
+        VM          *vz.VirtualMachine
+        Config      *vz.VirtualMachineConfiguration
+        Attrs       map[string]any
+        Seed        uint64
+        Invocation  uint64
+        Fingerprint uint64
+        mu          sync.Mutex
+        shutdown    chan struct{}
 }
 
 // CreateVM creates a new VM based on config
@@ -406,6 +417,9 @@ var (
 func RegisterVM(name string, instance *VMInstance) {
         vmRegistryMu.Lock()
         defer vmRegistryMu.Unlock()
+        if instance.Seed == 0 {
+                instance.Seed = seedFromName(name)
+        }
         vmRegistry[name] = instance
 }
 
@@ -496,6 +510,10 @@ func ResolveVMURI(uri string) lisp.Value {
 
 // SetAttr deposits a key-value pair into the VM's open accumulator.
 // Nothing validates; anything can be placed. Perceivable but not forced.
+//
+// Self-fuzzing: every call advances the invocation counter and XOR-accumulates
+// the splitmix64 output into the fingerprint. Same seed + same interaction
+// sequence → identical fingerprint (SPI property).
 func SetAttr(inst *VMInstance, key string, val any) {
         inst.mu.Lock()
         defer inst.mu.Unlock()
@@ -503,6 +521,8 @@ func SetAttr(inst *VMInstance, key string, val any) {
                 inst.Attrs = make(map[string]any)
         }
         inst.Attrs[key] = val
+        inst.Invocation++
+        inst.Fingerprint ^= splitmix64(inst.Seed ^ inst.Invocation)
 }
 
 // GetAttr reads a single attribute. Returns (val, true) or (nil, false).
@@ -602,6 +622,37 @@ func ResolveColorURI(uri string) lisp.Value {
                         return lisp.Float(hue)
                 case "hex":
                         return lisp.String(hslToHex(hue, sat, lit))
+                case "spi":
+                        // SPI sub-resource: seed, invocation, fingerprint snapshot.
+                        // Read under lock was already done above; use the copy.
+                        inst.mu.Lock()
+                        seed := inst.Seed
+                        inv := inst.Invocation
+                        fp := inst.Fingerprint
+                        inst.mu.Unlock()
+                        m := make(lisp.HashMap)
+                        m[lisp.Keyword("seed")] = lisp.Float(float64(seed))
+                        m[lisp.Keyword("invocation")] = lisp.Float(float64(inv))
+                        m[lisp.Keyword("fingerprint")] = lisp.Float(float64(fp))
+                        // Current splitmix64 color at this invocation
+                        ch, cs, cl := colorAt(seed, inv)
+                        m[lisp.Keyword("current-hex")] = lisp.String(hslToHex(ch, cs, cl))
+                        return m
+                case "walk":
+                        // Walk sub-resource: 8-step random walk from this VM.
+                        inst.mu.Lock()
+                        seed := inst.Seed
+                        inst.mu.Unlock()
+                        trail := RandomWalk(name, 8, seed)
+                        items := make(lisp.Vector, len(trail))
+                        for i, step := range trail {
+                                sm := make(lisp.HashMap)
+                                sm[lisp.Keyword("step")] = lisp.Float(float64(i))
+                                sm[lisp.Keyword("name")] = lisp.String(step.Name)
+                                sm[lisp.Keyword("hex")] = lisp.String(step.Hex)
+                                items[i] = sm
+                        }
+                        return items
                 default:
                         if v, exists := attrsCopy[parts[1]]; exists {
                                 return anyToLisp(v)
@@ -611,6 +662,12 @@ func ResolveColorURI(uri string) lisp.Value {
         }
 
         // Full projection — built from the already-snapshotted data.
+        inst.mu.Lock()
+        seed := inst.Seed
+        inv := inst.Invocation
+        fp := inst.Fingerprint
+        inst.mu.Unlock()
+
         m := make(lisp.HashMap)
         m[lisp.Keyword("name")] = lisp.String(name)
         m[lisp.Keyword("source-uri")] = lisp.String(VMScheme + name)
@@ -619,6 +676,9 @@ func ResolveColorURI(uri string) lisp.Value {
         m[lisp.Keyword("saturation")] = lisp.Float(sat)
         m[lisp.Keyword("lightness")] = lisp.Float(lit)
         m[lisp.Keyword("hex")] = lisp.String(hslToHex(hue, sat, lit))
+        m[lisp.Keyword("seed")] = lisp.Float(float64(seed))
+        m[lisp.Keyword("invocation")] = lisp.Float(float64(inv))
+        m[lisp.Keyword("fingerprint")] = lisp.Float(float64(fp))
 
         for k, v := range attrsCopy {
                 kw := lisp.Keyword(k)
@@ -677,6 +737,74 @@ func clamp01(v float64) float64 {
                 return 1
         }
         return v
+}
+
+// --- Gay.jl SplitMix64 bijection (exact constants) ---
+//
+// GOLDEN = 0x9e3779b97f4a7c15 (golden ratio fractional part × 2^64)
+// MIX1   = 0xbf58476d1ce4e5b9
+// MIX2   = 0x94d049bb133111eb
+//
+// splitmix64 is a bijection on uint64 — every output is unique for every input.
+// This is the same function used in Gay.jl, Julia's default SplittableRandom, and Java's.
+func splitmix64(x uint64) uint64 {
+        x += 0x9e3779b97f4a7c15
+        x = (x ^ (x >> 30)) * 0xbf58476d1ce4e5b9
+        x = (x ^ (x >> 27)) * 0x94d049bb133111eb
+        return x ^ (x >> 31)
+}
+
+// colorAt returns the HSL color at a given (seed, index) pair.
+// Pure function: same (seed, index) → same (h, s, l), always.
+// O(1) random access — no need to iterate from 0.
+func colorAt(seed, index uint64) (h, s, l float64) {
+        mixed := splitmix64(seed ^ index)
+        h = float64(mixed&0xFFFF) / 65535.0 * 360.0
+        s = 0.5 + float64((mixed>>16)&0xFFFF)/65535.0*0.5 // [0.5, 1.0]
+        l = 0.4 + float64((mixed>>32)&0xFFFF)/65535.0*0.2 // [0.4, 0.6]
+        return h, s, l
+}
+
+// seedFromName derives a deterministic uint64 seed from a VM name via FNV-1a.
+func seedFromName(name string) uint64 {
+        h := fnv.New64a()
+        h.Write([]byte(name))
+        return h.Sum64()
+}
+
+// RandomWalk walks the VM registry for `steps` steps, starting from `startName`.
+// At each step, splitmix64(walkSeed ^ step) determines the next VM by index.
+// Returns a trail of (name, hex-color) pairs. Same walkSeed + same registry → same trail.
+func RandomWalk(startName string, steps int, walkSeed uint64) []struct {
+        Name string
+        Hex  string
+} {
+        vmRegistryMu.RLock()
+        names := make([]string, 0, len(vmRegistry))
+        for n := range vmRegistry {
+                names = append(names, n)
+        }
+        vmRegistryMu.RUnlock()
+
+        if len(names) == 0 {
+                return nil
+        }
+        sort.Strings(names) // deterministic order
+
+        trail := make([]struct {
+                Name string
+                Hex  string
+        }, steps)
+
+        current := startName
+        for i := 0; i < steps; i++ {
+                idx := splitmix64(walkSeed ^ uint64(i)) % uint64(len(names))
+                current = names[idx]
+                h, s, l := colorAt(walkSeed, uint64(i))
+                trail[i].Name = current
+                trail[i].Hex = hslToHex(h, s, l)
+        }
+        return trail
 }
 
 func anyToLisp(v any) lisp.Value {
@@ -1205,6 +1333,82 @@ func RegisterNamespace(env *lisp.Env) {
                 }
                 uri := string(args[0].(lisp.String))
                 return ResolveColorURI(uri)
+        })
+
+        // (color/walk "alpine" 16 42) → vector of {step, name, hex} hashmaps
+        // walkSeed is optional; defaults to the VM's own seed.
+        reg("color/walk", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("color/walk: requires (name [steps] [walk-seed])")
+                }
+                name := string(args[0].(lisp.String))
+                steps := 8
+                if len(args) >= 2 {
+                        steps = int(args[1].(lisp.Int))
+                }
+                var ws uint64
+                if len(args) >= 3 {
+                        ws = uint64(args[2].(lisp.Int))
+                } else {
+                        inst, ok := GetVM(name)
+                        if ok {
+                                inst.mu.Lock()
+                                ws = inst.Seed
+                                inst.mu.Unlock()
+                        }
+                }
+                trail := RandomWalk(name, steps, ws)
+                items := make(lisp.Vector, len(trail))
+                for i, step := range trail {
+                        sm := make(lisp.HashMap)
+                        sm[lisp.Keyword("step")] = lisp.Float(float64(i))
+                        sm[lisp.Keyword("name")] = lisp.String(step.Name)
+                        sm[lisp.Keyword("hex")] = lisp.String(step.Hex)
+                        items[i] = sm
+                }
+                return items
+        })
+
+        // (color/spi-fingerprint "alpine") → {:seed :invocation :fingerprint :current-hex}
+        reg("color/spi-fingerprint", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("color/spi-fingerprint: requires (name)")
+                }
+                name := string(args[0].(lisp.String))
+                inst, ok := GetVM(name)
+                if !ok {
+                        return lisp.Nil{}
+                }
+                inst.mu.Lock()
+                seed := inst.Seed
+                inv := inst.Invocation
+                fp := inst.Fingerprint
+                inst.mu.Unlock()
+                m := make(lisp.HashMap)
+                m[lisp.Keyword("seed")] = lisp.Float(float64(seed))
+                m[lisp.Keyword("invocation")] = lisp.Float(float64(inv))
+                m[lisp.Keyword("fingerprint")] = lisp.Float(float64(fp))
+                ch, cs, cl := colorAt(seed, inv)
+                m[lisp.Keyword("current-hex")] = lisp.String(hslToHex(ch, cs, cl))
+                return m
+        })
+
+        // (color/fuzz-step "alpine") → advance invocation + return new color hex
+        reg("color/fuzz-step", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("color/fuzz-step: requires (name)")
+                }
+                name := string(args[0].(lisp.String))
+                inst, ok := GetVM(name)
+                if !ok {
+                        return lisp.Nil{}
+                }
+                inst.mu.Lock()
+                inst.Invocation++
+                inst.Fingerprint ^= splitmix64(inst.Seed ^ inst.Invocation)
+                h, s, l := colorAt(inst.Seed, inst.Invocation)
+                inst.mu.Unlock()
+                return lisp.String(hslToHex(h, s, l))
         })
 }
 
