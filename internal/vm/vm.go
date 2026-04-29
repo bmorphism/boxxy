@@ -342,6 +342,9 @@ func StopVM(instance *VMInstance) error {
 
 // GetState returns the current VM state as a string
 func GetState(instance *VMInstance) string {
+        if instance.VM == nil {
+                return "unknown"
+        }
         switch instance.VM.State() {
         case vz.VirtualMachineStateStopped:
                 return "stopped"
@@ -436,14 +439,20 @@ func ResolveVMURI(uri string) lisp.Value {
         }
 
         path := strings.TrimPrefix(uri, VMScheme)
+        if path == "" {
+                return lisp.Nil{}
+        }
 
         if path == "list" {
                 vms := ListVMs()
                 items := make(lisp.Vector, 0, len(vms))
                 for name, inst := range vms {
+                        inst.mu.Lock()
+                        state := getStateLocked(inst)
+                        inst.mu.Unlock()
                         m := make(lisp.HashMap)
                         m[lisp.Keyword("name")] = lisp.String(name)
-                        m[lisp.Keyword("state")] = lisp.String(GetState(inst))
+                        m[lisp.Keyword("state")] = lisp.String(state)
                         items = append(items, m)
                 }
                 return items
@@ -451,15 +460,23 @@ func ResolveVMURI(uri string) lisp.Value {
 
         parts := strings.SplitN(path, "/", 2)
         name := parts[0]
+        if name == "" {
+                return lisp.Nil{}
+        }
         inst, ok := GetVM(name)
         if !ok {
                 return lisp.Nil{}
         }
 
+        // Read state under lock — consistent with any concurrent SetAttr / color:// reads.
+        inst.mu.Lock()
+        state := getStateLocked(inst)
+        inst.mu.Unlock()
+
         if len(parts) == 1 {
                 m := make(lisp.HashMap)
                 m[lisp.Keyword("name")] = lisp.String(name)
-                m[lisp.Keyword("state")] = lisp.String(GetState(inst))
+                m[lisp.Keyword("state")] = lisp.String(state)
                 m[lisp.Keyword("nested-virt-supported")] = lisp.Bool(vz.IsNestedVirtualizationSupported())
                 return m
         }
@@ -467,13 +484,13 @@ func ResolveVMURI(uri string) lisp.Value {
         sub := parts[1]
         switch sub {
         case "state":
-                return lisp.String(GetState(inst))
+                return lisp.String(state)
         case "usb":
-                return lisp.Bool(true) // presence in registry implies config was applied
+                return lisp.Bool(true)
         case "save-path":
                 return lisp.Nil{}
         default:
-                panic(fmt.Sprintf("vm/resolve: unknown sub-resource: %s", sub))
+                return lisp.Nil{} // unknown sub-resource returns nil, no panic
         }
 }
 
@@ -516,6 +533,9 @@ func stateHue(state string) float64 {
 // It reads the same VMInstance but projects color semantics from the open Attrs.
 // Accumulation happens elsewhere (vm/set-attr!); this only reads.
 //
+// The entire read is done under a single lock acquisition to guarantee
+// snapshot consistency (no torn reads between hue/sat/lit and merged attrs).
+//
 //   color://{name}          → hashmap with :hue :saturation :lightness :name :source-uri + any attrs
 //   color://{name}/hue      → float
 //   color://{name}/hex      → string "#RRGGBB"
@@ -525,34 +545,54 @@ func ResolveColorURI(uri string) lisp.Value {
         }
 
         path := strings.TrimPrefix(uri, ColorScheme)
+        if path == "" {
+                return lisp.Nil{}
+        }
         parts := strings.SplitN(path, "/", 2)
         name := parts[0]
+        if name == "" {
+                return lisp.Nil{}
+        }
         inst, ok := GetVM(name)
         if !ok {
                 return lisp.Nil{}
         }
 
-        state := GetState(inst)
+        // Single lock for the entire snapshot — no torn reads.
+        inst.mu.Lock()
+        state := getStateLocked(inst)
         hue := stateHue(state)
         sat := 0.6
         lit := 0.5
 
-        // Overlay attrs: if someone deposited "hue", "saturation", "lightness", use those.
-        inst.mu.Lock()
-        if v, exists := inst.Attrs["hue"]; exists {
-                if f, ok := v.(float64); ok {
-                        hue = f
+        // Overlay attrs if deposited.
+        if inst.Attrs != nil {
+                if v, exists := inst.Attrs["hue"]; exists {
+                        if f, ok := v.(float64); ok {
+                                hue = f
+                        }
+                }
+                if v, exists := inst.Attrs["saturation"]; exists {
+                        if f, ok := v.(float64); ok {
+                                sat = f
+                        }
+                }
+                if v, exists := inst.Attrs["lightness"]; exists {
+                        if f, ok := v.(float64); ok {
+                                lit = f
+                        }
                 }
         }
-        if v, exists := inst.Attrs["saturation"]; exists {
-                if f, ok := v.(float64); ok {
-                        sat = f
-                }
-        }
-        if v, exists := inst.Attrs["lightness"]; exists {
-                if f, ok := v.(float64); ok {
-                        lit = f
-                }
+
+        // Clamp to valid HSL ranges.
+        hue = clampHue(hue)
+        sat = clamp01(sat)
+        lit = clamp01(lit)
+
+        // Snapshot attrs for sub-resource passthrough and full merge.
+        attrsCopy := make(map[string]any, len(inst.Attrs))
+        for k, v := range inst.Attrs {
+                attrsCopy[k] = v
         }
         inst.mu.Unlock()
 
@@ -563,15 +603,14 @@ func ResolveColorURI(uri string) lisp.Value {
                 case "hex":
                         return lisp.String(hslToHex(hue, sat, lit))
                 default:
-                        // passthrough to attrs
-                        if v, ok := GetAttr(inst, parts[1]); ok {
+                        if v, exists := attrsCopy[parts[1]]; exists {
                                 return anyToLisp(v)
                         }
                         return lisp.Nil{}
                 }
         }
 
-        // Full projection
+        // Full projection — built from the already-snapshotted data.
         m := make(lisp.HashMap)
         m[lisp.Keyword("name")] = lisp.String(name)
         m[lisp.Keyword("source-uri")] = lisp.String(VMScheme + name)
@@ -581,17 +620,63 @@ func ResolveColorURI(uri string) lisp.Value {
         m[lisp.Keyword("lightness")] = lisp.Float(lit)
         m[lisp.Keyword("hex")] = lisp.String(hslToHex(hue, sat, lit))
 
-        // Merge all open attrs as keywords
-        inst.mu.Lock()
-        for k, v := range inst.Attrs {
+        for k, v := range attrsCopy {
                 kw := lisp.Keyword(k)
                 if _, already := m[kw]; !already {
                         m[kw] = anyToLisp(v)
                 }
         }
-        inst.mu.Unlock()
 
         return m
+}
+
+// getStateLocked reads VM state while caller already holds inst.mu.
+func getStateLocked(inst *VMInstance) string {
+        if inst.VM == nil {
+                return "unknown"
+        }
+        switch inst.VM.State() {
+        case vz.VirtualMachineStateStopped:
+                return "stopped"
+        case vz.VirtualMachineStateRunning:
+                return "running"
+        case vz.VirtualMachineStatePaused:
+                return "paused"
+        case vz.VirtualMachineStateError:
+                return "error"
+        case vz.VirtualMachineStateStarting:
+                return "starting"
+        case vz.VirtualMachineStatePausing:
+                return "pausing"
+        case vz.VirtualMachineStateResuming:
+                return "resuming"
+        case vz.VirtualMachineStateStopping:
+                return "stopping"
+        case vz.VirtualMachineStateSaving:
+                return "saving"
+        case vz.VirtualMachineStateRestoring:
+                return "restoring"
+        default:
+                return "unknown"
+        }
+}
+
+func clampHue(h float64) float64 {
+        h = h - 360.0*float64(int(h/360.0))
+        if h < 0 {
+                h += 360.0
+        }
+        return h
+}
+
+func clamp01(v float64) float64 {
+        if v < 0 {
+                return 0
+        }
+        if v > 1 {
+                return 1
+        }
+        return v
 }
 
 func anyToLisp(v any) lisp.Value {
