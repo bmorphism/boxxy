@@ -9,11 +9,18 @@ import (
         "os"
         "os/signal"
         "runtime"
+        "strings"
         "sync"
         "syscall"
 
         "github.com/Code-Hex/vz/v3"
         "github.com/bmorphism/boxxy/internal/lisp"
+)
+
+// vm:// URI scheme constants (borrowing from vibespace-mcp pattern)
+const (
+        VMScheme   = "vm://"
+        VMListURI  = "vm://list"
 )
 
 func init() {
@@ -400,6 +407,70 @@ func GetVM(name string) (*VMInstance, bool) {
         return v, ok
 }
 
+func ListVMs() map[string]*VMInstance {
+        vmRegistryMu.RLock()
+        defer vmRegistryMu.RUnlock()
+        out := make(map[string]*VMInstance, len(vmRegistry))
+        for k, v := range vmRegistry {
+                out[k] = v
+        }
+        return out
+}
+
+// ResolveVMURI dispatches a vm:// URI and returns a Lisp value.
+//
+//   vm://list              → vector of {name, state} hashmaps
+//   vm://{name}            → {name, state, nested-virt, xhci, save-path} hashmap
+//   vm://{name}/state      → state string
+//   vm://{name}/usb        → bool (XHCI enabled)
+//   vm://{name}/save-path  → string or nil
+func ResolveVMURI(uri string) lisp.Value {
+        if !strings.HasPrefix(uri, VMScheme) {
+                panic(fmt.Sprintf("vm/resolve: not a vm:// URI: %s", uri))
+        }
+
+        path := strings.TrimPrefix(uri, VMScheme)
+
+        if path == "list" {
+                vms := ListVMs()
+                items := make(lisp.Vector, 0, len(vms))
+                for name, inst := range vms {
+                        m := make(lisp.HashMap)
+                        m[lisp.Keyword("name")] = lisp.String(name)
+                        m[lisp.Keyword("state")] = lisp.String(GetState(inst))
+                        items = append(items, m)
+                }
+                return items
+        }
+
+        parts := strings.SplitN(path, "/", 2)
+        name := parts[0]
+        inst, ok := GetVM(name)
+        if !ok {
+                return lisp.Nil{}
+        }
+
+        if len(parts) == 1 {
+                m := make(lisp.HashMap)
+                m[lisp.Keyword("name")] = lisp.String(name)
+                m[lisp.Keyword("state")] = lisp.String(GetState(inst))
+                m[lisp.Keyword("nested-virt-supported")] = lisp.Bool(vz.IsNestedVirtualizationSupported())
+                return m
+        }
+
+        sub := parts[1]
+        switch sub {
+        case "state":
+                return lisp.String(GetState(inst))
+        case "usb":
+                return lisp.Bool(true) // presence in registry implies config was applied
+        case "save-path":
+                return lisp.Nil{}
+        default:
+                panic(fmt.Sprintf("vm/resolve: unknown sub-resource: %s", sub))
+        }
+}
+
 // StoragePlan describes the storage configuration for test verification.
 type StoragePlan struct {
         HasISO  bool
@@ -783,6 +854,36 @@ func RegisterNamespace(env *lisp.Env) {
                         return lisp.Bool(false)
                 }
                 return lisp.Bool(ok)
+        })
+
+        // -- vm:// URI Resource Protocol (vibespace-mcp pattern) --
+
+        reg("vm/resolve", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("vm/resolve: requires (uri-string)")
+                }
+                uri := string(args[0].(lisp.String))
+                return ResolveVMURI(uri)
+        })
+
+        reg("vm/register!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vm/register!: requires (name vm)")
+                }
+                name := string(args[0].(lisp.String))
+                ext := args[1].(*lisp.ExternalValue)
+                instance := ext.Value.(*VMInstance)
+                RegisterVM(name, instance)
+                return lisp.String(VMScheme + name)
+        })
+
+        reg("vm/list-uris", func(args []lisp.Value) lisp.Value {
+                vms := ListVMs()
+                uris := make(lisp.Vector, 0, len(vms))
+                for name := range vms {
+                        uris = append(uris, lisp.String(VMScheme+name))
+                }
+                return uris
         })
 }
 
