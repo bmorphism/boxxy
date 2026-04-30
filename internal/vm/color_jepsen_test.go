@@ -52,11 +52,11 @@ func TestColorAtDeterministic(t *testing.T) {
 			if h1 < 0 || h1 >= 360 {
 				t.Errorf("hue out of [0,360): %f", h1)
 			}
-			if s1 < 0.5 || s1 > 1.0 {
-				t.Errorf("sat out of [0.5,1.0]: %f", s1)
+			if s1 < 0.5 || s1 >= 1.0 {
+				t.Errorf("sat out of [0.5,1.0): %f", s1)
 			}
-			if l1 < 0.4 || l1 > 0.6 {
-				t.Errorf("lit out of [0.4,0.6]: %f", l1)
+			if l1 < 0.4 || l1 >= 0.6 {
+				t.Errorf("lit out of [0.4,0.6): %f", l1)
 			}
 		}
 	}
@@ -583,7 +583,7 @@ func TestResolveColorURIEdgeCases(t *testing.T) {
 		{"color://", true, false},
 		{"color:///hue", true, false},
 		{"color://nonexistent", true, false},
-		{"nope://x", false, true},
+		{"nope://x", true, false},
 	}
 	for _, tc := range cases {
 		tc := tc

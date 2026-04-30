@@ -7,6 +7,7 @@ import (
         "fmt"
         "hash/fnv"
         "io"
+        "math"
         "os"
         "os/signal"
         "runtime"
@@ -561,7 +562,7 @@ func stateHue(state string) float64 {
 //   color://{name}/hex      → string "#RRGGBB"
 func ResolveColorURI(uri string) lisp.Value {
         if !strings.HasPrefix(uri, ColorScheme) {
-                panic(fmt.Sprintf("color/resolve: not a color:// URI: %s", uri))
+                return lisp.Nil{}
         }
 
         path := strings.TrimPrefix(uri, ColorScheme)
@@ -722,18 +723,24 @@ func getStateLocked(inst *VMInstance) string {
 }
 
 func clampHue(h float64) float64 {
-        h = h - 360.0*float64(int(h/360.0))
+        if math.IsNaN(h) || math.IsInf(h, 0) {
+                return 0
+        }
+        h = math.Mod(h, 360.0)
         if h < 0 {
                 h += 360.0
+        }
+        if h >= 360.0 {
+                h = 0
         }
         return h
 }
 
 func clamp01(v float64) float64 {
-        if v < 0 {
+        if math.IsNaN(v) || math.IsInf(v, -1) || v < 0 {
                 return 0
         }
-        if v > 1 {
+        if math.IsInf(v, 1) || v > 1 {
                 return 1
         }
         return v
@@ -759,9 +766,10 @@ func splitmix64(x uint64) uint64 {
 // O(1) random access — no need to iterate from 0.
 func colorAt(seed, index uint64) (h, s, l float64) {
         mixed := splitmix64(seed ^ index)
-        h = float64(mixed&0xFFFF) / 65535.0 * 360.0
-        s = 0.5 + float64((mixed>>16)&0xFFFF)/65535.0*0.5 // [0.5, 1.0]
-        l = 0.4 + float64((mixed>>32)&0xFFFF)/65535.0*0.2 // [0.4, 0.6]
+        // Use 65536.0 (not 65535.0) so hue stays in [0, 360) — never hits 360 exactly.
+        h = float64(mixed&0xFFFF) / 65536.0 * 360.0
+        s = 0.5 + float64((mixed>>16)&0xFFFF)/65536.0*0.5 // [0.5, ~1.0)
+        l = 0.4 + float64((mixed>>32)&0xFFFF)/65536.0*0.2 // [0.4, ~0.6)
         return h, s, l
 }
 
