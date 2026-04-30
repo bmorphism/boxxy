@@ -38,6 +38,220 @@ func (e *Env) Set(s Symbol, v Value) {
 	e.bindings[s] = v
 }
 
+// === Namespace System (SCI-style Clojure namespaces) ===
+
+// Namespace represents a Clojure-style namespace with bindings and aliases.
+type Namespace struct {
+	Name     string
+	Bindings map[Symbol]Value
+	Aliases  map[string]string // alias → fully-qualified ns name
+	Refers   map[Symbol]string // symbol → source ns name
+}
+
+// NSRegistry manages all namespaces.
+type NSRegistry struct {
+	namespaces map[string]*Namespace
+	current    string
+}
+
+var globalNSRegistry = &NSRegistry{
+	namespaces: map[string]*Namespace{},
+	current:    "user",
+}
+
+// GetNSRegistry returns the global namespace registry.
+func GetNSRegistry() *NSRegistry { return globalNSRegistry }
+
+// ResetNSRegistry replaces the global registry with a fresh one (for testing).
+func ResetNSRegistry() {
+	globalNSRegistry = &NSRegistry{
+		namespaces: map[string]*Namespace{},
+		current:    "user",
+	}
+}
+
+func (r *NSRegistry) FindOrCreate(name string) *Namespace {
+	if ns, ok := r.namespaces[name]; ok {
+		return ns
+	}
+	ns := &Namespace{
+		Name:     name,
+		Bindings: make(map[Symbol]Value),
+		Aliases:  make(map[string]string),
+		Refers:   make(map[Symbol]string),
+	}
+	r.namespaces[name] = ns
+	return ns
+}
+
+func (r *NSRegistry) Current() *Namespace  { return r.FindOrCreate(r.current) }
+func (r *NSRegistry) CurrentName() string   { return r.current }
+
+func (r *NSRegistry) SetCurrent(name string) {
+	r.current = name
+	r.FindOrCreate(name)
+}
+
+func (r *NSRegistry) AllNames() []string {
+	names := make([]string, 0, len(r.namespaces))
+	for n := range r.namespaces {
+		names = append(names, n)
+	}
+	return names
+}
+
+// Intern binds a symbol in the current namespace.
+func (r *NSRegistry) Intern(sym Symbol, val Value) {
+	r.Current().Bindings[sym] = val
+}
+
+// ResolveSymbol resolves a symbol through namespace machinery:
+//  1. Qualified (alias/local): look up alias in current ns, then as full ns name
+//  2. Unqualified: check refers, then current ns bindings
+func (r *NSRegistry) ResolveSymbol(sym Symbol) (Value, bool) {
+	name := string(sym)
+
+	if idx := strings.Index(name, "/"); idx > 0 {
+		alias := name[:idx]
+		local := Symbol(name[idx+1:])
+		cur := r.Current()
+		if nsName, ok := cur.Aliases[alias]; ok {
+			if ns, ok := r.namespaces[nsName]; ok {
+				if v, ok := ns.Bindings[local]; ok {
+					return v, true
+				}
+			}
+		}
+		if ns, ok := r.namespaces[alias]; ok {
+			if v, ok := ns.Bindings[local]; ok {
+				return v, true
+			}
+		}
+		return nil, false
+	}
+
+	cur := r.Current()
+	if srcNS, ok := cur.Refers[sym]; ok {
+		if ns, ok := r.namespaces[srcNS]; ok {
+			if v, ok := ns.Bindings[sym]; ok {
+				return v, true
+			}
+		}
+	}
+	if v, ok := cur.Bindings[sym]; ok {
+		return v, true
+	}
+	return nil, false
+}
+
+// InternInNS binds a value in a named namespace (for Go-side registration).
+func InternInNS(nsName string, sym Symbol, val Value) {
+	globalNSRegistry.FindOrCreate(nsName).Bindings[sym] = val
+}
+
+// SetupDefaultAliases configures the user namespace with standard aliases.
+func SetupDefaultAliases() {
+	user := globalNSRegistry.FindOrCreate("user")
+	user.Aliases["vz"] = "boxxy.vz"
+	user.Aliases["vm"] = "boxxy.vm"
+	user.Aliases["color"] = "boxxy.color"
+	user.Aliases["trace"] = "boxxy.trace"
+}
+
+// evalNSForm implements (ns name (:require ...))
+func evalNSForm(form List, env *Env) Value {
+	if len(form) < 2 {
+		panic("ns requires a name")
+	}
+	name, ok := form[1].(Symbol)
+	if !ok {
+		panic("ns name must be a symbol")
+	}
+	nsName := string(name)
+	globalNSRegistry.SetCurrent(nsName)
+
+	for _, directive := range form[2:] {
+		lst, ok := directive.(List)
+		if !ok {
+			continue
+		}
+		if len(lst) < 1 {
+			continue
+		}
+		kw, ok := lst[0].(Keyword)
+		if !ok {
+			continue
+		}
+		if kw == "require" {
+			processRequireSpecs(lst[1:])
+		}
+	}
+	return Symbol(nsName)
+}
+
+// processRequireSpecs processes require specs like [ns :as alias] or [ns :refer [sym ...]]
+func processRequireSpecs(specs []Value) {
+	for _, spec := range specs {
+		if lst, ok := spec.(List); ok && len(lst) == 2 {
+			if sym, ok := lst[0].(Symbol); ok && sym == "quote" {
+				spec = lst[1]
+			}
+		}
+		switch s := spec.(type) {
+		case Vector:
+			processRequireVec(s)
+		case Symbol:
+			globalNSRegistry.FindOrCreate(string(s))
+		}
+	}
+}
+
+func processRequireVec(v Vector) {
+	if len(v) == 0 {
+		return
+	}
+	nsName, ok := v[0].(Symbol)
+	if !ok {
+		panic("require: namespace name must be a symbol")
+	}
+	targetNS := string(nsName)
+	globalNSRegistry.FindOrCreate(targetNS)
+	cur := globalNSRegistry.Current()
+
+	for i := 1; i < len(v)-1; i += 2 {
+		kw, ok := v[i].(Keyword)
+		if !ok {
+			continue
+		}
+		switch kw {
+		case "as":
+			alias, ok := v[i+1].(Symbol)
+			if !ok {
+				panic(":as value must be a symbol")
+			}
+			cur.Aliases[string(alias)] = targetNS
+		case "refer":
+			switch ref := v[i+1].(type) {
+			case Vector:
+				for _, sym := range ref {
+					if name, ok := sym.(Symbol); ok {
+						cur.Refers[name] = targetNS
+					}
+				}
+			case Keyword:
+				if ref == "all" {
+					ns := globalNSRegistry.FindOrCreate(targetNS)
+					for sym := range ns.Bindings {
+						cur.Refers[sym] = targetNS
+					}
+				}
+			default:
+				panic(":refer value must be a vector or :all")
+			}
+		}
+	}
+}
+
 // Eval evaluates a value in an environment
 func Eval(val Value, env *Env) Value {
 	switch v := val.(type) {
@@ -46,6 +260,9 @@ func Eval(val Value, env *Env) Value {
 
 	case Symbol:
 		result, ok := env.Get(v)
+		if !ok {
+			result, ok = globalNSRegistry.ResolveSymbol(v)
+		}
 		if !ok {
 			panic(fmt.Sprintf("undefined symbol: %s", v))
 		}
@@ -89,6 +306,7 @@ func Eval(val Value, env *Env) Value {
 				}
 				value := Eval(v[2], env)
 				env.Set(name, value)
+				globalNSRegistry.Intern(name, value)
 				return value
 
 			case "let":
@@ -174,12 +392,28 @@ func Eval(val Value, env *Env) Value {
 				return result
 
 			case "require":
-				// No-op for now - namespaces are pre-registered
+				processRequireSpecs(v[1:])
 				return Nil{}
 
 			case "ns":
-				// No-op - namespaces handled differently
-				return Nil{}
+				return evalNSForm(v, env)
+
+			case "in-ns":
+				if len(v) != 2 {
+					panic("in-ns requires exactly one argument")
+				}
+				nsVal := Eval(v[1], env)
+				var nsName string
+				switch n := nsVal.(type) {
+				case Symbol:
+					nsName = string(n)
+				case String:
+					nsName = string(n)
+				default:
+					panic("in-ns requires a symbol or string")
+				}
+				globalNSRegistry.SetCurrent(nsName)
+				return Symbol(nsName)
 			}
 		}
 
@@ -608,6 +842,63 @@ func CreateStandardEnv() *Env {
 			panic("not requires exactly 1 argument")
 		}
 		return Bool(!isTruthy(args[0]))
+	}})
+
+	// Namespace introspection
+	env.Set("ns-name", &Fn{"ns-name", func(args []Value) Value {
+		return Symbol(globalNSRegistry.CurrentName())
+	}})
+
+	env.Set("all-ns", &Fn{"all-ns", func(args []Value) Value {
+		names := globalNSRegistry.AllNames()
+		result := make(Vector, len(names))
+		for i, n := range names {
+			result[i] = Symbol(n)
+		}
+		return result
+	}})
+
+	env.Set("ns-aliases", &Fn{"ns-aliases", func(args []Value) Value {
+		var ns *Namespace
+		if len(args) > 0 {
+			ns = globalNSRegistry.FindOrCreate(string(args[0].(Symbol)))
+		} else {
+			ns = globalNSRegistry.Current()
+		}
+		result := make(HashMap)
+		for alias, target := range ns.Aliases {
+			result[Symbol(alias)] = Symbol(target)
+		}
+		return result
+	}})
+
+	env.Set("ns-map", &Fn{"ns-map", func(args []Value) Value {
+		var ns *Namespace
+		if len(args) > 0 {
+			ns = globalNSRegistry.FindOrCreate(string(args[0].(Symbol)))
+		} else {
+			ns = globalNSRegistry.Current()
+		}
+		result := make(HashMap)
+		for sym, val := range ns.Bindings {
+			result[sym] = val
+		}
+		return result
+	}})
+
+	env.Set("ns-resolve", &Fn{"ns-resolve", func(args []Value) Value {
+		if len(args) < 1 {
+			panic("ns-resolve requires a symbol")
+		}
+		sym, ok := args[0].(Symbol)
+		if !ok {
+			panic("ns-resolve requires a symbol")
+		}
+		val, found := globalNSRegistry.ResolveSymbol(sym)
+		if !found {
+			return Nil{}
+		}
+		return val
 	}})
 
 	return env

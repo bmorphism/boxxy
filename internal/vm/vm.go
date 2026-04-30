@@ -891,7 +891,14 @@ func storagePlanFromConfig(cfg Config) StoragePlan {
 // implementations.
 func RegisterNamespace(env *lisp.Env) {
         reg := func(name string, f func([]lisp.Value) lisp.Value) {
-                env.Set(lisp.Symbol(name), &lisp.Fn{Name: name, Func: f})
+                fn := &lisp.Fn{Name: name, Func: f}
+                env.Set(lisp.Symbol(name), fn)
+                // Also populate proper namespace: "vz/foo" → boxxy.vz ns, "foo" binding
+                if idx := strings.Index(name, "/"); idx > 0 {
+                        nsPrefix := name[:idx]
+                        localName := name[idx+1:]
+                        lisp.InternInNS("boxxy."+nsPrefix, lisp.Symbol(localName), fn)
+                }
         }
 
         // -- Boot Loaders --
@@ -1501,6 +1508,8 @@ func RegisterNamespace(env *lisp.Env) {
                 m[lisp.Keyword("decomposed")] = lisp.String(fmt.Sprintf("%x", r.DecomposedFingerprint))
                 return m
         })
+
+        lisp.SetupDefaultAliases()
 }
 
 // package-level TraceCache singleton (matches vmRegistry pattern)
