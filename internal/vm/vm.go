@@ -54,9 +54,9 @@ type Config struct {
         Height            int
         Keyboard          bool
         Pointer           bool
-        EnableNestedVirt  bool
-        EnableXHCI        bool
-        SaveStatePath     string
+        EnableNestedVirt  bool   // macOS 15+ nested virtualization
+        EnableXHCI        bool   // macOS 15+ USB XHCI controller
+        SaveStatePath     string // path for save/restore (macOS 14+)
 }
 
 // VMInstance wraps a running VM.
@@ -211,10 +211,11 @@ func CreateVM(cfg Config) (*VMInstance, error) {
         }
         vmConfig.SetSocketDevicesVirtualMachineConfiguration([]vz.SocketDeviceConfiguration{socketDev})
 
+        // XHCI USB controller (macOS 15+)
         if cfg.EnableXHCI {
                 xhci, err := vz.NewXHCIControllerConfiguration()
                 if err != nil {
-                        return nil, fmt.Errorf("xhci controller: %w", err)
+                        return nil, fmt.Errorf("xhci: %w", err)
                 }
                 vmConfig.SetUSBControllersVirtualMachineConfiguration([]vz.USBControllerConfiguration{xhci})
         }
@@ -1652,6 +1653,255 @@ func RegisterNamespace(env *lisp.Env) {
         })
 
         lisp.SetupDefaultAliases()
+
+        // -- Morphcloud Backend --
+
+        reg("morphcloud/new", func(args []lisp.Value) lisp.Value {
+                if len(args) < 3 {
+                        panic("morphcloud/new: requires (name cpus mem-gb)")
+                }
+                name := string(args[0].(lisp.String))
+                cpus := int(args[1].(lisp.Int))
+                memGB := int(args[2].(lisp.Int))
+                m := NewMorphcloudLifecycle(name, cpus, memGB)
+                return &lisp.ExternalValue{Value: m, Type: "MorphcloudVM"}
+        })
+
+        reg("morphcloud/set-snapshot!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("morphcloud/set-snapshot!: requires (vm snapshot-id)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                m := ext.Value.(*MorphcloudLifecycle)
+                m.SnapshotID = string(args[1].(lisp.String))
+                return lisp.Bool(true)
+        })
+
+        reg("morphcloud/start!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("morphcloud/start!: requires (vm)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                m := ext.Value.(*MorphcloudLifecycle)
+                if err := m.Start(context.Background()); err != nil {
+                        panic(fmt.Sprintf("morphcloud/start!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("morphcloud/exec", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("morphcloud/exec: requires (vm command)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                m := ext.Value.(*MorphcloudLifecycle)
+                cmd := string(args[1].(lisp.String))
+                out, err := m.Exec(context.Background(), cmd)
+                if err != nil {
+                        panic(fmt.Sprintf("morphcloud/exec: %v", err))
+                }
+                return lisp.String(out)
+        })
+
+        reg("morphcloud/snapshot!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("morphcloud/snapshot!: requires (vm)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                m := ext.Value.(*MorphcloudLifecycle)
+                snap, err := m.Snapshot(context.Background())
+                if err != nil {
+                        panic(fmt.Sprintf("morphcloud/snapshot!: %v", err))
+                }
+                return lisp.String(snap.SnapshotID)
+        })
+
+        reg("morphcloud/stop!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("morphcloud/stop!: requires (vm)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                m := ext.Value.(*MorphcloudLifecycle)
+                if err := m.Stop(context.Background()); err != nil {
+                        panic(fmt.Sprintf("morphcloud/stop!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("morphcloud/summary", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("morphcloud/summary: requires (vm)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                m := ext.Value.(*MorphcloudLifecycle)
+                return lisp.String(m.Summary())
+        })
+
+        // -- Vers.sh Backend --
+
+        reg("vers/new", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("vers/new: requires (name)")
+                }
+                name := string(args[0].(lisp.String))
+                v := NewVersVM(name)
+                return &lisp.ExternalValue{Value: v, Type: "VersVM"}
+        })
+
+        reg("vers/run!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vers/run!: requires (vm image)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                v := ext.Value.(*VersVM)
+                image := string(args[1].(lisp.String))
+                if err := v.Run(context.Background(), image); err != nil {
+                        panic(fmt.Sprintf("vers/run!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("vers/exec", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vers/exec: requires (vm command)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                v := ext.Value.(*VersVM)
+                cmd := string(args[1].(lisp.String))
+                out, err := v.Execute(context.Background(), cmd)
+                if err != nil {
+                        panic(fmt.Sprintf("vers/exec: %v", err))
+                }
+                return lisp.String(out)
+        })
+
+        reg("vers/branch!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vers/branch!: requires (vm branch-name)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                v := ext.Value.(*VersVM)
+                branch := string(args[1].(lisp.String))
+                if err := v.BranchVM(context.Background(), branch); err != nil {
+                        panic(fmt.Sprintf("vers/branch!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("vers/checkout!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("vers/checkout!: requires (vm branch-name)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                v := ext.Value.(*VersVM)
+                branch := string(args[1].(lisp.String))
+                if err := v.Checkout(context.Background(), branch); err != nil {
+                        panic(fmt.Sprintf("vers/checkout!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("vers/stop!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("vers/stop!: requires (vm)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                v := ext.Value.(*VersVM)
+                if err := v.Stop(context.Background()); err != nil {
+                        panic(fmt.Sprintf("vers/stop!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("vers/summary", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("vers/summary: requires (vm)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                v := ext.Value.(*VersVM)
+                return lisp.String(v.Summary())
+        })
+
+        // -- Mautrix Bridge --
+
+        reg("bridge/new", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("bridge/new: requires (type name)")
+                }
+                btype := BridgeType(string(args[0].(lisp.String)))
+                name := string(args[1].(lisp.String))
+                b := NewBridge(btype, name)
+                return &lisp.ExternalValue{Value: b, Type: "Bridge"}
+        })
+
+        reg("bridge/configure!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("bridge/configure!: requires (bridge homeserver)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                b := ext.Value.(*Bridge)
+                hs := string(args[1].(lisp.String))
+                if err := b.Configure(hs); err != nil {
+                        panic(fmt.Sprintf("bridge/configure!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("bridge/start!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("bridge/start!: requires (bridge)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                b := ext.Value.(*Bridge)
+                if err := b.Start(context.Background()); err != nil {
+                        panic(fmt.Sprintf("bridge/start!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("bridge/stop!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("bridge/stop!: requires (bridge)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                b := ext.Value.(*Bridge)
+                if err := b.Stop(); err != nil {
+                        panic(fmt.Sprintf("bridge/stop!: %v", err))
+                }
+                return lisp.Bool(true)
+        })
+
+        reg("bridge/login!", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("bridge/login!: requires (bridge credentials)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                b := ext.Value.(*Bridge)
+                creds := string(args[1].(lisp.String))
+                out, err := b.Login(context.Background(), creds)
+                if err != nil {
+                        panic(fmt.Sprintf("bridge/login!: %v\n%s", err, out))
+                }
+                return lisp.String(out)
+        })
+
+        reg("bridge/summary", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("bridge/summary: requires (bridge)")
+                }
+                ext := args[0].(*lisp.ExternalValue)
+                b := ext.Value.(*Bridge)
+                return lisp.String(b.Summary())
+        })
+
+        reg("bridge/types", func(args []lisp.Value) lisp.Value {
+                types := ListBridgeTypes()
+                var vals []lisp.Value
+                for _, t := range types {
+                        vals = append(vals, lisp.String(string(t)))
+                }
+                return lisp.List(vals)
+        })
 }
 
 // lispToTerm converts a Lisp value to a stellogen Term.
