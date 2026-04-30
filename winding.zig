@@ -175,11 +175,11 @@ pub const MultiWinding = struct {
 
     // Find all resources with non-zero winding (leaks or double-frees)
     pub fn violations(self: MultiWinding, allocator: std.mem.Allocator) ![]const Violation {
-        var list = std.ArrayList(Violation).init(allocator);
+        var list = std.ArrayListUnmanaged(Violation){};
         var key_iter = self.accumulators.iterator();
         while (key_iter.next()) |entry| {
             if (!entry.value_ptr.isBalanced()) {
-                try list.append(.{
+                try list.append(allocator, .{
                     .resource_id = entry.key_ptr.*,
                     .winding = entry.value_ptr.winding(),
                     .residue = entry.value_ptr.residue(),
@@ -188,7 +188,7 @@ pub const MultiWinding = struct {
                 });
             }
         }
-        return list.toOwnedSlice();
+        return list.toOwnedSlice(allocator);
     }
 };
 
