@@ -418,6 +418,65 @@ func Eval(val Value, env *Env) Value {
 				}
 				return result
 
+			case "loop":
+				// (loop [x 0 y 1] body...)
+				// recur in tail position restarts the loop with new bindings.
+				if len(v) < 2 {
+					panic("loop requires bindings and body")
+				}
+				bindings, ok := v[1].(Vector)
+				if !ok {
+					panic("loop bindings must be a vector")
+				}
+				if len(bindings)%2 != 0 {
+					panic("loop bindings must have even number of elements")
+				}
+				nBindings := len(bindings) / 2
+				names := make([]Symbol, nBindings)
+				for i := 0; i < nBindings; i++ {
+					n, ok := bindings[i*2].(Symbol)
+					if !ok {
+						panic("loop binding name must be a symbol")
+					}
+					names[i] = n
+				}
+				body := v[2:]
+
+				// Initialize bindings
+				loopEnv := NewEnv(env)
+				for i := 0; i < nBindings; i++ {
+					loopEnv.Set(names[i], Eval(bindings[i*2+1], loopEnv))
+				}
+
+				// TCO loop: iterate until result is not a Recur
+				for {
+					var result Value = Nil{}
+					for _, expr := range body {
+						result = Eval(expr, loopEnv)
+					}
+					rec, isRecur := result.(Recur)
+					if !isRecur {
+						return result
+					}
+					if len(rec.Args) != nBindings {
+						panic(fmt.Sprintf("recur arity mismatch: expected %d, got %d",
+							nBindings, len(rec.Args)))
+					}
+					// Rebind without growing the stack
+					for i, name := range names {
+						loopEnv.Set(name, rec.Args[i])
+					}
+				}
+
+			case "recur":
+				// (recur new-x new-y)
+				// Returns a Recur sentinel; only valid inside loop.
+				args := make([]Value, len(v)-1)
+				for i, arg := range v[1:] {
+					args[i] = Eval(arg, env)
+				}
+				return Recur{Args: args}
+
 			case "require":
 				processRequireSpecs(v[1:])
 				return Nil{}
@@ -1431,6 +1490,142 @@ func CreateStandardEnv() *Env {
 			return Nil{}
 		}
 		return val
+	}})
+
+	// trampoline — bounces thunks until a non-thunk value.
+	env.Set("trampoline", &Fn{"trampoline", func(args []Value) Value {
+		if len(args) < 1 {
+			panic("trampoline requires at least a function")
+		}
+		fn := args[0].(*Fn)
+		result := fn.Func(args[1:])
+		for {
+			thunk, ok := result.(Thunk)
+			if !ok {
+				return result
+			}
+			result = thunk.Func()
+		}
+	}})
+
+	// thunk — wrap an expression as a zero-arg thunk for trampoline.
+	env.Set("thunk", &Fn{"thunk", func(args []Value) Value {
+		if len(args) < 1 {
+			panic("thunk requires at least a function")
+		}
+		fn := args[0].(*Fn)
+		captured := make([]Value, len(args)-1)
+		copy(captured, args[1:])
+		return Thunk{Func: func() Value {
+			return fn.Func(captured)
+		}}
+	}})
+
+	// memoize — returns a memoized version of a function.
+	env.Set("memoize", &Fn{"memoize", func(args []Value) Value {
+		if len(args) != 1 {
+			panic("memoize requires exactly 1 function")
+		}
+		fn := args[0].(*Fn)
+		cache := make(map[string]Value)
+		return &Fn{
+			Name: fn.Name + "/memo",
+			Func: func(innerArgs []Value) Value {
+				key := fmt.Sprintf("%v", innerArgs)
+				if v, ok := cache[key]; ok {
+					return v
+				}
+				result := fn.Func(innerArgs)
+				cache[key] = result
+				return result
+			},
+		}
+	}})
+
+	env.Set("memo-stats", &Fn{"memo-stats", func(args []Value) Value {
+		if len(args) != 1 {
+			panic("memo-stats requires 1 function")
+		}
+		fn := args[0].(*Fn)
+		return String(fn.Name)
+	}})
+
+	// mod — integer modular arithmetic (needed for GF(3) in Lisp)
+	env.Set("mod", &Fn{"mod", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("mod requires exactly 2 arguments")
+		}
+		a := int64(args[0].(Int))
+		b := int64(args[1].(Int))
+		r := a % b
+		if r < 0 {
+			r += b
+		}
+		return Int(r)
+	}})
+
+	// map — (map f coll) → vector
+	env.Set("map", &Fn{"map", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("map requires function and collection")
+		}
+		fn := args[0].(*Fn)
+		var items []Value
+		switch coll := args[1].(type) {
+		case Vector:
+			items = []Value(coll)
+		case List:
+			items = []Value(coll)
+		default:
+			panic(fmt.Sprintf("map not supported for %T", coll))
+		}
+		result := make(Vector, len(items))
+		for i, item := range items {
+			result[i] = fn.Func([]Value{item})
+		}
+		return result
+	}})
+
+	// reduce — (reduce f init coll) → value
+	env.Set("reduce", &Fn{"reduce", func(args []Value) Value {
+		if len(args) < 2 || len(args) > 3 {
+			panic("reduce requires (fn init? coll)")
+		}
+		fn := args[0].(*Fn)
+		var acc Value
+		var coll []Value
+		if len(args) == 3 {
+			acc = args[1]
+			switch c := args[2].(type) {
+			case Vector:
+				coll = []Value(c)
+			case List:
+				coll = []Value(c)
+			default:
+				panic(fmt.Sprintf("reduce not supported for %T", c))
+			}
+		} else {
+			switch c := args[1].(type) {
+			case Vector:
+				if len(c) == 0 {
+					return fn.Func(nil)
+				}
+				acc = c[0]
+				coll = []Value(c[1:])
+			case List:
+				if len(c) == 0 {
+					return fn.Func(nil)
+				}
+				acc = c[0]
+				coll = []Value(c[1:])
+			default:
+				panic(fmt.Sprintf("reduce not supported for %T", c))
+			}
+		}
+		for _, item := range coll {
+			acc = fn.Func([]Value{acc, item})
+		}
+		return acc
 	}})
 
 	return env

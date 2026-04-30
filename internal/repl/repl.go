@@ -13,6 +13,7 @@ import (
 	"github.com/bmorphism/boxxy/internal/color"
 	"github.com/bmorphism/boxxy/internal/lisp"
 	"github.com/bmorphism/boxxy/internal/streams"
+	"github.com/bmorphism/boxxy/internal/tile"
 	"github.com/bmorphism/boxxy/internal/tropical"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
@@ -38,6 +39,9 @@ func Start() {
 
 	// Register AGM belief revision namespace
 	RegisterAGM(env)
+
+	// Register tile namespace (color-dispatched VMs, Syrup wire, GF(3) lattice)
+	tile.RegisterNamespace(env)
 
 	// REPL-specific commands
 	env.Set("help", &lisp.Fn{Name: "help", Func: func(args []lisp.Value) lisp.Value {

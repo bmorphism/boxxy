@@ -118,6 +118,31 @@ var Backends = []Backend{
 		Trit:        1,
 		Color:       "#EF4444",
 	},
+	// VM backends — these launch boxxy REPL with a specific VM target
+	{
+		Name:        "Morphcloud",
+		Slug:        "morphcloud",
+		Cmd:         "", // internal — dispatches to morphcloud/* builtins
+		Description: "Morphcloud VM — snapshot-based cloud instances via REST API",
+		Trit:        1,
+		Color:       "#8B5CF6",
+	},
+	{
+		Name:        "Vers",
+		Slug:        "vers",
+		Cmd:         "", // internal — dispatches to vers/* builtins
+		Description: "Vers VM — branching virtual machines with copy-on-write snapshots",
+		Trit:        0,
+		Color:       "#EC4899",
+	},
+	{
+		Name:        "Bridge",
+		Slug:        "bridge",
+		Cmd:         "", // internal — dispatches to bridge/* builtins
+		Description: "Mautrix bridge manager — Signal, WhatsApp, Telegram, Bluesky, IRC, Slack, Discord",
+		Trit:        -1,
+		Color:       "#06D6A0",
+	},
 }
 
 // FindBackend looks up a backend by slug.

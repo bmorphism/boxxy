@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/bmorphism/boxxy/internal/android"
+	"github.com/bmorphism/boxxy/internal/repl"
 	"github.com/bmorphism/boxxy/internal/vm"
 )
 
@@ -38,6 +39,8 @@ func main() {
 		runHaiku(os.Args[2:])
 	case "sel4":
 		runSel4(os.Args[2:])
+	case "repl":
+		runREPL(os.Args[2:])
 	case "run":
 		runVM(os.Args[2:])
 	case "version", "-v", "--version":
@@ -801,10 +804,36 @@ Getting a Windows ARM64 ISO:
 	}
 }
 
+func runREPL(args []string) {
+	var seed uint64
+	classic := false
+
+	for i := 0; i < len(args); i++ {
+		switch args[i] {
+		case "--seed":
+			if i+1 < len(args) {
+				i++
+				seed, _ = strconv.ParseUint(args[i], 10, 64)
+			}
+		case "--classic":
+			classic = true
+		}
+	}
+
+	if classic {
+		repl.Start()
+	} else {
+		repl.StartTileREPL(seed)
+	}
+}
+
 func printUsage() {
 	fmt.Print(`boxxy — proof-of-attack VM platform via Apple Virtualization.framework
 
 Usage:
+  boxxy repl                           Tile-colored OSC 8 REPL (default)
+  boxxy repl --seed N                  REPL with deterministic seed
+  boxxy repl --classic                 Original lipgloss-themed REPL
   boxxy macos up                       Create + install + boot macOS VM
   boxxy macos ssh [cmd]                SSH into running guest
   boxxy macos status                   Show VM state

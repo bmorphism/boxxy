@@ -107,6 +107,21 @@ func (e *ExternalValue) String() string {
 	return fmt.Sprintf("#<%s>", e.Type)
 }
 
+// Recur is a sentinel returned by recur to signal loop continuation.
+// It carries the new bindings for the next iteration.
+type Recur struct {
+	Args []Value
+}
+
+func (r Recur) String() string { return "#<recur>" }
+
+// Thunk wraps a zero-arg function for trampoline-based mutual recursion.
+type Thunk struct {
+	Func func() Value
+}
+
+func (t Thunk) String() string { return "#<thunk>" }
+
 // Reader reads Lisp expressions
 type Reader struct {
 	reader *bufio.Reader
