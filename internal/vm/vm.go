@@ -1418,7 +1418,96 @@ func RegisterNamespace(env *lisp.Env) {
                 inst.mu.Unlock()
                 return lisp.String(hslToHex(h, s, l))
         })
+
+        // -- Trace / Functoriality --
+
+        // (trace/record-splitmix64 42 100 999) → record trace, return fingerprint hex
+        reg("trace/record-splitmix64", func(args []lisp.Value) lisp.Value {
+                inputs := make([]uint64, len(args))
+                for i, a := range args {
+                        inputs[i] = uint64(a.(lisp.Float))
+                }
+                bt := globalTraceCache.RecordSplitMix64(inputs)
+                return lisp.String(fmt.Sprintf("%x", bt.Fingerprint))
+        })
+
+        // (trace/record-color-at seed1 idx1 seed2 idx2 ...) → record pairs, return fingerprint
+        reg("trace/record-color-at", func(args []lisp.Value) lisp.Value {
+                if len(args)%2 != 0 {
+                        panic("trace/record-color-at: requires even number of args (seed idx pairs)")
+                }
+                pairs := make([][2]uint64, len(args)/2)
+                for i := 0; i < len(args); i += 2 {
+                        pairs[i/2] = [2]uint64{uint64(args[i].(lisp.Float)), uint64(args[i+1].(lisp.Float))}
+                }
+                bt := globalTraceCache.RecordColorAt(pairs)
+                return lisp.String(fmt.Sprintf("%x", bt.Fingerprint))
+        })
+
+        // (trace/record-seed-from-name "alice" "bob") → record name→seed trace
+        reg("trace/record-seed-from-name", func(args []lisp.Value) lisp.Value {
+                names := make([]string, len(args))
+                for i, a := range args {
+                        names[i] = string(a.(lisp.String))
+                }
+                bt := globalTraceCache.RecordSeedFromName(names)
+                return lisp.String(fmt.Sprintf("%x", bt.Fingerprint))
+        })
+
+        // (trace/behavioral-equal "splitmix64" "splitmix64-copy") → true/false/nil
+        reg("trace/behavioral-equal", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("trace/behavioral-equal: requires (name-a name-b)")
+                }
+                a := string(args[0].(lisp.String))
+                b := string(args[1].(lisp.String))
+                eq, err := globalTraceCache.BehaviorallyEqual(a, b)
+                if err != nil {
+                        return lisp.Nil{}
+                }
+                return lisp.Bool(eq)
+        })
+
+        // (trace/verify-functoriality n) → {:preserved true :count n :composed "..." :decomposed "..."}
+        reg("trace/verify-functoriality", func(args []lisp.Value) lisp.Value {
+                n := 100
+                if len(args) > 0 {
+                        n = int(args[0].(lisp.Float))
+                }
+                pairs := make([][2]uint64, n)
+                for i := 0; i < n; i++ {
+                        pairs[i] = [2]uint64{uint64(i * 7), uint64(i)}
+                }
+                r := globalTraceCache.VerifyFunctoriality(pairs)
+                m := make(lisp.HashMap)
+                m[lisp.Keyword("preserved")] = lisp.Bool(r.Preserved)
+                m[lisp.Keyword("count")] = lisp.Float(float64(r.InputCount))
+                m[lisp.Keyword("composed")] = lisp.String(fmt.Sprintf("%x", r.ComposedFingerprint))
+                m[lisp.Keyword("decomposed")] = lisp.String(fmt.Sprintf("%x", r.DecomposedFingerprint))
+                return m
+        })
+
+        // (trace/verify-e2e "alice" "bob" "carol") → {:preserved true :names 3 ...}
+        reg("trace/verify-e2e", func(args []lisp.Value) lisp.Value {
+                names := make([]string, len(args))
+                for i, a := range args {
+                        names[i] = string(a.(lisp.String))
+                }
+                r := globalTraceCache.VerifyEndToEndFunctoriality(names, 1)
+                m := make(lisp.HashMap)
+                m[lisp.Keyword("preserved")] = lisp.Bool(r.Preserved)
+                m[lisp.Keyword("names")] = lisp.Float(float64(len(r.Names)))
+                m[lisp.Keyword("composed")] = lisp.String(fmt.Sprintf("%x", r.ComposedFingerprint))
+                m[lisp.Keyword("decomposed")] = lisp.String(fmt.Sprintf("%x", r.DecomposedFingerprint))
+                return m
+        })
 }
+
+// package-level TraceCache singleton (matches vmRegistry pattern)
+var globalTraceCache = NewTraceCache()
+
+// GlobalTraceCache returns the package-level trace cache.
+func GlobalTraceCache() *TraceCache { return globalTraceCache }
 
 // Silence unused import warnings
 var _ = io.EOF
