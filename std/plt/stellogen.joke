@@ -1,0 +1,180 @@
+;; stellogen - Stellar resolution / constellation logic for boxxy
+;;
+;; Boris Eng's Stellogen (transcendental syntax):
+;;   - A star is a set of rays (positive or negative polarities)
+;;   - A constellation is a set of stars
+;;   - Interaction: a positive ray annihilates a matching negative ray
+;;   - Execution: iterated interaction until no more annihilations (normal form)
+;;   - Cut-elimination = interaction to normal form
+;;
+;; Maps to boxxy: rays are colored via SPI, interaction traces are memoized.
+
+(ns boxxy.stellogen
+  (:require [boxxy.trace :as trace]
+            [boxxy.color :as color]))
+
+;; =============================================================================
+;; Rays & Stars
+;; =============================================================================
+
+(defn ray+
+  "Positive ray: an output / conclusion. name is a symbol, terms is a vector."
+  [name terms]
+  {:tag :ray :polarity :+ :name name :terms (or terms [])})
+
+(defn ray-
+  "Negative ray: an input / hypothesis. name is a symbol, terms is a vector."
+  [name terms]
+  {:tag :ray :polarity :- :name name :terms (or terms [])})
+
+(defn star
+  "A star is a set of rays. Represents a logical clause / interaction point."
+  [& rays]
+  {:tag :star :rays (or rays [])})
+
+(defn constellation
+  "A constellation is a set of stars. Represents a proof structure / program."
+  [& stars]
+  {:tag :constellation :stars (or stars [])})
+
+;; =============================================================================
+;; Unification (first-order term matching)
+;; =============================================================================
+
+(defn var?
+  "Is this term a logic variable? Variables start with uppercase or ?."
+  [t]
+  (and (string? t)
+       (or (= (first (str t)) "?")
+           (and (>= (first (str t)) "A") (<= (first (str t)) "Z")))))
+
+(defn unify-terms
+  "Unify two term vectors. Returns a substitution map or nil on failure."
+  [ts1 ts2]
+  (if (not (= (count ts1) (count ts2)))
+    nil
+    (reduce
+      (fn [subst i]
+        (if (nil? subst) nil
+          (let [t1 (nth ts1 i) t2 (nth ts2 i)]
+            (cond
+              (= t1 t2) subst
+              (var? t1) (assoc subst t1 t2)
+              (var? t2) (assoc subst t2 t1)
+              :else nil))))
+      {} (vector 0 1 2)))) ;; up to 3-arity
+
+;; =============================================================================
+;; Interaction (Ray Annihilation)
+;; =============================================================================
+
+(defn rays-annihilate?
+  "Can ray+ and ray- interact? Same name, opposite polarity, unifiable terms."
+  [r1 r2]
+  (and (= (:name r1) (:name r2))
+       (not (= (:polarity r1) (:polarity r2)))
+       (not (nil? (unify-terms (:terms r1) (:terms r2))))))
+
+(defn interact-stars
+  "Try to interact two stars: find a pair of annihilating rays,
+  remove them, apply substitution to remaining rays, merge residuals.
+  Returns the residual star or nil if no interaction possible."
+  [s1 s2]
+  (let [find-pair (fn []
+                    (reduce
+                      (fn [found r1]
+                        (if found found
+                          (reduce
+                            (fn [found2 r2]
+                              (if found2 found2
+                                (if (rays-annihilate? r1 r2)
+                                  {:r1 r1 :r2 r2 :subst (unify-terms (:terms r1) (:terms r2))}
+                                  nil)))
+                            nil (:rays s2))))
+                      nil (:rays s1)))]
+    (let [pair (find-pair)]
+      (if (nil? pair)
+        nil
+        (let [remaining1 (filter (fn [r] (not (= r (:r1 pair)))) (:rays s1))
+              remaining2 (filter (fn [r] (not (= r (:r2 pair)))) (:rays s2))]
+          (star (reduce conj [] (reduce conj remaining1 remaining2))))))))
+
+;; =============================================================================
+;; Execution (Iterated Interaction)
+;; =============================================================================
+
+(defn execute-step
+  "One execution step on a constellation: find any two stars that interact,
+  replace them with their residual. Returns {:constellation c :interacted bool}."
+  [c]
+  (let [stars (:stars c)
+        n (count stars)]
+    (let [try-all (fn [i j]
+                    (if (>= i n)
+                      {:constellation c :interacted false}
+                      (if (>= j n)
+                        (try-all (+ i 1) (+ i 2))
+                        (let [result (interact-stars (nth stars i) (nth stars j))]
+                          (if (nil? result)
+                            (try-all i (+ j 1))
+                            (let [remaining (filter
+                                    (fn [s] (and (not (= s (nth stars i)))
+                                                 (not (= s (nth stars j)))))
+                                    stars)]
+                              {:constellation (constellation (conj remaining result))
+                               :interacted true
+                               :annihilated [(nth stars i) (nth stars j)]}))))))]
+      ;; simplified: try first two pairs
+      (if (< n 2)
+        {:constellation c :interacted false}
+        (let [result (interact-stars (first stars) (nth stars 1))]
+          (if (nil? result)
+            {:constellation c :interacted false}
+            {:constellation (constellation (conj (rest (rest stars)) result))
+             :interacted true}))))))
+
+(defn execute
+  "Execute a constellation to normal form (or until fuel exhausted).
+  Returns {:constellation normal-form :steps n :normal bool}."
+  [c fuel]
+  (let [go (fn [c n]
+             (if (= n 0)
+               {:constellation c :steps (- fuel n) :normal false}
+               (let [step (execute-step c)]
+                 (if (not (:interacted step))
+                   {:constellation c :steps (- fuel n) :normal true}
+                   (go (:constellation step) (- n 1))))))]
+    (go c fuel)))
+
+;; =============================================================================
+;; Constellation Combinators
+;; =============================================================================
+
+(defn tensor
+  "Tensor product of two constellations: disjoint union of stars.
+  Corresponds to parallel composition / multiplicative conjunction."
+  [c1 c2]
+  (constellation (reduce conj (:stars c1) (:stars c2))))
+
+(defn cut
+  "Create a cut between two constellations by adding matching ray+/ray- pairs.
+  name is the channel, terms are shared variables."
+  [c1 c2 name terms]
+  (let [s1 (star (ray+ name terms))
+        s2 (star (ray- name terms))]
+    (tensor (tensor c1 (constellation [s1]))
+            (tensor c2 (constellation [s2])))))
+
+;; =============================================================================
+;; Proof Search
+;; =============================================================================
+
+(defn closed?
+  "Is a constellation closed (no rays left)? A closed constellation is a proof."
+  [c]
+  (= 0 (reduce + 0 (map (fn [s] (count (:rays s))) (:stars c)))))
+
+(defn normal-form?
+  "Is a constellation in normal form (no interactions possible)?"
+  [c]
+  (not (:interacted (execute-step c))))

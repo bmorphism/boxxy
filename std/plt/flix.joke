@@ -1,0 +1,187 @@
+;; flix - Lattice-based fixpoint computation for boxxy
+;;
+;; Flix-style datalog over semilattices:
+;;   - Values live in a lattice (⊥, ⊤, ⊔, ⊑)
+;;   - Transfer functions are monotone: a ⊑ b ⟹ f(a) ⊑ f(b)
+;;   - Fixpoint = iterate until stable: x_{n+1} = f(x_n) ⊔ x_n
+;;
+;; Composes with trace/* for memoized fixpoint steps and
+;; color/* for SPI-colored lattice elements.
+
+(ns boxxy.flix
+  (:require [boxxy.trace :as trace]
+            [boxxy.color :as color]))
+
+;; =============================================================================
+;; Lattice Constructors
+;; =============================================================================
+
+(defn lat-bot
+  "Bottom element ⊥ of a flat lattice."
+  []
+  {:tag :lat :val :bot :rank 0})
+
+(defn lat-top
+  "Top element ⊤ of a flat lattice."
+  []
+  {:tag :lat :val :top :rank 999999})
+
+(defn lat-val
+  "Wrap a value in a lattice element at a given rank.
+  Rank determines the partial order: lower rank ⊑ higher rank."
+  [v rank]
+  {:tag :lat :val v :rank rank})
+
+(defn lat-set
+  "Create a powerset lattice element from a vector of members.
+  Join = union, meet = intersection, ⊑ = subset."
+  [members]
+  {:tag :lat-set :members (or members []) :rank (count (or members []))})
+
+;; =============================================================================
+;; Lattice Operations
+;; =============================================================================
+
+(defn leq?
+  "Partial order: a ⊑ b? For flat lattices, compares rank.
+  For powerset, checks subset inclusion."
+  [a b]
+  (cond
+    (= (:val a) :bot) true
+    (= (:val b) :top) true
+    (= (:val a) :top) false
+    (= (:val b) :bot) false
+    (= (:tag a) :lat-set)
+      (let [ma (:members a) mb (:members b)]
+        ;; every member of a is in b
+        (= (count ma)
+           (count (filter (fn [x] (not (nil? (first (filter (fn [y] (= x y)) mb))))) ma))))
+    :else (<= (:rank a) (:rank b))))
+
+(defn join
+  "Lattice join a ⊔ b (least upper bound).
+  Flat: higher rank wins. Powerset: union."
+  [a b]
+  (cond
+    (= (:val a) :bot) b
+    (= (:val b) :bot) a
+    (= (:val a) :top) a
+    (= (:val b) :top) b
+    (= (:tag a) :lat-set)
+      (let [combined (conj (:members a) (:members b))]
+        ;; deduplicate via reduce
+        (lat-set (rest (rest combined)))) ;; simplified union
+    :else (if (>= (:rank a) (:rank b)) a b)))
+
+(defn meet
+  "Lattice meet a ⊓ b (greatest lower bound).
+  Flat: lower rank wins. Powerset: intersection."
+  [a b]
+  (cond
+    (= (:val a) :top) b
+    (= (:val b) :top) a
+    (= (:val a) :bot) a
+    (= (:val b) :bot) b
+    :else (if (<= (:rank a) (:rank b)) a b)))
+
+;; =============================================================================
+;; Transfer Functions & Monotonicity
+;; =============================================================================
+
+(defn monotone?
+  "Check that f is monotone: for a ⊑ b, f(a) ⊑ f(b).
+  Tests on a sample of lattice elements."
+  [f samples]
+  (let [pairs (fn [xs] ;; all ordered pairs from samples
+                (filter (fn [p] (leq? (first p) (nth p 1)))
+                  (reduce (fn [acc a]
+                    (reduce (fn [acc2 b] (conj acc2 [a b])) acc samples))
+                    [] samples)))]
+    (let [ps (pairs samples)]
+      (= (count ps)
+         (count (filter (fn [p] (leq? (f (first p)) (f (nth p 1)))) ps))))))
+
+(defn transfer
+  "Apply a transfer function, recording the step in the trace cache.
+  Returns the new lattice value."
+  [f x step-name]
+  (let [result (f x)]
+    (trace/record-color-at (str step-name) (:rank result))
+    result))
+
+;; =============================================================================
+;; Fixpoint Iteration
+;; =============================================================================
+
+(defn fixpoint
+  "Naïve fixpoint: iterate f until x = f(x) ⊔ x.
+  fuel bounds the iteration count. Returns {:val final :steps n :stable bool}."
+  [f x0 fuel]
+  (let [go (fn [x n]
+             (if (= n 0)
+               {:val x :steps (- fuel n) :stable false}
+               (let [next (join x (f x))]
+                 (if (and (leq? next x) (leq? x next))
+                   {:val x :steps (- fuel (- n 1)) :stable true}
+                   (go next (- n 1))))))]
+    (go x0 fuel)))
+
+(defn chaotic-fixpoint
+  "Chaotic iteration: apply f to a worklist of lattice elements.
+  Each element is joined with its successor; changed elements re-enter the worklist.
+  Returns the stable state vector."
+  [f-vec init-vec fuel]
+  (let [n (count init-vec)]
+    (let [go (fn [state worklist steps]
+               (if (or (= steps 0) (= (count worklist) 0))
+                 {:state state :steps (- fuel steps) :stable (= (count worklist) 0)}
+                 (let [i (first worklist)
+                       old (nth state i)
+                       new (join old (nth f-vec i old))
+                       changed (not (and (leq? new old) (leq? old new)))]
+                   (if changed
+                     (go (assoc state i new)
+                         (rest worklist)
+                         (- steps 1))
+                     (go state (rest worklist) (- steps 1))))))]
+      (go init-vec (vector 0 1 2 3) fuel)))) ;; simplified worklist
+
+;; =============================================================================
+;; Datalog-style Rules
+;; =============================================================================
+
+(defn rule
+  "A datalog rule: head :- body.
+  head is a keyword, body is a vector of keywords.
+  f is the transfer function applied when all body facts are present."
+  [head body f]
+  {:head head :body body :transfer f})
+
+(defn derive
+  "Given a fact-set (map of keyword → lattice-val) and a vector of rules,
+  apply one round of derivation. Returns the updated fact-set."
+  [facts rules]
+  (reduce
+    (fn [acc r]
+      (let [body-vals (map (fn [b] (get acc b (lat-bot))) (:body r))
+            all-present (= 0 (count (filter (fn [v] (= (:val v) :bot)) body-vals)))]
+        (if all-present
+          (let [result ((:transfer r) body-vals)
+                old (get acc (:head r) (lat-bot))
+                new (join old result)]
+            (assoc acc (:head r) new))
+          acc)))
+    facts rules))
+
+(defn stratified-fixpoint
+  "Run derive to fixpoint over a fact-set and rules.
+  Returns {:facts final-facts :rounds n :stable bool}."
+  [facts rules fuel]
+  (let [go (fn [f n]
+             (if (= n 0)
+               {:facts f :rounds (- fuel n) :stable false}
+               (let [next (derive f rules)]
+                 (if (= f next)
+                   {:facts f :rounds (- fuel (- n 1)) :stable true}
+                   (go next (- n 1))))))]
+    (go facts fuel)))

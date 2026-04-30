@@ -296,6 +296,22 @@ func Eval(val Value, env *Env) Value {
 				}
 				return v[1]
 
+			case "defn":
+				if len(v) < 4 {
+					panic("defn requires name, params, and body")
+				}
+				name, ok := v[1].(Symbol)
+				if !ok {
+					panic("defn first argument must be a symbol")
+				}
+				fnForm := make(List, 0, len(v)-1)
+				fnForm = append(fnForm, Symbol("fn"))
+				fnForm = append(fnForm, v[2:]...)
+				value := Eval(fnForm, env)
+				env.Set(name, value)
+				globalNSRegistry.Intern(name, value)
+				return value
+
 			case "def":
 				if len(v) != 3 {
 					panic("def requires exactly two arguments")

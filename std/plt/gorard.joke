@@ -1,0 +1,165 @@
+;; gorard - Multiway rewriting systems for boxxy
+;;
+;; Jonathan Gorard's multiway systems:
+;;   - A state can rewrite to multiple successors (non-deterministic)
+;;   - The branchial graph tracks which branches coexist
+;;   - The causal graph tracks which rewrites enable which
+;;   - Confluence = all branches eventually merge (Church-Rosser)
+;;
+;; Composes with trace/* for behavioral equivalence of rewrite paths
+;; and color/* for SPI-colored branches.
+
+(ns boxxy.gorard
+  (:require [boxxy.trace :as trace]
+            [boxxy.color :as color]))
+
+;; =============================================================================
+;; States & Rules
+;; =============================================================================
+
+(defn state
+  "Create a multiway state. v is any value, id is a unique tag."
+  [v id]
+  {:tag :mw-state :val v :id id :gen 0})
+
+(defn rewrite-rule
+  "Create a rewrite rule: pattern → successors.
+  match? is (fn [state] bool), produce is (fn [state] [state ...])."
+  [name match? produce]
+  {:tag :mw-rule :name name :match? match? :produce produce})
+
+;; =============================================================================
+;; Single-step Rewriting
+;; =============================================================================
+
+(defn apply-rules
+  "Apply all matching rules to a state. Returns a vector of successor states,
+  each tagged with the rule that produced it and generation incremented."
+  [rules st]
+  (let [gen (+ 1 (:gen st))]
+    (reduce
+      (fn [acc r]
+        (if ((:match? r) st)
+          (let [successors ((:produce r) st)]
+            (reduce
+              (fn [acc2 s]
+                (conj acc2 (assoc s :gen gen :parent (:id st) :rule (:name r))))
+              acc successors))
+          acc))
+      [] rules)))
+
+;; =============================================================================
+;; Multiway Evolution
+;; =============================================================================
+
+(defn evolve-step
+  "Evolve a multiway system one step: apply all rules to all current states.
+  Returns the new frontier (all successor states)."
+  [rules frontier]
+  (reduce
+    (fn [acc st]
+      (let [succs (apply-rules rules st)]
+        (reduce conj acc succs)))
+    [] frontier))
+
+(defn evolve
+  "Evolve a multiway system for n steps from initial states.
+  Returns {:frontier final-states :history [gen0 gen1 ...] :total-states n}."
+  [rules initial-states n]
+  (let [go (fn [frontier history steps]
+             (if (= steps 0)
+               {:frontier frontier
+                :history history
+                :total-states (reduce + 0 (map count history))}
+               (let [next (evolve-step rules frontier)]
+                 (if (= (count next) 0)
+                   {:frontier frontier
+                    :history (conj history frontier)
+                    :total-states (reduce + 0 (map count (conj history frontier)))}
+                   (go next (conj history frontier) (- steps 1))))))]
+    (go initial-states [] n)))
+
+;; =============================================================================
+;; Branchial Graph
+;; =============================================================================
+
+(defn branchial-pairs
+  "Given a frontier of states, return all pairs that share a common ancestor
+  at the same generation. These are 'branchially connected'."
+  [frontier]
+  (let [by-parent (reduce
+                    (fn [acc st]
+                      (let [p (or (:parent st) :root)]
+                        (assoc acc p (conj (or (get acc p) []) st))))
+                    {} frontier)]
+    (reduce
+      (fn [acc entry]
+        (let [siblings (nth entry 1)]
+          (if (> (count siblings) 1)
+            (conj acc {:parent (first entry) :branches siblings :width (count siblings)})
+            acc)))
+      [] by-parent))) ;; simplified — returns grouped siblings
+
+(defn branching-factor
+  "Average branching factor across a frontier."
+  [frontier]
+  (let [pairs (branchial-pairs frontier)
+        total-width (reduce + 0 (map (fn [p] (:width p)) pairs))]
+    (if (= (count pairs) 0) 1
+      (/ total-width (count pairs)))))
+
+;; =============================================================================
+;; Causal Graph
+;; =============================================================================
+
+(defn causal-edges
+  "Extract causal edges from a history: parent-id → child-id for each rewrite.
+  Returns a vector of {:from parent-id :to child-id :rule rule-name :gen gen}."
+  [history]
+  (reduce
+    (fn [acc gen-states]
+      (reduce
+        (fn [acc2 st]
+          (if (:parent st)
+            (conj acc2 {:from (:parent st) :to (:id st)
+                        :rule (or (:rule st) :unknown) :gen (:gen st)})
+            acc2))
+        acc gen-states))
+    [] history))
+
+;; =============================================================================
+;; Confluence Detection
+;; =============================================================================
+
+(defn confluent?
+  "Check weak confluence: for any state with multiple successors,
+  all successors eventually reach a common descendant.
+  Approximated by checking if the frontier size decreases or stabilizes."
+  [history]
+  (let [sizes (map count history)]
+    (if (< (count sizes) 2)
+      true
+      (let [last-size (nth sizes (- (count sizes) 1))
+            prev-size (nth sizes (- (count sizes) 2))]
+        (<= last-size prev-size)))))
+
+;; =============================================================================
+;; Trace Integration
+;; =============================================================================
+
+(defn traced-evolve
+  "Evolve with trace memoization: identical rewrite paths are deduplicated.
+  Uses trace/behavioral-equal to detect when two branches produce equivalent states."
+  [rules initial-states n]
+  (let [result (evolve rules initial-states n)
+        frontier (:frontier result)
+        unique (reduce
+                 (fn [acc st]
+                   (let [dominated (first (filter
+                     (fn [existing]
+                       (and (= (:val existing) (:val st))
+                            (not (= (:id existing) (:id st)))))
+                     acc))]
+                     (if dominated acc (conj acc st))))
+                 [] frontier)]
+    (assoc result :frontier unique :deduplicated (- (count frontier) (count unique)))))

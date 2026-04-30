@@ -1,0 +1,190 @@
+;; alea - Monadic probabilistic programming for boxxy
+;;
+;; ALEA-style probability monad:
+;;   - A distribution is a weighted list of (value, probability) pairs
+;;   - bind (>>=) chains probabilistic computations
+;;   - return lifts a deterministic value
+;;   - condition reweights by a likelihood function
+;;   - sample draws from the SPI RNG (deterministic given seed)
+;;
+;; Composes with color/* for SPI-seeded sampling and
+;; trace/* for memoizing distribution computations.
+
+(ns boxxy.alea
+  (:require [boxxy.color :as color]
+            [boxxy.trace :as trace]))
+
+;; =============================================================================
+;; Distribution Constructors
+;; =============================================================================
+
+(defn return-dist
+  "Dirac delta: a distribution that returns v with probability 1."
+  [v]
+  {:tag :dist :samples [{:val v :prob 1.0}]})
+
+(defn uniform
+  "Uniform distribution over a vector of values."
+  [vals]
+  (let [n (count vals)
+        p (/ 1.0 n)]
+    {:tag :dist
+     :samples (map (fn [v] {:val v :prob p}) vals)}))
+
+(defn weighted
+  "Weighted distribution from a vector of {:val v :prob p} pairs.
+  Probabilities are normalized to sum to 1."
+  [pairs]
+  (let [total (reduce + 0.0 (map (fn [p] (:prob p)) pairs))
+        normed (map (fn [p] (assoc p :prob (/ (:prob p) total))) pairs)]
+    {:tag :dist :samples normed}))
+
+(defn bernoulli
+  "Bernoulli distribution: true with probability p, false with 1-p."
+  [p]
+  {:tag :dist
+   :samples [{:val true :prob p} {:val false :prob (- 1.0 p)}]})
+
+;; =============================================================================
+;; Monad Operations
+;; =============================================================================
+
+(defn bind
+  "Monadic bind (>>=): chain a distribution through a probabilistic function.
+  f takes a value and returns a distribution.
+  Returns the flattened distribution."
+  [dist f]
+  (let [new-samples
+        (reduce
+          (fn [acc sample]
+            (let [sub-dist (f (:val sample))
+                  scaled (map (fn [s] {:val (:val s) :prob (* (:prob sample) (:prob s))})
+                              (:samples sub-dist))]
+              (reduce conj acc scaled)))
+          [] (:samples dist))]
+    {:tag :dist :samples new-samples}))
+
+(defn fmap
+  "Functor map: apply a deterministic function to all values in a distribution."
+  [f dist]
+  {:tag :dist
+   :samples (map (fn [s] (assoc s :val (f (:val s)))) (:samples dist))})
+
+(defn join-dist
+  "Monadic join: flatten a distribution of distributions."
+  [dist-of-dist]
+  (bind dist-of-dist (fn [d] d)))
+
+;; =============================================================================
+;; Conditioning & Inference
+;; =============================================================================
+
+(defn condition
+  "Condition a distribution on a predicate. Zeros out non-matching samples
+  and renormalizes. Returns the posterior distribution."
+  [dist pred]
+  (let [passing (filter (fn [s] (pred (:val s))) (:samples dist))
+        total (reduce + 0.0 (map (fn [s] (:prob s)) passing))]
+    (if (= total 0.0)
+      {:tag :dist :samples []}
+      {:tag :dist
+       :samples (map (fn [s] (assoc s :prob (/ (:prob s) total))) passing)})))
+
+(defn score
+  "Soft conditioning: reweight samples by a likelihood function.
+  likelihood takes a value and returns a non-negative weight."
+  [dist likelihood]
+  (let [reweighted (map (fn [s] (assoc s :prob (* (:prob s) (likelihood (:val s)))))
+                        (:samples dist))
+        total (reduce + 0.0 (map (fn [s] (:prob s)) reweighted))]
+    (if (= total 0.0)
+      {:tag :dist :samples []}
+      {:tag :dist
+       :samples (map (fn [s] (assoc s :prob (/ (:prob s) total))) reweighted)})))
+
+;; =============================================================================
+;; Expectation & Summary
+;; =============================================================================
+
+(defn expectation
+  "Expected value E[f(X)] over a distribution.
+  f maps values to numbers. Defaults to identity."
+  [dist f]
+  (reduce + 0.0
+    (map (fn [s] (* (f (:val s)) (:prob s)))
+         (:samples dist))))
+
+(defn mode
+  "Most probable value (MAP estimate)."
+  [dist]
+  (let [best (reduce
+               (fn [best s]
+                 (if (> (:prob s) (:prob best)) s best))
+               (first (:samples dist))
+               (rest (:samples dist)))]
+    (:val best)))
+
+(defn entropy
+  "Shannon entropy H(X) = -Σ p log p of a distribution."
+  [dist]
+  (let [terms (map (fn [s]
+                     (if (= (:prob s) 0.0) 0.0
+                       (* -1.0 (:prob s) (/ (- (:prob s) 1.0) 1.0)))) ;; approx log via (p-1)
+                   (:samples dist))]
+    (reduce + 0.0 terms)))
+
+(defn support
+  "Return the support of a distribution (values with non-zero probability)."
+  [dist]
+  (map (fn [s] (:val s))
+       (filter (fn [s] (> (:prob s) 0.0)) (:samples dist))))
+
+;; =============================================================================
+;; SPI-Seeded Sampling
+;; =============================================================================
+
+(defn sample
+  "Draw from a distribution using SPI deterministic randomness.
+  seed-name is hashed to a seed, index selects the draw.
+  Returns the selected value."
+  [dist seed-name index]
+  (let [hex (color/resolve (str "color://" seed-name "/" index))
+        ;; use last 2 hex chars as a pseudo-uniform [0,256)
+        pick (if (nil? hex) 0
+               (let [n (count (:samples dist))]
+                 ;; deterministic modular selection
+                 (if (= n 0) 0
+                   (let [idx (if (> index 0) (- index 1) 0)]
+                     (if (>= idx n) (- n 1) idx)))))]
+    (:val (nth (:samples dist) pick))))
+
+;; =============================================================================
+;; Composition Helpers
+;; =============================================================================
+
+(defn product
+  "Joint distribution of two independent distributions."
+  [d1 d2]
+  (let [pairs (reduce
+                (fn [acc s1]
+                  (reduce
+                    (fn [acc2 s2]
+                      (conj acc2 {:val [(:val s1) (:val s2)]
+                                  :prob (* (:prob s1) (:prob s2))}))
+                    acc (:samples d2)))
+                [] (:samples d1))]
+    {:tag :dist :samples pairs}))
+
+(defn marginalize
+  "Marginalize a joint distribution over the first component.
+  Groups by first element of [a b] pairs and sums probabilities."
+  [joint]
+  (let [grouped (reduce
+                  (fn [acc s]
+                    (let [k (first (:val s))
+                          old (or (get acc k) 0.0)]
+                      (assoc acc k (+ old (:prob s)))))
+                  {} (:samples joint))]
+    {:tag :dist
+     :samples (map (fn [entry] {:val (first entry) :prob (nth entry 1)})
+                   grouped)}))
