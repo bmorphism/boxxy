@@ -1509,7 +1509,182 @@ func RegisterNamespace(env *lisp.Env) {
                 return m
         })
 
+        // -- Stellogen: stellar resolution builtins --
+
+        reg("stellogen/new-ray", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("stellogen/new-ray: requires (polarity name [terms...])")
+                }
+                polStr := string(args[0].(lisp.String))
+                name := string(args[1].(lisp.String))
+                var pol Polarity
+                switch polStr {
+                case "+", "pos", "positive":
+                        pol = Positive
+                case "-", "neg", "negative":
+                        pol = Negative
+                default:
+                        pol = 0 // neutral
+                }
+                terms := make([]Term, 0, len(args)-2)
+                for _, a := range args[2:] {
+                        terms = append(terms, lispToTerm(a))
+                }
+                return &lisp.ExternalValue{Value: &Ray{Polarity: pol, Name: name, Terms: terms}, Type: "StellogenRay"}
+        })
+
+        reg("stellogen/new-star", func(args []lisp.Value) lisp.Value {
+                rays := make([]Ray, 0, len(args))
+                for _, a := range args {
+                        ext := a.(*lisp.ExternalValue)
+                        rays = append(rays, *ext.Value.(*Ray))
+                }
+                return &lisp.ExternalValue{Value: &Star{Rays: rays}, Type: "StellogenStar"}
+        })
+
+        reg("stellogen/new-constellation", func(args []lisp.Value) lisp.Value {
+                stars := make([]Star, 0, len(args))
+                for _, a := range args {
+                        ext := a.(*lisp.ExternalValue)
+                        stars = append(stars, *ext.Value.(*Star))
+                }
+                return &lisp.ExternalValue{Value: NewConstellation(stars...), Type: "StellogenConstellation"}
+        })
+
+        reg("stellogen/fire", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("stellogen/fire: requires (constellation)")
+                }
+                c := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                probe := c.Fire(PolarityAware{})
+                if probe == nil {
+                        return lisp.Nil{}
+                }
+                m := lisp.HashMap{}
+                m[lisp.Keyword("star-i")] = lisp.Float(float64(probe.StarI))
+                m[lisp.Keyword("star-j")] = lisp.Float(float64(probe.StarJ))
+                m[lisp.Keyword("ray-i")] = lisp.Float(float64(probe.RayI))
+                m[lisp.Keyword("ray-j")] = lisp.Float(float64(probe.RayJ))
+                return m
+        })
+
+        reg("stellogen/execute", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("stellogen/execute: requires (constellation [fuel])")
+                }
+                c := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                fuel := 100
+                if len(args) > 1 {
+                        fuel = int(args[1].(lisp.Float))
+                }
+                result := Execute(c, fuel, PolarityAware{})
+                m := lisp.HashMap{}
+                m[lisp.Keyword("steps")] = lisp.Float(float64(result.Steps))
+                m[lisp.Keyword("constellation")] = &lisp.ExternalValue{Value: result.Constellation, Type: "StellogenConstellation"}
+                m[lisp.Keyword("sexpr")] = lisp.String(result.Constellation.ToSexpr())
+                return m
+        })
+
+        reg("stellogen/normalize", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("stellogen/normalize: requires (constellation)")
+                }
+                c := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                return &lisp.ExternalValue{Value: NormalizeVars(c), Type: "StellogenConstellation"}
+        })
+
+        reg("stellogen/term-of", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("stellogen/term-of: requires (constellation)")
+                }
+                c := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                return lisp.String(TermOfConstellation(c).String())
+        })
+
+        reg("stellogen/unify", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("stellogen/unify: requires (term1 term2)")
+                }
+                t1 := lispToTerm(args[0])
+                t2 := lispToTerm(args[1])
+                theta, ok := Unify([]Term{t1}, []Term{t2})
+                if !ok {
+                        return lisp.Nil{}
+                }
+                m := lisp.HashMap{}
+                for k, v := range theta {
+                        m[lisp.Keyword(k)] = lisp.String(v.String())
+                }
+                return m
+        })
+
+        reg("stellogen/sexpr", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("stellogen/sexpr: requires (constellation)")
+                }
+                c := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                return lisp.String(c.SortedSexpr())
+        })
+
+        reg("stellogen/interaction-count", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("stellogen/interaction-count: requires (constellation)")
+                }
+                c := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                return lisp.Float(float64(c.InteractionCount(PolarityAware{})))
+        })
+
+        reg("stellogen/closed?", func(args []lisp.Value) lisp.Value {
+                if len(args) < 1 {
+                        panic("stellogen/closed?: requires (constellation)")
+                }
+                c := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                return lisp.Bool(c.Closed())
+        })
+
+        reg("stellogen/structural-equal?", func(args []lisp.Value) lisp.Value {
+                if len(args) < 2 {
+                        panic("stellogen/structural-equal?: requires (constellation-a constellation-b)")
+                }
+                a := args[0].(*lisp.ExternalValue).Value.(*Constellation)
+                b := args[1].(*lisp.ExternalValue).Value.(*Constellation)
+                return lisp.Bool(StructuralEqual(a, b))
+        })
+
         lisp.SetupDefaultAliases()
+}
+
+// lispToTerm converts a Lisp value to a stellogen Term.
+// Strings starting with "?" are Vars, vectors become Apps, others are Syms.
+func lispToTerm(v lisp.Value) Term {
+	switch val := v.(type) {
+	case lisp.String:
+		s := string(val)
+		if len(s) > 0 && s[0] == '?' {
+			return Var{Name: s[1:]}
+		}
+		return Sym{Name: s}
+	case lisp.Keyword:
+		return Sym{Name: string(val)}
+	case lisp.Symbol:
+		s := string(val)
+		if len(s) > 0 && s[0] == '?' {
+			return Var{Name: s[1:]}
+		}
+		return Sym{Name: s}
+	case lisp.Vector:
+		if len(val) == 0 {
+			return Sym{Name: "nil"}
+		}
+		head := fmt.Sprintf("%v", val[0])
+		args := make([]Term, 0, len(val)-1)
+		for _, a := range val[1:] {
+			args = append(args, lispToTerm(a))
+		}
+		return App{Head: head, Args: args}
+	default:
+		return Sym{Name: fmt.Sprintf("%v", v)}
+	}
 }
 
 // package-level TraceCache singleton (matches vmRegistry pattern)

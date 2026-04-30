@@ -400,6 +400,17 @@ func Eval(val Value, env *Env) Value {
 				}
 				return Nil{}
 
+			case "cond":
+				for i := 1; i < len(v)-1; i += 2 {
+					if kw, ok := v[i].(Keyword); ok && string(kw) == "else" {
+						return Eval(v[i+1], env)
+					}
+					if isTruthy(Eval(v[i], env)) {
+						return Eval(v[i+1], env)
+					}
+				}
+				return Nil{}
+
 			case "do":
 				var result Value = Nil{}
 				for _, expr := range v[1:] {
@@ -761,6 +772,511 @@ func CreateStandardEnv() *Env {
 		}
 		for i := 1; i < len(args); i += 2 {
 			result[args[i]] = args[i+1]
+		}
+		return result
+	}})
+
+	// Comparison: >=, <=, mod
+	env.Set(">=", &Fn{">=", func(args []Value) Value {
+		if len(args) < 2 {
+			return Bool(true)
+		}
+		for i := 0; i < len(args)-1; i++ {
+			if int64(args[i].(Int)) < int64(args[i+1].(Int)) {
+				return Bool(false)
+			}
+		}
+		return Bool(true)
+	}})
+
+	env.Set("<=", &Fn{"<=", func(args []Value) Value {
+		if len(args) < 2 {
+			return Bool(true)
+		}
+		for i := 0; i < len(args)-1; i++ {
+			if int64(args[i].(Int)) > int64(args[i+1].(Int)) {
+				return Bool(false)
+			}
+		}
+		return Bool(true)
+	}})
+
+	env.Set("mod", &Fn{"mod", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("mod requires exactly 2 arguments")
+		}
+		a := int64(args[0].(Int))
+		b := int64(args[1].(Int))
+		r := a % b
+		if r < 0 && b > 0 {
+			r += b
+		}
+		return Int(r)
+	}})
+
+	env.Set("inc", &Fn{"inc", func(args []Value) Value {
+		return Int(int64(args[0].(Int)) + 1)
+	}})
+
+	env.Set("dec", &Fn{"dec", func(args []Value) Value {
+		return Int(int64(args[0].(Int)) - 1)
+	}})
+
+	env.Set("abs", &Fn{"abs", func(args []Value) Value {
+		n := int64(args[0].(Int))
+		if n < 0 {
+			return Int(-n)
+		}
+		return Int(n)
+	}})
+
+	env.Set("max", &Fn{"max", func(args []Value) Value {
+		best := int64(args[0].(Int))
+		for _, a := range args[1:] {
+			if v := int64(a.(Int)); v > best {
+				best = v
+			}
+		}
+		return Int(best)
+	}})
+
+	env.Set("min", &Fn{"min", func(args []Value) Value {
+		best := int64(args[0].(Int))
+		for _, a := range args[1:] {
+			if v := int64(a.(Int)); v < best {
+				best = v
+			}
+		}
+		return Int(best)
+	}})
+
+	// Higher-order: map, reduce, filter, apply, some, every?
+	env.Set("map", &Fn{"map", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("map requires function and collection")
+		}
+		fn := args[0].(*Fn)
+		var elems []Value
+		switch c := args[1].(type) {
+		case Vector:
+			elems = []Value(c)
+		case List:
+			elems = []Value(c)
+		default:
+			panic(fmt.Sprintf("map not supported for %T", c))
+		}
+		result := make(Vector, len(elems))
+		for i, e := range elems {
+			result[i] = fn.Func([]Value{e})
+		}
+		return result
+	}})
+
+	env.Set("reduce", &Fn{"reduce", func(args []Value) Value {
+		if len(args) < 2 || len(args) > 3 {
+			panic("reduce requires 2 or 3 arguments")
+		}
+		fn := args[0].(*Fn)
+		var init Value
+		var coll []Value
+		if len(args) == 3 {
+			init = args[1]
+			switch c := args[2].(type) {
+			case Vector:
+				coll = []Value(c)
+			case List:
+				coll = []Value(c)
+			case Nil:
+				return init
+			default:
+				panic(fmt.Sprintf("reduce not supported for %T", c))
+			}
+		} else {
+			switch c := args[1].(type) {
+			case Vector:
+				coll = []Value(c)
+			case List:
+				coll = []Value(c)
+			default:
+				panic(fmt.Sprintf("reduce not supported for %T", c))
+			}
+			if len(coll) == 0 {
+				return fn.Func(nil)
+			}
+			init = coll[0]
+			coll = coll[1:]
+		}
+		acc := init
+		for _, e := range coll {
+			acc = fn.Func([]Value{acc, e})
+		}
+		return acc
+	}})
+
+	env.Set("filter", &Fn{"filter", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("filter requires predicate and collection")
+		}
+		fn := args[0].(*Fn)
+		var elems []Value
+		switch c := args[1].(type) {
+		case Vector:
+			elems = []Value(c)
+		case List:
+			elems = []Value(c)
+		default:
+			panic(fmt.Sprintf("filter not supported for %T", c))
+		}
+		result := make(Vector, 0)
+		for _, e := range elems {
+			if isTruthy(fn.Func([]Value{e})) {
+				result = append(result, e)
+			}
+		}
+		return result
+	}})
+
+	env.Set("apply", &Fn{"apply", func(args []Value) Value {
+		if len(args) < 2 {
+			panic("apply requires function and args")
+		}
+		fn := args[0].(*Fn)
+		last := args[len(args)-1]
+		var fnArgs []Value
+		fnArgs = append(fnArgs, args[1:len(args)-1]...)
+		switch c := last.(type) {
+		case Vector:
+			fnArgs = append(fnArgs, []Value(c)...)
+		case List:
+			fnArgs = append(fnArgs, []Value(c)...)
+		default:
+			fnArgs = append(fnArgs, last)
+		}
+		return fn.Func(fnArgs)
+	}})
+
+	env.Set("some", &Fn{"some", func(args []Value) Value {
+		fn := args[0].(*Fn)
+		var elems []Value
+		switch c := args[1].(type) {
+		case Vector:
+			elems = []Value(c)
+		case List:
+			elems = []Value(c)
+		}
+		for _, e := range elems {
+			if v := fn.Func([]Value{e}); isTruthy(v) {
+				return v
+			}
+		}
+		return Nil{}
+	}})
+
+	env.Set("every?", &Fn{"every?", func(args []Value) Value {
+		fn := args[0].(*Fn)
+		var elems []Value
+		switch c := args[1].(type) {
+		case Vector:
+			elems = []Value(c)
+		case List:
+			elems = []Value(c)
+		}
+		for _, e := range elems {
+			if !isTruthy(fn.Func([]Value{e})) {
+				return Bool(false)
+			}
+		}
+		return Bool(true)
+	}})
+
+	// Collection: concat, into, keys, vals, dissoc, merge, hash-map, empty?, contains?, range
+	env.Set("concat", &Fn{"concat", func(args []Value) Value {
+		result := make(Vector, 0)
+		for _, a := range args {
+			switch c := a.(type) {
+			case Vector:
+				result = append(result, []Value(c)...)
+			case List:
+				result = append(result, []Value(c)...)
+			case Nil:
+				// skip
+			default:
+				result = append(result, c)
+			}
+		}
+		return result
+	}})
+
+	env.Set("into", &Fn{"into", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("into requires 2 arguments")
+		}
+		switch target := args[0].(type) {
+		case Vector:
+			result := make(Vector, len(target))
+			copy(result, target)
+			switch src := args[1].(type) {
+			case Vector:
+				return append(result, []Value(src)...)
+			case List:
+				return append(result, []Value(src)...)
+			}
+			return result
+		case HashMap:
+			result := make(HashMap, len(target))
+			for k, v := range target {
+				result[k] = v
+			}
+			switch src := args[1].(type) {
+			case Vector:
+				for _, e := range src {
+					pair := e.(Vector)
+					result[pair[0]] = pair[1]
+				}
+			case HashMap:
+				for k, v := range src {
+					result[k] = v
+				}
+			}
+			return result
+		case Nil:
+			return args[1]
+		default:
+			panic(fmt.Sprintf("into not supported for %T", target))
+		}
+	}})
+
+	env.Set("keys", &Fn{"keys", func(args []Value) Value {
+		m := args[0].(HashMap)
+		result := make(Vector, 0, len(m))
+		for k := range m {
+			result = append(result, k)
+		}
+		return result
+	}})
+
+	env.Set("vals", &Fn{"vals", func(args []Value) Value {
+		m := args[0].(HashMap)
+		result := make(Vector, 0, len(m))
+		for _, v := range m {
+			result = append(result, v)
+		}
+		return result
+	}})
+
+	env.Set("dissoc", &Fn{"dissoc", func(args []Value) Value {
+		m := args[0].(HashMap)
+		result := make(HashMap, len(m))
+		for k, v := range m {
+			result[k] = v
+		}
+		for _, k := range args[1:] {
+			delete(result, k)
+		}
+		return result
+	}})
+
+	env.Set("merge", &Fn{"merge", func(args []Value) Value {
+		result := make(HashMap)
+		for _, a := range args {
+			switch m := a.(type) {
+			case HashMap:
+				for k, v := range m {
+					result[k] = v
+				}
+			case Nil:
+				// skip
+			}
+		}
+		return result
+	}})
+
+	env.Set("hash-map", &Fn{"hash-map", func(args []Value) Value {
+		if len(args)%2 != 0 {
+			panic("hash-map requires even number of arguments")
+		}
+		result := make(HashMap, len(args)/2)
+		for i := 0; i < len(args); i += 2 {
+			result[args[i]] = args[i+1]
+		}
+		return result
+	}})
+
+	env.Set("empty?", &Fn{"empty?", func(args []Value) Value {
+		switch c := args[0].(type) {
+		case Vector:
+			return Bool(len(c) == 0)
+		case List:
+			return Bool(len(c) == 0)
+		case HashMap:
+			return Bool(len(c) == 0)
+		case String:
+			return Bool(len(c) == 0)
+		case Nil:
+			return Bool(true)
+		}
+		return Bool(false)
+	}})
+
+	env.Set("contains?", &Fn{"contains?", func(args []Value) Value {
+		switch m := args[0].(type) {
+		case HashMap:
+			_, ok := m[args[1]]
+			return Bool(ok)
+		case Vector:
+			idx := int(args[1].(Int))
+			return Bool(idx >= 0 && idx < len(m))
+		}
+		return Bool(false)
+	}})
+
+	env.Set("range", &Fn{"range", func(args []Value) Value {
+		var start, end, step int64
+		switch len(args) {
+		case 1:
+			end = int64(args[0].(Int))
+		case 2:
+			start = int64(args[0].(Int))
+			end = int64(args[1].(Int))
+		case 3:
+			start = int64(args[0].(Int))
+			end = int64(args[1].(Int))
+			step = int64(args[2].(Int))
+		default:
+			panic("range requires 1-3 arguments")
+		}
+		if step == 0 {
+			if start < end {
+				step = 1
+			} else {
+				step = -1
+			}
+		}
+		result := make(Vector, 0)
+		if step > 0 {
+			for i := start; i < end; i += step {
+				result = append(result, Int(i))
+			}
+		} else {
+			for i := start; i > end; i += step {
+				result = append(result, Int(i))
+			}
+		}
+		return result
+	}})
+
+	env.Set("update", &Fn{"update", func(args []Value) Value {
+		if len(args) < 3 {
+			panic("update requires map, key, and function")
+		}
+		m := args[0].(HashMap)
+		key := args[1]
+		fn := args[2].(*Fn)
+		result := make(HashMap, len(m))
+		for k, v := range m {
+			result[k] = v
+		}
+		old := result[key]
+		if old == nil {
+			old = Nil{}
+		}
+		fnArgs := []Value{old}
+		fnArgs = append(fnArgs, args[3:]...)
+		result[key] = fn.Func(fnArgs)
+		return result
+	}})
+
+	env.Set("keyword", &Fn{"keyword", func(args []Value) Value {
+		switch v := args[0].(type) {
+		case String:
+			return Keyword(v)
+		case Keyword:
+			return v
+		case Symbol:
+			return Keyword(v)
+		default:
+			return Keyword(fmt.Sprint(v))
+		}
+	}})
+
+	env.Set("symbol", &Fn{"symbol", func(args []Value) Value {
+		switch v := args[0].(type) {
+		case String:
+			return Symbol(v)
+		case Symbol:
+			return v
+		case Keyword:
+			return Symbol(v)
+		default:
+			return Symbol(fmt.Sprint(v))
+		}
+	}})
+
+	env.Set("name", &Fn{"name", func(args []Value) Value {
+		switch v := args[0].(type) {
+		case Keyword:
+			return String(v)
+		case Symbol:
+			return String(v)
+		case String:
+			return v
+		default:
+			return String(fmt.Sprint(v))
+		}
+	}})
+
+	env.Set("map?", &Fn{"map?", func(args []Value) Value {
+		_, ok := args[0].(HashMap)
+		return Bool(ok)
+	}})
+
+	env.Set("keyword?", &Fn{"keyword?", func(args []Value) Value {
+		_, ok := args[0].(Keyword)
+		return Bool(ok)
+	}})
+
+	env.Set("list?", &Fn{"list?", func(args []Value) Value {
+		_, ok := args[0].(List)
+		return Bool(ok)
+	}})
+
+	env.Set("cons", &Fn{"cons", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("cons requires exactly 2 arguments")
+		}
+		switch c := args[1].(type) {
+		case Vector:
+			result := make(List, 0, len(c)+1)
+			result = append(result, args[0])
+			result = append(result, []Value(c)...)
+			return result
+		case List:
+			result := make(List, 0, len(c)+1)
+			result = append(result, args[0])
+			result = append(result, []Value(c)...)
+			return result
+		case Nil:
+			return List{args[0]}
+		default:
+			return List{args[0], args[1]}
+		}
+	}})
+
+	env.Set("mapv", &Fn{"mapv", func(args []Value) Value {
+		if len(args) != 2 {
+			panic("mapv requires function and collection")
+		}
+		fn := args[0].(*Fn)
+		var elems []Value
+		switch c := args[1].(type) {
+		case Vector:
+			elems = []Value(c)
+		case List:
+			elems = []Value(c)
+		}
+		result := make(Vector, len(elems))
+		for i, e := range elems {
+			result[i] = fn.Func([]Value{e})
 		}
 		return result
 	}})
