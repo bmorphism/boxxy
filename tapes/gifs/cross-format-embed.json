@@ -1,0 +1,134 @@
+[
+  {
+    "tape": "parallel-spi",
+    "frames": [
+      {
+        "frame": 0,
+        "dims": {
+          "768": {
+            "cosine": 0.99626732,
+            "divergence": 0.00373268
+          },
+          "1536": {
+            "cosine": 0.99602263,
+            "divergence": 0.00397737
+          }
+        }
+      },
+      {
+        "frame": 1,
+        "dims": {
+          "768": {
+            "cosine": 0.99024991,
+            "divergence": 0.00975009
+          },
+          "1536": {
+            "cosine": 0.99006297,
+            "divergence": 0.00993703
+          }
+        }
+      },
+      {
+        "frame": 2,
+        "dims": {
+          "768": {
+            "cosine": 0.98301877,
+            "divergence": 0.01698123
+          },
+          "1536": {
+            "cosine": 0.98239825,
+            "divergence": 0.01760175
+          }
+        }
+      }
+    ]
+  },
+  {
+    "tape": "tile-self-awareness",
+    "frames": [
+      {
+        "frame": 0,
+        "dims": {
+          "768": {
+            "cosine": 0.99636103,
+            "divergence": 0.00363897
+          },
+          "1536": {
+            "cosine": 0.99619935,
+            "divergence": 0.00380065
+          }
+        }
+      },
+      {
+        "frame": 1,
+        "dims": {
+          "768": {
+            "cosine": 0.99165926,
+            "divergence": 0.00834074
+          },
+          "1536": {
+            "cosine": 0.99096531,
+            "divergence": 0.00903469
+          }
+        }
+      },
+      {
+        "frame": 2,
+        "dims": {
+          "768": {
+            "cosine": 0.98828655,
+            "divergence": 0.01171345
+          },
+          "1536": {
+            "cosine": 0.98786380,
+            "divergence": 0.01213620
+          }
+        }
+      }
+    ]
+  },
+  {
+    "tape": "triangulate-contrast",
+    "frames": [
+      {
+        "frame": 0,
+        "dims": {
+          "768": {
+            "cosine": 0.99667568,
+            "divergence": 0.00332432
+          },
+          "1536": {
+            "cosine": 0.99635480,
+            "divergence": 0.00364520
+          }
+        }
+      },
+      {
+        "frame": 1,
+        "dims": {
+          "768": {
+            "cosine": 0.99158568,
+            "divergence": 0.00841432
+          },
+          "1536": {
+            "cosine": 0.99161717,
+            "divergence": 0.00838283
+          }
+        }
+      },
+      {
+        "frame": 2,
+        "dims": {
+          "768": {
+            "cosine": 0.97531166,
+            "divergence": 0.02468834
+          },
+          "1536": {
+            "cosine": 0.97506790,
+            "divergence": 0.02493210
+          }
+        }
+      }
+    ]
+  }
+]

@@ -1,0 +1,11 @@
+{"axes": [
+{"axis": "raw_video", "dims": [{"dim":768,"cosine":0.97485739,"bifurcation":0.02514261},{"dim":1536,"cosine":0.97526861,"bifurcation":0.02473139},{"dim":3072,"cosine":0.97435676,"bifurcation":0.02564324}]}
+,
+{"axis": "keyframe_snapshots", "dims": [{"dim":768,"avg_cosine":0.94936771,"bifurcation":0.05063229},{"dim":1536,"avg_cosine":0.94845331,"bifurcation":0.05154669},{"dim":3072,"avg_cosine":0.94734468,"bifurcation":0.05265532}]}
+,
+{"axis": "text_prompts", "dims": [{"dim":768,"seed_contrast":0.94291547,"identity_vs_triangulation":0.56711798,"fib_vs_rainbow":0.68108523},{"dim":1536,"seed_contrast":0.93956602,"identity_vs_triangulation":0.55511176,"fib_vs_rainbow":0.67772881},{"dim":3072,"seed_contrast":0.93762135,"identity_vs_triangulation":0.54877201,"fib_vs_rainbow":0.67442657}]}
+,
+{"axis": "video_plus_prompt", "dims": [{"dim":768,"avg_cosine":0.96889445,"bifurcation":0.03110555},{"dim":1536,"avg_cosine":0.96789006,"bifurcation":0.03210994},{"dim":3072,"avg_cosine":0.96722847,"bifurcation":0.03277153}]}
+,
+{"axis": "frame_trajectory", "dim": 1536, "stats": {"mean_cosine": 0.9269183, "std": 0.03248175, "min_cosine": 0.86256738, "max_divergence_frame": 3, "max_cosine": 0.9967035, "peak_similarity_frame": 0, "frame_sims": [0.996703, 0.948254, 0.931634, 0.862567, 0.931328, 0.917485, 0.902508, 0.922263, 0.915319, 0.94112]}}
+]}

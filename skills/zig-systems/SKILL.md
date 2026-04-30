@@ -365,6 +365,30 @@ pub fn main() void {
 5. **Profile with perf**: `perf record ./binary` then `perf report`
 6. **Consider SIMD**: `@Vector` type for parallel operations
 
+## Tape Verification with Color Losses
+
+The Zig numerics stack (`color_losses.zig`, `winding.zig`, `color_winding.zig`) provides
+the 8 color loss functions used by `scripts/tape-check.sh` for VHS tape verification.
+
+**Every tape must be verified** using Gemini Embedding 2 matryoshka multimodal (768/1536/3072 dims)
+plus inline color losses. The Zig implementations serve as the ground-truth reference for:
+- L5 (Path Length): CIE L*a*b* arc length via fixed-point arithmetic
+- L6 (Jacobian Spectral Norm): max singular value of the color Jacobian
+
+Run after rendering any tape:
+```bash
+./scripts/tape-check.sh tapes/<name>.tape
+```
+
+See `docs/tape-verification.md` for the full protocol.
+
+### Zig Test Suite (30 tests)
+```bash
+zig test color_losses.zig   # 17 tests — 8 loss functions
+zig test winding.zig         # 7 tests  — GF(3) winding accumulator
+zig test color_winding.zig   # 6 tests  — TileVerifier bridge
+```
+
 ## References
 
 - [Zig Language Documentation](https://ziglang.org/documentation/master/)
@@ -373,6 +397,7 @@ pub fn main() void {
 - [Memory Model Guide](references/MEMORY_MODEL.md)
 - [FFI Integration](references/FFI_GUIDE.md)
 - [Performance Tuning](references/PERFORMANCE.md)
+- [Tape Verification Protocol](../../docs/tape-verification.md)
 
 ## Troubleshooting
 

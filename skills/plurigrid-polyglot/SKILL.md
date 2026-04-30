@@ -355,6 +355,29 @@ PLURIGRID_DEBUG=1 plurigrid invoke <skill> <cmd>
 - [Polyglot Composition Patterns](references/COMPOSITION_PATTERNS.md)
 - [Performance Benchmarking](references/PERFORMANCE_GUIDE.md)
 
+## Tape Verification Gate
+
+All polyglot skill compositions that produce VHS tapes **must** pass the Gemini Embedding 2
+matryoshka multimodal verifier before the tape is considered complete.
+
+```bash
+./scripts/tape-check.sh tapes/<tape-name>.tape
+```
+
+This verifies:
+- 5 embedding axes at 3 matryoshka dims (768/1536/3072)
+- Matryoshka nesting invariant (inner = prefix of outer)
+- Cross-modal coherence (text vs video)
+- Temporal keyframe trajectory
+- Color losses L5 (path length) + L6 (Jacobian) from `color_losses.zig`
+
+Results: `tapes/gifs/<tape-name>-check.json`
+
+When orchestrating multi-language pipelines that render tapes (e.g., VHS demos of
+Go/Clojure/Hy/Zig interop), run `tape-check.sh` as the final quality gate.
+
+See `docs/tape-verification.md` for the full protocol.
+
 ## Future Enhancements
 
 ### Phase 1: Foundation (Current)
